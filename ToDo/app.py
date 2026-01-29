@@ -60,5 +60,23 @@ def update(id):
         return render_template('update.html', task=task)
 
 
+
+
+
+
+@app.route('/clear', methods=['POST'])
+def clear():
+    try:
+        ToDos.query.delete()
+        db.session.commit()
+        return redirect('/')
+    except:
+        return 'Something went wrong'
+
+
+
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)
