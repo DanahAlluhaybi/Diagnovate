@@ -1,0 +1,128 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    background: ghostwhite;
+    padding: 10rem 1rem;
+}
+
+/* ===== Card ===== */
+.loginContainer {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    border-radius: 14px;
+    background-color: #fff;
+    padding: 2.5rem 3rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+}
+
+
+.formTitle {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: midnightblue;
+}
+
+/* ===== Form ===== */
+.loginForm {
+    display: grid;
+    grid-template-columns: 0.5fr 0.5fr;
+    column-gap: 2rem;
+}
+
+/* ===== Input Wrapper ===== */
+.inputWrapper {
+    position: relative;
+    height: 60px;
+    width: 100%;
+    margin-bottom: 1.8rem;
+    flex-direction: column;
+}
+.inputLabel {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem; /* مسافة بين العنوان والحقل */
+    color: midnightblue; /* لون العنوان */
+}
+
+/* ===== Input Field ===== */
+.inputField {
+    height: 100%;
+    width: 100%;
+    outline: none;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #c7d2fe;
+    padding-left: 1rem;
+    transition: 0.25s ease;
+    color: black;
+}
+
+.inputField::placeholder {
+    color: #8fa4e6;
+}
+
+.inputField:focus {
+    border-color:dodgerblue;
+    box-shadow:  0 0 0 3px rgba(30, 144, 255, 0.15);
+}
+
+.inputWrapper svg {
+    display: none;
+}
+
+/* ===== Full width rows ===== */
+.fullWidth {
+    grid-column: 1 / -1;
+}
+
+/* ===== Button ===== */
+.loginButton {
+    grid-column: 1 / -1;
+    height: 52px;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    cursor: pointer;
+    background:linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+.loginButton:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(30, 60, 114, 0.45);
+}
+.signupText {
+    margin-top: 1.8rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.signupText a {
+    color: dodgerblue;
+    text-decoration: none;
+    font-weight: 600;
+}
+.signupText {
+    margin-top: 1.8rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.signupText a {
+    color: dodgerblue;
+    text-decoration: none;
+    font-weight: 600;
+}
+.signupText a:hover {
+    text-decoration: underline;
+}

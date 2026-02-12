@@ -1,0 +1,136 @@
+.pageWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: ghostwhite;
+}
+
+/* ===== Login Card ===== */
+.loginContainer {
+    max-width: 510px;
+    width: 100%;
+    border-radius: 14px;
+    background-color: #fff;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+}
+
+/* ===== Title ===== */
+.formTitle {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: midnightblue;
+}
+
+/* ===== Form ===== */
+.loginForm {
+    width: 100%;
+}
+
+/* ===== Input Wrapper ===== */
+.inputWrapper {
+    position: relative;
+    height: 60px;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+/* ===== Input Field ===== */
+.inputField {
+    height: 100%;
+    width: 100%;
+    outline: none;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #c7d2fe;
+    padding-left: 3rem;
+    transition: 0.25s ease;
+    color: black;
+}
+
+.inputField:focus {
+    border-color: dodgerblue;
+    box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.15);
+}
+
+.inputField::placeholder {
+    color: #8fa4e6;
+}
+
+/* ===== Icon ===== */
+.icon {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    color: #6b7280;
+    font-size: 1.2rem;
+    pointer-events: none;
+    transition: color 0.3s ease;
+}
+
+.inputField:focus + .icon {
+    color: midnightblue;
+}
+
+/* ===== Forgot Password ===== */
+.forgetPassLink {
+    display: block;
+    text-align: left;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    color: dodgerblue;
+    text-decoration: none;
+}
+
+.forgetPassLink:hover {
+    text-decoration: underline;
+}
+
+/* ===== Button ===== */
+.loginButton {
+    width: 100%;
+    height: 54px;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    cursor: pointer;
+
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff;
+
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+
+    box-shadow: 0 10px 25px rgba(30, 60, 114, 0.35);
+    transition: all 0.3s ease;
+}
+
+.loginButton:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(30, 60, 114, 0.45);
+}
+
+
+
+/* ===== Signup Text ===== */
+.signupText {
+    margin-top: 1.8rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.signupText a {
+    color: dodgerblue;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.signupText a:hover {
+    text-decoration: underline;
+}
