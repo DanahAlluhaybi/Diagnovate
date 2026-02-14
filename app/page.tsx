@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   Scan,
   Brain,
@@ -96,7 +97,7 @@ export default function HomePage() {
             <nav className={styles.nav}>
               <button className={`${styles.navBtn} ${styles.navActive}`}>Home</button>
               <button className={styles.navBtn}>About</button>
-              <button className={styles.navBtn}>Contact</button>
+                <Link href="/contact" className={styles.navBtn}>Contact</Link>
             </nav>
           </header>
         </div>
