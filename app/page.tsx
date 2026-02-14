@@ -97,7 +97,7 @@ export default function HomePage() {
             <nav className={styles.nav}>
               <button className={`${styles.navBtn} ${styles.navActive}`}>Home</button>
               <button className={styles.navBtn}>About</button>
-                <Link href="/contact" className={styles.navBtn}>Contact</Link>
+              <Link href="/contact" className={styles.navBtn}>Contact</Link>
             </nav>
           </header>
         </div>
@@ -120,12 +120,19 @@ export default function HomePage() {
               </p>
 
               <div className={styles.heroButtons}>
-                <button className={styles.primaryBtn}>
-                  Login & Try
-                </button>
-                <button className={styles.secondaryBtn}>
-                  Contact Us
-                </button>
+                {/* ✅ Login button - يروح لصفحة log-in */}
+                <Link href="/log-in">
+                  <button className={styles.primaryBtn}>
+                    Login & Try
+                  </button>
+                </Link>
+
+                {/* ✅ Contact Us button - يروح لصفحة contact */}
+                <Link href="/contact">
+                  <button className={styles.secondaryBtn}>
+                    Contact Us
+                  </button>
+                </Link>
               </div>
             </div>
 
