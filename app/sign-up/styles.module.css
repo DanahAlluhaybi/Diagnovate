@@ -98,6 +98,7 @@ body {
 .loginButton:hover {
     transform: translateY(-3px);
     box-shadow: 0 15px 35px rgba(30, 60, 114, 0.45);
+
 }
 .signupText {
     margin-top: 1.8rem;
