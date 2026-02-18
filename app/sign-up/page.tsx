@@ -2,17 +2,14 @@
 
 import Link from 'next/link';
 import styles from './styles.module.css';
-import { Mail, User, Lock } from 'lucide-react';
-import {Briefcase, Phone} from "lucide";
+import { Mail, User, Lock, Briefcase, Phone } from 'lucide-react';
 
 const SignUpPage = () => {
-    // @ts-ignore
     return (
-        <div className={styles.loginContainer}>
+        <div className={styles.signupContainer}>  {/* غيرناها */}
             <h2 className={styles.formTitle}>Create Account</h2>
 
-            <form className={styles.loginForm}>
-
+            <form className={styles.signupForm}>  {/* غيرناها */}
                 <div className={styles.inputWrapper}>
                     <label className={styles.inputLabel}>First Name *</label>
                     <input
@@ -21,7 +18,6 @@ const SignUpPage = () => {
                         required
                     />
                 </div>
-
 
                 <div className={styles.inputWrapper}>
                     <label className={styles.inputLabel}>Last Name *</label>
@@ -34,7 +30,7 @@ const SignUpPage = () => {
                 </div>
 
                 <div className={styles.inputWrapper}>
-                    <label className={styles.inputLabel}> Email Address*</label>
+                    <label className={styles.inputLabel}>Email Address*</label>
                     <input
                         type="email"
                         className={styles.inputField}
@@ -54,7 +50,6 @@ const SignUpPage = () => {
                     />
                 </div>
 
-
                 <div className={styles.inputWrapper}>
                     <label className={styles.inputLabel}>ID Number*</label>
                     <input
@@ -67,7 +62,7 @@ const SignUpPage = () => {
                 </div>
 
                 <div className={styles.inputWrapper}>
-                    <label className={styles.inputLabel}>Jop Title*</label>
+                    <label className={styles.inputLabel}>Job Title*</label>
                     <input
                         type="text"
                         className={styles.inputField}
@@ -96,13 +91,12 @@ const SignUpPage = () => {
                     <Lock />
                 </div>
 
-                <button type="submit" className={styles.loginButton}>
+                <button type="submit" className={styles.signupButton}>  {/* غيرناها */}
                     Sign Up
                 </button>
             </form>
 
-
-            <p className={styles.signupText}>
+            <p className={styles.loginText}>  {/* غيرناها من signupText */}
                 Already have an account?{' '}
                 <Link href="/log-in">Log in</Link>
             </p>
@@ -111,4 +105,3 @@ const SignUpPage = () => {
 };
 
 export default SignUpPage;
-
