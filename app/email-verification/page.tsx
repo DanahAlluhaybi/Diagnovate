@@ -8,7 +8,7 @@ import styles from './styles.module.css';
 const EmailVerificationPage = () => {
     const [code, setCode] = useState(['', '', '', '', '', '']);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log('Verification code:', code.join(''));
     };
@@ -45,7 +45,7 @@ const EmailVerificationPage = () => {
             </form>
 
             <p className={styles.resendLink}>
-                Didn't receive an email?<Link href="/resend">Resend</Link>
+                Did not receive an email?<Link href="/resend">Resend</Link>
             </p>
         </div>
     );

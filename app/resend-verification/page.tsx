@@ -9,7 +9,7 @@ const ResetPasswordPage = () => {
     return (
         <div className={styles.container}>
 
-            <div className={styles.time}>5:41</div>
+
 
             <h1 className={styles.title}>How do you want to reset your Password?</h1>
 
@@ -28,8 +28,7 @@ const ResetPasswordPage = () => {
                         defaultChecked
                     />
                     <label htmlFor="email" className={styles.optionLabel}>
-                        <span className={styles.optionText}>Email a link to</span>
-                        <span className={styles.optionValue}>gf********@g********</span>
+                        <span className={styles.optionText}>Email a link to ********@g********</span>
                     </label>
                 </div>
 
@@ -42,8 +41,7 @@ const ResetPasswordPage = () => {
                         className={styles.radio}
                     />
                     <label htmlFor="phone" className={styles.optionLabel}>
-                        <span className={styles.optionText}>Send a code to a phone number that ends with</span>
-                        <span className={styles.optionValue}>23</span>
+                        <span className={styles.optionText}>Send a code to a phone number </span>
                     </label>
                 </div>
             </div>
@@ -53,9 +51,7 @@ const ResetPasswordPage = () => {
                 Send
             </button>
 
-            <div className={styles.accessLink}>
-                <Link href="/help">I can't access my account</Link>
-            </div>
+
         </div>
     );
 };
