@@ -8,7 +8,7 @@ body {
 }
 
 /* ===== Card ===== */
-.loginContainer {
+.signupContainer {  /* غيرنا الاسم */
     width: 100%;
     max-width: 900px;
     margin: 0 auto;
@@ -17,7 +17,6 @@ body {
     padding: 2.5rem 3rem;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
 }
-
 
 .formTitle {
     text-align: center;
@@ -28,7 +27,7 @@ body {
 }
 
 /* ===== Form ===== */
-.loginForm {
+.signupForm {  /* غيرنا الاسم */
     display: grid;
     grid-template-columns: 0.5fr 0.5fr;
     column-gap: 2rem;
@@ -42,11 +41,12 @@ body {
     margin-bottom: 1.8rem;
     flex-direction: column;
 }
+
 .inputLabel {
     font-size: 0.9rem;
     font-weight: 700;
-    margin-bottom: 0.5rem; /* مسافة بين العنوان والحقل */
-    color: midnightblue; /* لون العنوان */
+    margin-bottom: 0.5rem;
+    color: midnightblue;
 }
 
 /* ===== Input Field ===== */
@@ -67,8 +67,8 @@ body {
 }
 
 .inputField:focus {
-    border-color:dodgerblue;
-    box-shadow:  0 0 0 3px rgba(30, 144, 255, 0.15);
+    border-color: dodgerblue;
+    box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.15);
 }
 
 .inputWrapper svg {
@@ -81,13 +81,13 @@ body {
 }
 
 /* ===== Button ===== */
-.loginButton {
+.signupButton {  /* غيرنا الاسم */
     grid-column: 1 / -1;
     height: 52px;
     margin-top: 1rem;
     font-size: 1.1rem;
     cursor: pointer;
-    background:linear-gradient(135deg, #1e3c72, #2a5298);
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -95,35 +95,25 @@ body {
     transition: 0.3s ease;
 }
 
-.loginButton:hover {
+.signupButton:hover {
     transform: translateY(-3px);
     box-shadow: 0 15px 35px rgba(30, 60, 114, 0.45);
 
 }
-.signupText {
+
+.loginText {  /* غيرنا الاسم من signupText */
     margin-top: 1.8rem;
     text-align: center;
     font-size: 0.95rem;
     color: #444;
 }
 
-.signupText a {
+.loginText a {
     color: dodgerblue;
     text-decoration: none;
     font-weight: 600;
-}
-.signupText {
-    margin-top: 1.8rem;
-    text-align: center;
-    font-size: 0.95rem;
-    color: #444;
 }
 
-.signupText a {
-    color: dodgerblue;
-    text-decoration: none;
-    font-weight: 600;
-}
-.signupText a:hover {
+.loginText a:hover {
     text-decoration: underline;
 }
