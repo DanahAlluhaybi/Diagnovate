@@ -1,32 +1,24 @@
 'use client';
-import styles from './styles.module.css';  // صح
-// مو import styles from './dashboardstyles.module.css';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import styles from './styles.module.css';
 import {
-    Activity, Camera, FileText, LogOut, Bell, Search, User,
-    TrendingUp, Award, Layers, Heart, Shield, Clock,
-    BarChart3
+    Activity, Camera, FileText, LogOut, Bell, Calendar,
+    TrendingUp, Heart, ChevronRight, User
 } from 'lucide-react';
 
-interface UserData {
-    id: number;
-    email: string;
-    is_verified: boolean;
-    created_at: string;
-}
-
-interface CaseStats {
+interface DashboardStats {
     active_cases: number;
-    bethesda_3_plus: number;
-    tirads_4_5: number;
-    ai_consensus: number;
+    urgent_cases: number;
+    total_patients: number;
+    today_appointments: number;
 }
 
 interface RecentCase {
     id: number;
     case_id: string;
+    patient_name: string;
     nodule_size: string;
     location: string;
     tirads_score: number;
@@ -34,67 +26,200 @@ interface RecentCase {
     created_at: string;
 }
 
+interface Appointment {
+    id: number;
+    patient_name: string;
+    patient_id: string;
+    appointment_time: string;
+    appointment_date: string;
+    appointment_type: string;
+    status: string;
+    case_id: string;
+    doctor_id: number;
+}
+
+interface Doctor {
+    id: number;
+    name: string;
+    email: string;
+    specialty: string;
+}
+
 export default function DashboardPage() {
     const router = useRouter();
-    const [user, setUser] = useState<UserData | null>(null);
-    const [stats, setStats] = useState<CaseStats | null>(null);
+    const [stats, setStats] = useState<DashboardStats | null>(null);
     const [recentCases, setRecentCases] = useState<RecentCase[]>([]);
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [doctor, setDoctor] = useState<Doctor | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    const [showForm, setShowForm] = useState(false);
+    const [newAppointment, setNewAppointment] = useState({
+        patient_name: '',
+        patient_id: '',
+        appointment_time: '',
+        appointment_date: '',
+        appointment_type: 'Consultation',
+        status: 'Pending',
+        case_id: ''
+    });
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            const userData = localStorage.getItem('user');
-            const token = localStorage.getItem('token');
+        fetchAllData();
+    }, []);
 
-            if (!userData || !token) {
+    const fetchAllData = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const userData = localStorage.getItem('user');
+
+            if (!token || !userData) {
                 router.push('/log-in');
                 return;
             }
 
-            const parsedUser = JSON.parse(userData);
-            setUser(parsedUser);
+            const user = JSON.parse(userData);
+            setDoctor(user);
 
-            try {
-                // جلب الإحصائيات الحقيقية من API
-                const statsRes = await fetch('http://localhost:5000/api/dashboard/stats', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (statsRes.ok) {
-                    const statsData = await statsRes.json();
-                    setStats(statsData);
+            const statsRes = await fetch('http://localhost:5000/api/dashboard/stats', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
+            });
 
-                // جلب الحالات الأخيرة
-                const casesRes = await fetch('http://localhost:5000/api/dashboard/recent-cases', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (casesRes.ok) {
-                    const casesData = await casesRes.json();
-                    setRecentCases(casesData);
-                }
-            } catch (error) {
-                console.error('Error fetching dashboard data:', error);
-                // إذا فشل الاتصال، نستخدم بيانات تجريبية مؤقتاً
-                setStats({
-                    active_cases: 0,
-                    bethesda_3_plus: 0,
-                    tirads_4_5: 0,
-                    ai_consensus: 0
-                });
-                setRecentCases([]);
-            } finally {
-                setLoading(false);
+            if (statsRes.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                router.push('/log-in');
+                return;
             }
-        };
 
-        fetchUserData();
-    }, [router]);
+            if (statsRes.ok) {
+                const statsData = await statsRes.json();
+                setStats(statsData);
+            }
+
+            const casesRes = await fetch('http://localhost:5000/api/dashboard/recent-cases', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (casesRes.ok) {
+                const casesData = await casesRes.json();
+                setRecentCases(casesData);
+            }
+
+            await fetchAppointments(token);
+
+        } catch (err) {
+            setError('Failed to connect to server');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchAppointments = async (token: string) => {
+        try {
+            const res = await fetch('http://localhost:5000/api/appointments/today', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setAppointments(data);
+            }
+        } catch (err) {
+            console.error('Error fetching appointments:', err);
+        }
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setNewAppointment(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleAddAppointment = async () => {
+        if (!newAppointment.patient_name || !newAppointment.appointment_time || !newAppointment.appointment_date) {
+            alert('Please fill all required fields');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+
+            const res = await fetch('http://localhost:5000/api/appointments', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    patient_name: newAppointment.patient_name,
+                    patient_id: newAppointment.patient_id,
+                    appointment_time: newAppointment.appointment_time,
+                    appointment_date: newAppointment.appointment_date,
+                    appointment_type: newAppointment.appointment_type,
+                    status: newAppointment.status,
+                    case_id: newAppointment.case_id
+                })
+            });
+
+            if (res.ok) {
+                const result = await res.json();
+                setAppointments(prev => [...prev, result.appointment]);
+                setShowForm(false);
+                setNewAppointment({
+                    patient_name: '',
+                    patient_id: '',
+                    appointment_time: '',
+                    appointment_date: '',
+                    appointment_type: 'Consultation',
+                    status: 'Pending',
+                    case_id: ''
+                });
+                alert('Appointment added successfully!');
+            } else {
+                const errorData = await res.json();
+                alert(errorData.error || 'Failed to add appointment');
+            }
+        } catch (err) {
+            console.error('Error adding appointment:', err);
+            alert('Failed to connect to server');
+        }
+    };
+
+    const handleUpdateStatus = async (appointmentId: number, newStatus: string) => {
+        try {
+            const token = localStorage.getItem('token');
+
+            const res = await fetch(`http://localhost:5000/api/appointments/${appointmentId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            if (res.ok) {
+                setAppointments(prev =>
+                    prev.map(apt =>
+                        apt.id === appointmentId ? { ...apt, status: newStatus } : apt
+                    )
+                );
+            }
+        } catch (err) {
+            console.error('Error updating status:', err);
+        }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -102,260 +227,390 @@ export default function DashboardPage() {
         router.push('/log-in');
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour >= 5 && hour < 12) return 'Good morning';
+        if (hour >= 12 && hour < 17) return 'Good afternoon';
+        if (hour >= 17 && hour < 21) return 'Good evening';
+        return 'Good night';
     };
 
-    const getTimeAgo = (dateString: string) => {
-        const now = new Date();
-        const past = new Date(dateString);
-        const diffMs = now.getTime() - past.getTime();
-        const diffMins = Math.floor(diffMs / 60000);
+    const formatDoctorName = (name: string | undefined) => {
+        if (!name) return 'Doctor';
+        if (name.toLowerCase().startsWith('dr.') || name.toLowerCase().startsWith('dr ')) {
+            return name;
+        }
+        return `Dr. ${name}`;
+    };
 
-        if (diffMins < 60) return `${diffMins} min ago`;
-        if (diffMins < 1440) return `${Math.floor(diffMins / 60)} hours ago`;
-        return `${Math.floor(diffMins / 1440)} days ago`;
+    const getFirstName = (name: string | undefined) => {
+        if (!name) return 'Doctor';
+        const cleanName = name.replace(/^dr\.?\s*/i, '');
+        return cleanName.split(' ')[0];
+    };
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     };
 
     if (loading) {
         return (
             <div className={styles.loadingContainer}>
                 <div className={styles.loadingSpinner}></div>
-                <p>Loading your clinical data...</p>
+                <p>Loading dashboard...</p>
             </div>
         );
     }
 
-    const doctorName = user?.email.split('@')[0] || 'Clinician';
-
     return (
         <div className={styles.container}>
-            {/* Sidebar */}
-            <aside className={styles.sidebar}>
+            <header className={styles.header}>
                 <div className={styles.logoArea}>
                     <div className={styles.logo}>
-                        <Heart size={24} />
+                        <Heart size={28} />
                     </div>
-                    <div>
-                        <h2 className={styles.logoText}>Diagnovate</h2>
+                    <div className={styles.logoTextArea}>
+                        <h1 className={styles.logoMain}>DIAGNOVATE</h1>
                         <p className={styles.logoSub}>Thyroid Cancer Diagnostics</p>
                     </div>
                 </div>
 
-                <nav className={styles.nav}>
-                    <Link href="/dashboard" className={`${styles.navItem} ${styles.navActive}`}>
-                        <Activity size={20} />
-                        <span>Dashboard</span>
-                    </Link>
-                    {/* هذا الرابط تم تعديله من /ultrasound إلى /image-enhancement */}
-                    <Link href="/image-enhancement" className={styles.navItem}>
-                        <Camera size={20} />
-                        <span>Ultrasound Analysis</span>
-                    </Link>
-                    <Link href="/biopsy" className={styles.navItem}>
-                        <FileText size={20} />
-                        <span>Biopsy Results</span>
-                    </Link>
-                    <Link href="/patients" className={styles.navItem}>
-                        <User size={20} />
-                        <span>Patient Registry</span>
-                    </Link>
-                    <Link href="/reports" className={styles.navItem}>
-                        <BarChart3 size={20} />
-                        <span>Clinical Reports</span>
-                    </Link>
-                    <Link href="/guidelines" className={styles.navItem}>
-                        <Award size={20} />
-                        <span>ACR TI-RADS</span>
-                    </Link>
-                </nav>
-
-                <div className={styles.sidebarFooter}>
-                    <button onClick={handleLogout} className={styles.logoutButton}>
-                        <LogOut size={20} />
-                        <span>Sign Out</span>
-                    </button>
-                    <div className={styles.doctorBadge}>
-                        <div className={styles.doctorAvatar}>
-                            {doctorName.charAt(0).toUpperCase()}
+                <div className={styles.headerRight}>
+                    <div className={styles.profileCard}>
+                        <div className={styles.avatar}>
+                            <User size={24} />
                         </div>
-                        <div>
-                            <p className={styles.doctorName}>Dr. {doctorName}</p>
-                            <p className={styles.doctorTitle}>Thyroid Specialist</p>
-                            <p className={styles.doctorEmail}>{user?.email}</p>
+                        <div className={styles.profileInfo}>
+                            <div className={styles.profileName}>
+                                <span className={styles.doctorName}>
+                                    {formatDoctorName(doctor?.name)}
+                                </span>
+                                <span className={styles.specialty}>
+                                    {doctor?.specialty || 'Thyroid Specialist'}
+                                </span>
+                            </div>
+                            <div className={styles.profileEmail}>
+                                {doctor?.email || 'doctor@diagnovate.com'}
+                            </div>
                         </div>
                     </div>
-                </div>
-            </aside>
 
-            {/* Main Content */}
+                    <div className={styles.actions}>
+                        <button className={styles.iconButton}><Bell size={20} /></button>
+                        <button className={styles.iconButton}><Calendar size={20} /></button>
+                        <button onClick={handleLogout} className={styles.iconButton}><LogOut size={20} /></button>
+                    </div>
+                </div>
+            </header>
+
             <main className={styles.main}>
-                {/* Header */}
-                <header className={styles.header}>
+                <div className={styles.welcomeSection}>
                     <div>
-                        <h1 className={styles.greeting}>
-                            Thyroid Cancer Dashboard
-                        </h1>
+                        <h2 className={styles.greeting}>
+                            {getGreeting()}, Dr. {getFirstName(doctor?.name)}
+                        </h2>
                         <p className={styles.date}>
-                            {user?.created_at ? formatDate(user.created_at) : formatDate(new Date().toISOString())}
+                            {new Date().toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            })}
                         </p>
                     </div>
-                    <div className={styles.headerActions}>
-                        <button className={styles.iconButton}>
-                            <Search size={20} />
-                        </button>
-                        <button className={styles.iconButton}>
-                            <Bell size={20} />
-                        </button>
-                    </div>
-                </header>
-
-                {/* Real Stats Cards */}
-                <div className={styles.statsGrid}>
-                    <div className={styles.statCard}>
-                        <div className={styles.statIcon} style={{ backgroundColor: '#e6f7ff', color: '#0099cc' }}>
-                            <Activity size={24} />
-                        </div>
-                        <div>
-                            <p className={styles.statLabel}>Active Cases</p>
-                            <p className={styles.statValue}>{stats?.active_cases || 0}</p>
-                        </div>
-                    </div>
-                    <div className={styles.statCard}>
-                        <div className={styles.statIcon} style={{ backgroundColor: '#fff1f0', color: '#f5222d' }}>
-                            <Shield size={24} />
-                        </div>
-                        <div>
-                            <p className={styles.statLabel}>Bethesda III+</p>
-                            <p className={styles.statValue}>{stats?.bethesda_3_plus || 0}</p>
-                        </div>
-                    </div>
-                    <div className={styles.statCard}>
-                        <div className={styles.statIcon} style={{ backgroundColor: '#f6ffed', color: '#52c41a' }}>
-                            <TrendingUp size={24} />
-                        </div>
-                        <div>
-                            <p className={styles.statLabel}>TI-RADS 4/5</p>
-                            <p className={styles.statValue}>{stats?.tirads_4_5 || 0}</p>
-                        </div>
-                    </div>
-                    <div className={styles.statCard}>
-                        <div className={styles.statIcon} style={{ backgroundColor: '#f9f0ff', color: '#722ed1' }}>
-                            <Layers size={24} />
-                        </div>
-                        <div>
-                            <p className={styles.statLabel}>AI Consensus</p>
-                            <p className={styles.statValue}>{stats?.ai_consensus || 0}%</p>
-                        </div>
-                    </div>
                 </div>
 
-                {/* Features Grid - ثابتة لأنها features مش بيانات متغيرة */}
+                {error ? (
+                    <div className={styles.errorBox}>
+                        <p>{error}</p>
+                        <button onClick={fetchAllData}>Retry</button>
+                    </div>
+                ) : (
+                    <div className={styles.statsGrid}>
+                        <div className={styles.statCard}>
+                            <div className={styles.statIcon} style={{ backgroundColor: '#e6f7ff', color: '#0099cc' }}>
+                                <Activity size={24} />
+                            </div>
+                            <div>
+                                <p className={styles.statLabel}>Active Cases</p>
+                                <p className={styles.statValue}>{stats?.active_cases || 0}</p>
+                            </div>
+                        </div>
+                        <div className={styles.statCard}>
+                            <div className={styles.statIcon} style={{ backgroundColor: '#fff1f0', color: '#f5222d' }}>
+                                <TrendingUp size={24} />
+                            </div>
+                            <div>
+                                <p className={styles.statLabel}>Urgent Cases</p>
+                                <p className={styles.statValue}>{stats?.urgent_cases || 0}</p>
+                            </div>
+                        </div>
+                        <div className={styles.statCard}>
+                            <div className={styles.statIcon} style={{ backgroundColor: '#e6f7e6', color: '#10b981' }}>
+                                <User size={24} />
+                            </div>
+                            <div>
+                                <p className={styles.statLabel}>Total Patients</p>
+                                <p className={styles.statValue}>{stats?.total_patients || 0}</p>
+                            </div>
+                        </div>
+                        <div className={styles.statCard}>
+                            <div className={styles.statIcon} style={{ backgroundColor: '#fef3c7', color: '#f59e0b' }}>
+                                <Calendar size={24} />
+                            </div>
+                            <div>
+                                <p className={styles.statLabel}>Today's Appointments</p>
+                                <p className={styles.statValue}>{stats?.today_appointments || 0}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className={styles.featuresGrid}>
-                    {/* Feature 1: Ultrasound Enhancement */}
-                    {/* هذا الرابط تم تعديله من /ultrasound إلى /image-enhancement */}
                     <Link href="/image-enhancement" className={styles.featureCard}>
                         <div className={styles.featureHeader}>
                             <div className={styles.featureIcon} style={{ backgroundColor: '#0099cc' }}>
-                                <Camera size={24} color="white" />
+                                <Camera size={28} color="white" />
                             </div>
-                            <span className={styles.featureBadge}>AI-Powered</span>
+                            <span className={styles.featureBadge}>AI-POWERED</span>
                         </div>
-                        <h3 className={styles.featureTitle}>Thyroid Ultrasound Enhancement</h3>
-                        <p className={styles.featureDesc}>
-                            Transform blurry thyroid ultrasound images into crystal-clear diagnostic quality in real-time.
-                        </p>
+                        <h3 className={styles.featureTitle}>Ultrasound Enhancement</h3>
+                        <p className={styles.featureDesc}>Transform blurry thyroid ultrasound images into crystal-clear diagnostic quality</p>
                         <ul className={styles.featureList}>
-                            <li>• Enhances contrast for thyroid nodules</li>
-                            <li>• Removes speckle noise from scans</li>
-                            <li>• Sharpens nodule boundaries</li>
-                            <li>• Auto-detects microcalcifications</li>
+                            <li>Contrast enhancement for nodules</li>
+                            <li>Speckle noise removal</li>
+                            <li>Nodule boundary sharpening</li>
+                            <li>Microcalcification detection</li>
                         </ul>
-                        <div className={styles.featureFooter}>
-                            <span className={styles.featureLink}>Start Analysis →</span>
-                        </div>
                     </Link>
 
-                    {/* Feature 2: TI-RADS Scoring */}
-                    <Link href="/ti-rads" className={styles.featureCard}>
+                    <Link href="/ai-diagnosis" className={styles.featureCard}>
                         <div className={styles.featureHeader}>
                             <div className={styles.featureIcon} style={{ backgroundColor: '#722ed1' }}>
-                                <Award size={24} color="white" />
+                                <Activity size={28} color="white" />
                             </div>
-                            <span className={styles.featureBadge}>ACR Guidelines</span>
+                            <span className={styles.featureBadge}>DEEP LEARNING</span>
                         </div>
-                        <h3 className={styles.featureTitle}>ACR TI-RADS Scoring</h3>
-                        <p className={styles.featureDesc}>
-                            Automated scoring based on composition, echogenicity, shape, margin, and echogenic foci.
-                        </p>
+                        <h3 className={styles.featureTitle}>AI Diagnosis Models</h3>
+                        <p className={styles.featureDesc}>Deep learning analysis for nodule classification and risk assessment</p>
                         <ul className={styles.featureList}>
-                            <li>• Composition (cystic/solid)</li>
-                            <li>• Echogenicity assessment</li>
-                            <li>• Margin evaluation</li>
-                            <li>• Echogenic foci detection</li>
+                            <li>Nodule classification</li>
+                            <li>Malignancy risk</li>
+                            <li>TI-RADS scoring</li>
+                            <li>Biopsy recommendations</li>
                         </ul>
-                        <div className={styles.featureFooter}>
-                            <span className={styles.featureLink}>Score Nodules →</span>
+                    </Link>
+
+                    <Link href="/reports" className={styles.featureCard}>
+                        <div className={styles.featureHeader}>
+                            <div className={styles.featureIcon} style={{ backgroundColor: '#fa8c16' }}>
+                                <FileText size={28} color="white" />
+                            </div>
+                            <span className={styles.featureBadge}>AI-ASSISTED</span>
                         </div>
+                        <h3 className={styles.featureTitle}>Report Generation</h3>
+                        <p className={styles.featureDesc}>Create comprehensive clinical reports with AI assistance</p>
+                        <ul className={styles.featureList}>
+                            <li>Automated findings</li>
+                            <li>TI-RADS documentation</li>
+                            <li>Biopsy integration</li>
+                            <li>PDF export</li>
+                        </ul>
                     </Link>
                 </div>
 
-                {/* Recent Thyroid Cases - حقيقية من API */}
-                <div className={styles.recentSection}>
-                    <div className={styles.sectionHeader}>
-                        <h2 className={styles.sectionTitle}>Recent Thyroid Cases</h2>
-                        <Link href="/cases" className={styles.viewAll}>
-                            View All Cases
+                <div className={styles.tableSection}>
+                    <div className={styles.tableHeader}>
+                        <h3>Today's Appointments & Patients</h3>
+                        <Link href="/appointments" className={styles.viewAllLink}>
+                            View All <ChevronRight size={16} />
                         </Link>
                     </div>
-                    <div className={styles.casesList}>
-                        {recentCases.length > 0 ? (
-                            recentCases.map((case_) => (
-                                <Link href={`/case/${case_.id}`} key={case_.id} className={styles.caseItem}>
-                                    <div className={styles.caseInfo}>
-                                        <p className={styles.caseId}>{case_.case_id}</p>
-                                        <p className={styles.caseDetails}>
-                                            {case_.nodule_size} • {case_.location} • TI-RADS {case_.tirads_score}
-                                        </p>
-                                    </div>
-                                    <div className={styles.caseStatus}>
-                    <span className={styles.statusBadge}
-                          style={{
-                              backgroundColor: case_.bethesda_category >= 'V' ? '#fff1f0' : '#f6ffed',
-                              color: case_.bethesda_category >= 'V' ? '#f5222d' : '#52c41a'
-                          }}>
-                      Bethesda {case_.bethesda_category}
-                    </span>
-                                        <span className={styles.caseTime}>
-                      <Clock size={14} style={{ marginRight: 4 }} />
-                                            {getTimeAgo(case_.created_at)}
-                    </span>
-                                    </div>
-                                </Link>
-                            ))
-                        ) : (
-                            <p className={styles.noCases}>No recent cases. Start by analyzing an ultrasound.</p>
-                        )}
+
+                    <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                        <button className={styles.addButton} onClick={() => setShowForm(!showForm)}>
+                            + New Appointment
+                        </button>
+                    </div>
+
+                    {showForm && (
+                        <div className={styles.formContainer}>
+                            <h4>Add New Appointment</h4>
+                            <div className={styles.formGrid}>
+                                <input
+                                    type="text"
+                                    name="patient_name"
+                                    placeholder="Patient Name *"
+                                    value={newAppointment.patient_name}
+                                    onChange={handleInputChange}
+                                    className={styles.formInput}
+                                />
+                                <input
+                                    type="text"
+                                    name="patient_id"
+                                    placeholder="Patient ID"
+                                    value={newAppointment.patient_id}
+                                    onChange={handleInputChange}
+                                    className={styles.formInput}
+                                />
+                                <input
+                                    type="date"
+                                    name="appointment_date"
+                                    value={newAppointment.appointment_date}
+                                    onChange={handleInputChange}
+                                    className={styles.formInput}
+                                />
+                                <input
+                                    type="time"
+                                    name="appointment_time"
+                                    value={newAppointment.appointment_time}
+                                    onChange={handleInputChange}
+                                    className={styles.formInput}
+                                />
+                                <select
+                                    name="appointment_type"
+                                    value={newAppointment.appointment_type}
+                                    onChange={handleInputChange}
+                                    className={styles.formInput}
+                                >
+                                    <option value="Consultation">Consultation</option>
+                                    <option value="Follow-up">Follow-up</option>
+                                    <option value="Ultrasound">Ultrasound</option>
+                                    <option value="Biopsy">Biopsy</option>
+                                </select>
+                                <select
+                                    name="status"
+                                    value={newAppointment.status}
+                                    onChange={handleInputChange}
+                                    className={styles.formInput}
+                                >
+                                    <option value="Pending">Pending</option>
+                                    <option value="Confirmed">Confirmed</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                                <input
+                                    type="text"
+                                    name="case_id"
+                                    placeholder="Case ID (optional)"
+                                    value={newAppointment.case_id}
+                                    onChange={handleInputChange}
+                                    className={styles.formInput}
+                                />
+                                <div className={styles.formActions}>
+                                    <button onClick={handleAddAppointment} className={styles.saveBtn}>
+                                        Save Appointment
+                                    </button>
+                                    <button onClick={() => setShowForm(false)} className={styles.cancelBtn}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className={styles.tableWrapper}>
+                        <table className={styles.appointmentsTable}>
+                            <thead>
+                            <tr>
+                                <th>Patient Name</th>
+                                <th>Time/Date</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Case ID</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {appointments.length > 0 ? (
+                                appointments.map((apt) => (
+                                    <tr key={apt.id}>
+                                        <td>
+                                            <div className={styles.patientInfo}>
+                                                <div className={styles.patientAvatar}>
+                                                    {apt.patient_name.split(' ').map(n => n[0]).join('')}
+                                                </div>
+                                                <div>
+                                                    <div className={styles.patientName}>{apt.patient_name}</div>
+                                                    <div className={styles.patientId}>ID: {apt.patient_id || 'N/A'}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {apt.appointment_time}
+                                            {apt.appointment_date !== new Date().toISOString().split('T')[0] &&
+                                                ` (${new Date(apt.appointment_date).toLocaleDateString()})`
+                                            }
+                                        </td>
+                                        <td>
+                                                <span className={`${styles.badge} ${styles[apt.appointment_type.toLowerCase() + 'Badge'] || styles.consultationBadge}`}>
+                                                    {apt.appointment_type}
+                                                </span>
+                                        </td>
+                                        <td>
+                                            <select
+                                                value={apt.status}
+                                                onChange={(e) => handleUpdateStatus(apt.id, e.target.value)}
+                                                className={`${styles.statusSelect} ${styles[apt.status.toLowerCase() + 'Select']}`}
+                                            >
+                                                <option value="Pending">Pending</option>
+                                                <option value="Confirmed">Confirmed</option>
+                                                <option value="Completed">Completed</option>
+                                                <option value="Cancelled">Cancelled</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <span className={styles.caseId}>#{apt.case_id}</span>
+                                        </td>
+                                        <td>
+                                            <Link href={`/cases/${apt.case_id}`} className={styles.viewBtn}>
+                                                View <ChevronRight size={14} />
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={6} className={styles.noData}>
+                                        No appointments found for today
+                                    </td>
+                                </tr>
+                            )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                {/* Clinical Guidelines - ثابت */}
-                <div className={styles.guidelinesBanner}>
-                    <div>
-                        <h3 className={styles.guidelinesTitle}>ATA Guidelines 2024</h3>
-                        <p className={styles.guidelinesDesc}>
-                            AI-powered recommendations following American Thyroid Association guidelines for nodule management.
-                        </p>
+                {recentCases.length > 0 && (
+                    <div className={styles.recentCasesSection}>
+                        <h3>Recent Cases</h3>
+                        <div className={styles.casesGrid}>
+                            {recentCases.map((caseItem) => (
+                                <Link href={`/cases/${caseItem.case_id}`} key={caseItem.id} className={styles.caseCard}>
+                                    <div className={styles.caseHeader}>
+                                        <span className={styles.caseId}>#{caseItem.case_id}</span>
+                                        <span className={styles.caseDate}>{formatDate(caseItem.created_at)}</span>
+                                    </div>
+                                    <div className={styles.caseBody}>
+                                        <p><strong>Patient:</strong> {caseItem.patient_name}</p>
+                                        <p><strong>Nodule Size:</strong> {caseItem.nodule_size}</p>
+                                        <p><strong>Location:</strong> {caseItem.location}</p>
+                                        <div className={styles.caseScores}>
+                                            <span className={styles.tirads}>TI-RADS: {caseItem.tirads_score}</span>
+                                            <span className={styles.bethesda}>Bethesda: {caseItem.bethesda_category}</span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
                     </div>
-                    <Link href="/guidelines" className={styles.guidelinesButton}>
-                        View Guidelines
-                    </Link>
-                </div>
+                )}
             </main>
         </div>
     );

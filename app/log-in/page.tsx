@@ -1,12 +1,11 @@
 'use client';
-
-import Link from 'next/link';
-import styles from './styles.module.css';
-import { Mail, Lock } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/api';
+import { Mail, Lock } from 'lucide-react';
+import styles from './styles.module.css';
 
-const LoginPage = () => {
+export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -15,33 +14,19 @@ const LoginPage = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
         setLoading(true);
+        setError('');
 
         try {
-            const res = await fetch('http://localhost:5000/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
+            const data = await auth.login({ email, password });
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.error || 'Login failed');
-            }
-
-            // Save to localStorage
             localStorage.setItem('token', data.access_token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('user', JSON.stringify(data.doctor));
 
-            // Redirect to dashboard
             router.push('/dashboard');
 
         } catch (err: any) {
-            setError(err.message);
+            setError(err.message || 'Invalid email or password');
         } finally {
             setLoading(false);
         }
@@ -50,51 +35,33 @@ const LoginPage = () => {
     return (
         <div className={styles.pageWrapper}>
             <div className={styles.loginContainer}>
-                <h2 className={styles.formTitle}>Login</h2>
+                <h1 className={styles.formTitle}>Login to Diagnovate</h1>
 
-                {error && (
-                    <div style={{
-                        backgroundColor: '#ffebee',
-                        color: '#c62828',
-                        padding: '12px',
-                        borderRadius: '8px',
-                        marginBottom: '20px',
-                        textAlign: 'center',
-                        fontSize: '14px'
-                    }}>
-                        {error}
-                    </div>
-                )}
+                {error && <div className={styles.errorMessage}>{error}</div>}
 
                 <form className={styles.loginForm} onSubmit={handleSubmit}>
                     <div className={styles.inputWrapper}>
                         <input
                             type="email"
-                            placeholder="Email Address"
                             className={styles.inputField}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Email Address"
                             required
-                            disabled={loading}
                         />
-                        <Mail className={styles.icon} size={20} />
+                        <Mail className={styles.icon} size={18} />
                     </div>
 
                     <div className={styles.inputWrapper}>
                         <input
                             type="password"
-                            placeholder="Password"
                             className={styles.inputField}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Password"
                             required
-                            disabled={loading}
                         />
-                        <Lock className={styles.icon} size={20} />
-                    </div>
-
-                    <div className={styles.forgetPassLink}>
-                        <a href="/forgot-password">Forgot password?</a>
+                        <Lock className={styles.icon} size={18} />
                     </div>
 
                     <button
@@ -102,17 +69,14 @@ const LoginPage = () => {
                         className={styles.loginButton}
                         disabled={loading}
                     >
-                        {loading ? 'Loading...' : 'Log In'}
+                        {loading ? 'Loading...' : 'Login'}
                     </button>
                 </form>
 
                 <p className={styles.signupText}>
-                    Don&apos;t have an account?{' '}
-                    <Link href="/sign-up">Sign up now</Link>
+                    Don't have an account? <a href="/sign-up">Sign up</a>
                 </p>
             </div>
         </div>
     );
-};
-
-export default LoginPage;
+}
