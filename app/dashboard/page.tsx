@@ -1,11 +1,11 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './styles.module.css';
 import {
-    Activity, Camera, FileText, LogOut, Bell, Calendar,
-    TrendingUp, Heart, ChevronRight, User
+    Activity, Camera, FileText, LogOut, Bell,
+    TrendingUp, Heart, ChevronRight, User, Calendar
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -52,7 +52,10 @@ export default function DashboardPage() {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [doctor, setDoctor] = useState<Doctor | null>(null);
     const [loading, setLoading] = useState(true);
+    const [loggingOut, setLoggingOut] = useState(false);
     const [error, setError] = useState('');
+    const [showNotifications, setShowNotifications] = useState(false);
+    const notifRef = useRef<HTMLDivElement>(null);
 
     const [showForm, setShowForm] = useState(false);
     const [newAppointment, setNewAppointment] = useState({
@@ -67,6 +70,16 @@ export default function DashboardPage() {
 
     useEffect(() => {
         fetchAllData();
+    }, []);
+
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+                setShowNotifications(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const fetchAllData = async () => {
@@ -222,9 +235,12 @@ export default function DashboardPage() {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        router.push('/log-in');
+        setLoggingOut(true);
+        setTimeout(() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            router.push('/log-in');
+        }, 1500);
     };
 
     const getGreeting = () => {
@@ -259,11 +275,34 @@ export default function DashboardPage() {
         });
     };
 
+    // Logout overlay screen
+    if (loggingOut) {
+        return (
+            <div className={styles.logoutScreen}>
+                <div className={styles.logoutCard}>
+                    <div className={styles.logoutSpinner} />
+                    <p className={styles.logoutText}>Signing out...</p>
+                    <p className={styles.logoutSub}>See you next time, Dr. {getFirstName(doctor?.name)}</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Dashboard loading screen (same style as Sign Out)
     if (loading) {
         return (
-            <div className={styles.loadingContainer}>
-                <div className={styles.loadingSpinner}></div>
-                <p>Loading dashboard...</p>
+            <div className={styles.logoutScreen}>
+                <div className={styles.logoutCard}>
+                    <div className={styles.logoutSpinner} />
+
+                    <p className={styles.logoutText}>
+                        Loading dashboard...
+                    </p>
+
+                    <p className={styles.logoutSub}>
+                        Preparing your workspace, Dr. {getFirstName(doctor?.name)}
+                    </p>
+                </div>
             </div>
         );
     }
@@ -282,7 +321,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div className={styles.headerRight}>
-                    <div className={styles.profileCard}>
+                    <Link href="/profile" className={styles.profileCard}>
                         <div className={styles.avatar}>
                             <User size={24} />
                         </div>
@@ -299,12 +338,40 @@ export default function DashboardPage() {
                                 {doctor?.email || 'doctor@diagnovate.com'}
                             </div>
                         </div>
-                    </div>
+                    </Link>
 
                     <div className={styles.actions}>
-                        <button className={styles.iconButton}><Bell size={20} /></button>
-                        <button className={styles.iconButton}><Calendar size={20} /></button>
-                        <button onClick={handleLogout} className={styles.iconButton}><LogOut size={20} /></button>
+                        <div className={styles.notifWrapper} ref={notifRef}>
+                            <button
+                                className={`${styles.iconButton} ${showNotifications ? styles.iconButtonActive : ''}`}
+                                onClick={() => setShowNotifications(v => !v)}
+                                aria-label="Notifications"
+                            >
+                                <Bell size={20} />
+                            </button>
+
+                            {showNotifications && (
+                                <div className={styles.notifPopup}>
+                                    <div className={styles.notifHeader}>
+                                        <Bell size={15} />
+                                        <span>Notifications</span>
+                                    </div>
+                                    <div className={styles.notifEmpty}>
+                                        <div className={styles.notifEmptyIcon}>
+                                            <Bell size={26} />
+                                        </div>
+                                        <p className={styles.notifEmptyTitle}>No Notifications</p>
+                                        <p className={styles.notifEmptyText}>
+                                            You have no notifications for today.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <button onClick={handleLogout} className={styles.iconButton} aria-label="Logout">
+                            <LogOut size={20} />
+                        </button>
                     </div>
                 </div>
             </header>
@@ -443,73 +510,26 @@ export default function DashboardPage() {
                         <div className={styles.formContainer}>
                             <h4>Add New Appointment</h4>
                             <div className={styles.formGrid}>
-                                <input
-                                    type="text"
-                                    name="patient_name"
-                                    placeholder="Patient Name *"
-                                    value={newAppointment.patient_name}
-                                    onChange={handleInputChange}
-                                    className={styles.formInput}
-                                />
-                                <input
-                                    type="text"
-                                    name="patient_id"
-                                    placeholder="Patient ID"
-                                    value={newAppointment.patient_id}
-                                    onChange={handleInputChange}
-                                    className={styles.formInput}
-                                />
-                                <input
-                                    type="date"
-                                    name="appointment_date"
-                                    value={newAppointment.appointment_date}
-                                    onChange={handleInputChange}
-                                    className={styles.formInput}
-                                />
-                                <input
-                                    type="time"
-                                    name="appointment_time"
-                                    value={newAppointment.appointment_time}
-                                    onChange={handleInputChange}
-                                    className={styles.formInput}
-                                />
-                                <select
-                                    name="appointment_type"
-                                    value={newAppointment.appointment_type}
-                                    onChange={handleInputChange}
-                                    className={styles.formInput}
-                                >
+                                <input type="text" name="patient_name" placeholder="Patient Name *" value={newAppointment.patient_name} onChange={handleInputChange} className={styles.formInput} />
+                                <input type="text" name="patient_id" placeholder="Patient ID" value={newAppointment.patient_id} onChange={handleInputChange} className={styles.formInput} />
+                                <input type="date" name="appointment_date" value={newAppointment.appointment_date} onChange={handleInputChange} className={styles.formInput} />
+                                <input type="time" name="appointment_time" value={newAppointment.appointment_time} onChange={handleInputChange} className={styles.formInput} />
+                                <select name="appointment_type" value={newAppointment.appointment_type} onChange={handleInputChange} className={styles.formInput}>
                                     <option value="Consultation">Consultation</option>
                                     <option value="Follow-up">Follow-up</option>
                                     <option value="Ultrasound">Ultrasound</option>
                                     <option value="Biopsy">Biopsy</option>
                                 </select>
-                                <select
-                                    name="status"
-                                    value={newAppointment.status}
-                                    onChange={handleInputChange}
-                                    className={styles.formInput}
-                                >
+                                <select name="status" value={newAppointment.status} onChange={handleInputChange} className={styles.formInput}>
                                     <option value="Pending">Pending</option>
                                     <option value="Confirmed">Confirmed</option>
                                     <option value="Completed">Completed</option>
                                     <option value="Cancelled">Cancelled</option>
                                 </select>
-                                <input
-                                    type="text"
-                                    name="case_id"
-                                    placeholder="Case ID (optional)"
-                                    value={newAppointment.case_id}
-                                    onChange={handleInputChange}
-                                    className={styles.formInput}
-                                />
+                                <input type="text" name="case_id" placeholder="Case ID (optional)" value={newAppointment.case_id} onChange={handleInputChange} className={styles.formInput} />
                                 <div className={styles.formActions}>
-                                    <button onClick={handleAddAppointment} className={styles.saveBtn}>
-                                        Save Appointment
-                                    </button>
-                                    <button onClick={() => setShowForm(false)} className={styles.cancelBtn}>
-                                        Cancel
-                                    </button>
+                                    <button onClick={handleAddAppointment} className={styles.saveBtn}>Save Appointment</button>
+                                    <button onClick={() => setShowForm(false)} className={styles.cancelBtn}>Cancel</button>
                                 </div>
                             </div>
                         </div>
@@ -549,9 +569,9 @@ export default function DashboardPage() {
                                             }
                                         </td>
                                         <td>
-                                                <span className={`${styles.badge} ${styles[apt.appointment_type.toLowerCase() + 'Badge'] || styles.consultationBadge}`}>
-                                                    {apt.appointment_type}
-                                                </span>
+                                            <span className={`${styles.badge} ${styles[apt.appointment_type.toLowerCase() + 'Badge'] || styles.consultationBadge}`}>
+                                                {apt.appointment_type}
+                                            </span>
                                         </td>
                                         <td>
                                             <select
@@ -565,9 +585,7 @@ export default function DashboardPage() {
                                                 <option value="Cancelled">Cancelled</option>
                                             </select>
                                         </td>
-                                        <td>
-                                            <span className={styles.caseId}>#{apt.case_id}</span>
-                                        </td>
+                                        <td><span className={styles.caseId}>#{apt.case_id}</span></td>
                                         <td>
                                             <Link href={`/cases/${apt.case_id}`} className={styles.viewBtn}>
                                                 View <ChevronRight size={14} />
@@ -577,9 +595,7 @@ export default function DashboardPage() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={6} className={styles.noData}>
-                                        No appointments found for today
-                                    </td>
+                                    <td colSpan={6} className={styles.noData}>No appointments found for today</td>
                                 </tr>
                             )}
                             </tbody>
@@ -594,7 +610,7 @@ export default function DashboardPage() {
                             {recentCases.map((caseItem) => (
                                 <Link href={`/cases/${caseItem.case_id}`} key={caseItem.id} className={styles.caseCard}>
                                     <div className={styles.caseHeader}>
-                                        <span className={styles.caseId}>#{caseItem.case_id}</span>
+             ب                           <span className={styles.caseId}>#{caseItem.case_id}</span>
                                         <span className={styles.caseDate}>{formatDate(caseItem.created_at)}</span>
                                     </div>
                                     <div className={styles.caseBody}>
