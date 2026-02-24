@@ -1,0 +1,44 @@
+.adminHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.statsRow {
+  display: flex;
+  gap: 15px;
+}
+
+.statBox {
+  background: white;
+  padding: 12px 18px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  font-weight: 600;
+}
+
+.pendingStat { color: #d97706; }
+.approvedStat { color: #16a34a; }
+.rejectedStat { color: #dc2626; }
+
+.filterTabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.filterBtn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.filterBtnActive {
+  background: #0099cc;
+  color: white;
+  border: none;
+}
