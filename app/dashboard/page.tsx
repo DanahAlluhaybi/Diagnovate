@@ -432,7 +432,7 @@ export default function DashboardPage() {
                                 <Calendar size={24} />
                             </div>
                             <div>
-                                <p className={styles.statLabel}>Today's Appointments</p>
+                                <p className={styles.statLabel}>Today’s Appointments</p>
                                 <p className={styles.statValue}>{stats?.today_appointments || 0}</p>
                             </div>
                         </div>
@@ -440,6 +440,26 @@ export default function DashboardPage() {
                 )}
 
                 <div className={styles.featuresGrid}>
+
+                    <Link href="/patient-management" className={styles.featureCard}>
+                        <div className={styles.featureHeader}>
+                            <div className={styles.featureIcon} style={{ backgroundColor: '#10b981' }}>
+                                <User size={28} color="white" />
+                            </div>
+                            <span className={styles.featureBadge}>PATIENT MANAGEMENT</span>
+                        </div>
+                        <h3 className={styles.featureTitle}>Patient Management</h3>
+                        <p className={styles.featureDesc}>Comprehensive patient records, appointments, and medical history management</p>
+                        <ul className={styles.featureList}>
+                            <li>Patient records & profiles</li>
+                            <li>Appointment scheduling</li>
+                            <li>Medical history tracking</li>
+                            <li>Treatment plans</li>
+                        </ul>
+                    </Link>
+
+
+
                     <Link href="/image-enhancement" className={styles.featureCard}>
                         <div className={styles.featureHeader}>
                             <div className={styles.featureIcon} style={{ backgroundColor: '#0099cc' }}>
@@ -494,7 +514,7 @@ export default function DashboardPage() {
 
                 <div className={styles.tableSection}>
                     <div className={styles.tableHeader}>
-                        <h3>Today's Appointments & Patients</h3>
+                        <h3>Today’s Appointments & Patients</h3>
                         <Link href="/appointments" className={styles.viewAllLink}>
                             View All <ChevronRight size={16} />
                         </Link>
