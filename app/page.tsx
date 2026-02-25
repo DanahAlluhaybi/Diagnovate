@@ -120,14 +120,13 @@ export default function HomePage() {
               </p>
 
               <div className={styles.heroButtons}>
-                {/* ✅ Login button - يروح لصفحة log-in */}
-                <Link href="/log-in">
+                {/* ✅ Login & Try → goes to /role */}
+                <Link href="/role">
                   <button className={styles.primaryBtn}>
                     Login & Try
                   </button>
                 </Link>
 
-                {/* ✅ Contact Us button - يروح لصفحة contact */}
                 <Link href="/contact">
                   <button className={styles.secondaryBtn}>
                     Contact Us
@@ -195,9 +194,11 @@ export default function HomePage() {
               Join leading pathology labs using Diagnovate AI platform.
             </p>
             <div className={styles.ctaButtons}>
-              <button className={styles.primaryBtn}>
-                Start Free Trial
-              </button>
+              <Link href="/role">
+                <button className={styles.primaryBtn}>
+                  Start Free Trial
+                </button>
+              </Link>
               <button className={styles.secondaryBtn}>
                 Schedule Demo
               </button>
