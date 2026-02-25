@@ -1,12 +1,15 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { auth } from '@/lib/api';
 import { Mail, Lock } from 'lucide-react';
 import styles from './styles.module.css';
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const role = searchParams.get('role') || 'doctor';
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -23,7 +26,12 @@ export default function LoginPage() {
             localStorage.setItem('token', data.access_token);
             localStorage.setItem('user', JSON.stringify(data.doctor));
 
-            router.push('/dashboard');
+            // ✅ Route based on role
+            if (role === 'admin') {
+                router.push('/admin');
+            } else {
+                router.push('/dashboard');
+            }
 
         } catch (err: any) {
             setError(err.message || 'Invalid email or password');
@@ -78,5 +86,13 @@ export default function LoginPage() {
                 </p>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <LoginForm />
+        </Suspense>
     );
 }

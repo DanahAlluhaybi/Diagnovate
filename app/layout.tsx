@@ -1,9 +1,16 @@
 import type { Metadata } from 'next';
-import './globals.css';     // ✅ استيراد CSS العام
+import { Merriweather } from 'next/font/google';
+import './globals.css';
+
+const merriweather = Merriweather({
+    subsets: ['latin'],
+    weight: ['300', '400', '700', '900'],
+    variable: '--font-merriweather',
+});
 
 export const metadata: Metadata = {
-    title: 'Diagnovate - AI for Thyroid Diagnostics',
-    description: 'Web platform for digital pathology and radiology',
+    title: 'Diagnovate',
+    description: 'AI-powered thyroid cancer diagnostics platform',
 };
 
 export default function RootLayout({
@@ -12,7 +19,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en">
+        <html lang="en" className={merriweather.variable}>
         <body>{children}</body>
         </html>
     );
