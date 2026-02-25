@@ -1,4 +1,5 @@
 'use client';
+import { Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -373,6 +374,27 @@ export default function DashboardPage() {
                 )}
 
                 <div className={styles.featuresGrid}>
+
+
+                    {/* 👇 هذا الكود يكون الأول الآن */}
+                    <Link href="/patient-management" className={styles.featureCard}>
+                        <div className={styles.featureHeader}>
+                            <div className={styles.featureIcon} style={{ backgroundColor: '#13c2c2' }}>
+                                <Users size={28} color="white" />
+                            </div>
+                            <span className={styles.featureBadge}>PATIENT CARE</span>
+                        </div>
+                        <h3 className={styles.featureTitle}>Patient Management</h3>
+                        <p className={styles.featureDesc}>Comprehensive patient records and clinical history tracking</p>
+                        <ul className={styles.featureList}>
+                            <li>Patient profiles & history</li>
+                            <li>Treatment timeline</li>
+                            <li>Follow-up scheduling</li>
+                            <li>Clinical notes</li>
+                        </ul>
+                    </Link>
+
+
                     <Link href="/image-enhancement" className={styles.featureCard}>
                         <div className={styles.featureHeader}>
                             <div className={styles.featureIcon} style={{ backgroundColor: '#0099cc' }}>
