@@ -1,0 +1,305 @@
+/* ===== Container ===== */
+.container {
+    min-height: 100vh;
+    background-color: #f0f8ff;
+    padding: 20px;
+}
+
+/* ===== Header Strip ===== */
+.headerStrip {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50.9px;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+}
+
+.header {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+}
+
+/* ===== Logo ===== */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.logoIcon {
+    font-size: 2.5rem;
+}
+
+.logoText {
+    color: #333;
+}
+
+.logoHighlight {
+    color: #007bff;
+}
+
+/* ===== Navigation ===== */
+.nav {
+    display: flex;
+    gap: 20px;
+}
+
+.navBtn {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 1rem;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: color 0.3s;
+    text-decoration: none;
+}
+
+.navBtn:hover {
+    color: #0056b3;
+}
+
+.navActive {
+    color: #0056b3;
+    font-weight: 600;
+    border-bottom: 2px solid #0056b3;
+}
+
+/* ===== Main ===== */
+.main {
+    max-width: 1200px;
+    margin: 20px auto 0;
+    padding: 40px 20px;
+}
+
+/* ===== Card ===== */
+.card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaeef2;
+}
+
+/* ===== Footer ===== */
+.footer {
+    margin-top: 40px;
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+    padding: 20px 0;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* ===== Oval shape ===== */
+.ovalWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0 50px;
+    padding: 10px;
+}
+
+.ovalShape {
+    background: #ffffff;
+    width: 100%;
+    max-width: 950px;
+    padding: 50px 70px;
+    border-radius: 120px 120px 120px 120px / 70px 70px 70px 70px;
+    box-shadow: 0 30px 60px rgb(99, 182, 189);
+    color: black;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.ovalShape:hover {
+    transform: scale(1.01);
+}
+
+.ovalMainTitle {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    position: relative;
+    display: inline-block;
+}
+
+.ovalMainTitle::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 3px;
+    background:#0056b3;
+    margin: 15px auto 0;
+    border-radius: 3px;
+}
+
+.ovalTextContent {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: left;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.ovalParagraph {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    margin: 0;
+    padding: 0 15px;
+    position: relative;
+    padding-left: 25px;
+    border-left: 3px solid rgba(255,255,255,0.3);
+}
+
+.ovalFinalParagraph {
+    font-size: 1.2rem;
+    line-height: 1.7;
+    margin: 15px 0 0;
+    padding: 20px 15px 0;
+    border-top: 1px solid rgba(255,255,255,0.3);
+    text-align: center;
+    border-left: none;
+}
+
+/* ===== About extras ===== */
+.sectionTitle{
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    text-align: center;
+    margin: 10px 0 25px;
+}
+
+.offerGrid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+    margin-top: 10px;
+}
+
+.offerCard{
+    background: #ffffff;
+    border: 1px solid #eaeef2;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.offerCard:hover{
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba(0, 123, 255, 0.1);
+    border-color: rgba(0, 123, 255, 0.2);
+}
+
+.offerTitle{
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1e3c72;
+    margin-bottom: 10px;
+}
+
+.offerDesc{
+    color: #555;
+    line-height: 1.7;
+    font-size: 0.98rem;
+}
+
+/* CTA */
+.cta{
+    margin-top: 30px;
+    padding: 18px 20px;
+border-radius: 16px;
+    background: #f0f8ff;
+    border: 1px solid #dbeafe;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ctaText{
+    margin: 0;
+    font-weight: 600;
+    color: #1e3c72;
+}
+
+.ctaBtn{
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    border: 1px solid #007bff;
+}
+
+.ctaBtn:hover{
+    background: #0056b3;
+    border-color: #0056b3;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .card {
+        padding: 30px 20px;
+    }
+
+    .ovalShape {
+        padding: 40px 30px;
+        border-radius: 80px 80px 80px 80px / 50px 50px 50px 50px;
+    }
+
+    .ovalMainTitle {
+        font-size: 2.2rem;
+    }
+
+    .ovalParagraph {
+        font-size: 1rem;
+        padding-left: 15px;
+    }
+
+    .ovalFinalParagraph {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .ovalShape {
+        padding: 30px 20px;
+        border-radius: 60px 60px 60px 60px / 40px 40px 40px 40px;
+    }
+
+    .ovalMainTitle {
+        font-size: 1.8rem;
+    }
+
+    .ovalTextContent {
+        gap: 15px;
+    }
+}
