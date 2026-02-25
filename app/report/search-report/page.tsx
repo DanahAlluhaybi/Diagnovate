@@ -37,8 +37,8 @@ interface Report {
 }
 
 const MOCK_REPORTS: Report[] = [
-    { id: 'RPT-001', patientName: 'Ahmed Al-Rashid', patientId: 'P-10023', age: 45, gender: 'Male', diagnosisDate: '2024-11-10', histType: 'PTC', stage: 'Stage II', ataRisk: 'Intermediate Risk', status: 'Finalized', doctor: 'Dr. Sara Khalid' },
-    { id: 'RPT-002', patientName: 'Fatima Al-Zahrani', patientId: 'P-10045', age: 38, gender: 'Female', diagnosisDate: '2024-12-01', histType: 'FTC', stage: 'Stage I', ataRisk: 'Low Risk', status: 'Draft', doctor: 'Dr. Omar Nasser' },
+    { id: 'RPT-001', patientName: 'Ahmed Al-Rashid', patientId: 'P-10023', age: 45, gender: 'Male', diagnosisDate: '2025-11-10', histType: 'PTC', stage: 'Stage II', ataRisk: 'Intermediate Risk', status: 'Finalized', doctor: 'Dr. Sara Khalid' },
+    { id: 'RPT-002', patientName: 'Fatima Al-Zahrani', patientId: 'P-10045', age: 38, gender: 'Female', diagnosisDate: '2025-12-01', histType: 'FTC', stage: 'Stage I', ataRisk: 'Low Risk', status: 'Draft', doctor: 'Dr. Omar Nasser' },
     { id: 'RPT-004', patientName: 'Noura Al-Shamrani', patientId: 'P-10089', age: 29, gender: 'Female', diagnosisDate: '2025-01-28', histType: 'PTC', stage: 'Stage I', ataRisk: 'Low Risk', status: 'Pending', doctor: 'Dr. Omar Nasser' },
 ];
 
