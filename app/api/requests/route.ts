@@ -1,22 +1,7 @@
 import { NextResponse } from "next/server";
 
 
-let requests: any[] = [
-  {
-    id: 1,
-    name: "Dr. Sara",
-    email: "sara@mail.com",
-    specialty: "Endocrinologist",
-    status: "Pending",
-  },
-  {
-    id: 2,
-    name: "Dr. Ahmed",
-    email: "ahmed@mail.com",
-    specialty: "Radiologist",
-    status: "Pending",
-  },
-];
+let requests: any[] = [];
 
 export async function GET() {
   return NextResponse.json(requests);
