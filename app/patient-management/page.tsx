@@ -190,10 +190,60 @@ export default function PatientManagementPage() {
     const [formError, setFormError] = useState("");
     const [doctor, setDoctor] = useState<Doctor | null>(null);
     const [showModal, setShowModal] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    //  دالة جلب المرضى من API
+    const fetchPatients = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem("token");
+            const response = await fetch('http://localhost:5000/api/patients', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                setPatients(result.data);
+            } else {
+                console.error('Error fetching patients:', result.error);
+            }
+        } catch (error) {
+            console.error('Network error:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // دالة إضافة مريض جديد
+    const addPatientToAPI = async (patientData: any) => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await fetch('http://localhost:5000/api/patients', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(patientData)
+            });
+
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            return { success: false, error: 'Network error' };
+        }
+    };
 
     useEffect(() => {
         const userData = localStorage.getItem("user");
         if (userData) setDoctor(JSON.parse(userData));
+
+        //  جلب المرضى عند تحميل الصفحة
+        fetchPatients();
     }, []);
 
     const handleLogout = () => {
@@ -252,31 +302,27 @@ export default function PatientManagementPage() {
         setSelectedPatient(null);
     }
 
-    function handleAddPatient() {
+    // 🔥 دالة إضافة مريض معدلة
+    async function handleAddPatient() {
         if (!form.firstName || !form.lastName || !form.mrn || !form.age || !form.phone) {
             setFormError("Please fill in all required fields.");
             return;
         }
-        const newPatient: Patient = {
-            id: `PT-${String(patients.length + 1).padStart(3, "0")}`,
-            mrn: form.mrn,
-            firstName: form.firstName,
-            lastName: form.lastName,
-            age: parseInt(form.age),
-            gender: form.gender,
-            phone: form.phone,
-            email: form.email,
-            lastVisit: new Date().toISOString().split("T")[0],
-            status: form.status,
-            condition: form.condition,
-        };
-        setPatients((prev) => [newPatient, ...prev]);
-        setShowModal(false);
-        setSelectedPatient(newPatient);
-        setCurrentView("detail");
+
+        const result = await addPatientToAPI(form);
+
+        if (result.success) {
+            setPatients(prev => [result.data, ...prev]);
+            setShowModal(false);
+            setSelectedPatient(result.data);
+            setCurrentView("detail");
+            setFormError("");
+        } else {
+            setFormError(result.error || 'Failed to add patient');
+        }
     }
 
-    // ── Detail View ──────────────────────────────────────────────────────────
+    // ── Detail View ──────
     if (currentView === "detail" && selectedPatient) {
         return (
             <div className={styles.container}>
@@ -347,11 +393,9 @@ export default function PatientManagementPage() {
 
             <div className={styles.pageContent}>
                 <div className={styles.pageTopBar}>
-                    <button className={styles.backIconButton} onClick={() => router.push("/dashboard")}>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M15 10H5M5 10L9 6M5 10L9 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                    </button>
+                    <a href="/dashboard" className={styles.backBtn}>
+                        ← Back to Dashboard
+                    </a>
                     <h2 className={styles.pageTitle}>Patient Management</h2>
                 </div>
 
@@ -408,7 +452,15 @@ export default function PatientManagementPage() {
                         </tr>
                         </thead>
                         <tbody>
-                        {filteredPatients.length > 0 ? (
+                        {loading ? (
+                            <tr>
+                                <td colSpan={7}>
+                                    <div className={styles.emptyState}>
+                                        <p>Loading patients...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : filteredPatients.length > 0 ? (
                             filteredPatients.map((patient) => (
                                 <tr key={patient.id} className={styles.patientRow} onClick={() => handleSelectPatient(patient)}>
                                     <td>
