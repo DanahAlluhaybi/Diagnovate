@@ -5,14 +5,13 @@ import Link from 'next/link';
 import styles from './styles.module.css';
 import {
     Activity, Camera, FileText, LogOut, Bell,
-    TrendingUp, Heart, ChevronRight, User, Calendar
+    TrendingUp, Heart, ChevronRight, User
 } from 'lucide-react';
 
 interface DashboardStats {
     active_cases: number;
     urgent_cases: number;
     total_patients: number;
-    today_appointments: number;
 }
 
 interface RecentCase {
@@ -26,18 +25,6 @@ interface RecentCase {
     created_at: string;
 }
 
-interface Appointment {
-    id: number;
-    patient_name: string;
-    patient_id: string;
-    appointment_time: string;
-    appointment_date: string;
-    appointment_type: string;
-    status: string;
-    case_id: string;
-    doctor_id: number;
-}
-
 interface Doctor {
     id: number;
     name: string;
@@ -49,24 +36,12 @@ export default function DashboardPage() {
     const router = useRouter();
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [recentCases, setRecentCases] = useState<RecentCase[]>([]);
-    const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [doctor, setDoctor] = useState<Doctor | null>(null);
     const [loading, setLoading] = useState(true);
     const [loggingOut, setLoggingOut] = useState(false);
     const [error, setError] = useState('');
     const [showNotifications, setShowNotifications] = useState(false);
     const notifRef = useRef<HTMLDivElement>(null);
-
-    const [showForm, setShowForm] = useState(false);
-    const [newAppointment, setNewAppointment] = useState({
-        patient_name: '',
-        patient_id: '',
-        appointment_time: '',
-        appointment_date: '',
-        appointment_type: 'Consultation',
-        status: 'Pending',
-        case_id: ''
-    });
 
     useEffect(() => {
         fetchAllData();
@@ -126,111 +101,11 @@ export default function DashboardPage() {
                 setRecentCases(casesData);
             }
 
-            await fetchAppointments(token);
-
         } catch (err) {
             setError('Failed to connect to server');
             console.error(err);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const fetchAppointments = async (token: string) => {
-        try {
-            const res = await fetch('http://localhost:5000/api/appointments/today', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setAppointments(data);
-            }
-        } catch (err) {
-            console.error('Error fetching appointments:', err);
-        }
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setNewAppointment(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleAddAppointment = async () => {
-        if (!newAppointment.patient_name || !newAppointment.appointment_time || !newAppointment.appointment_date) {
-            alert('Please fill all required fields');
-            return;
-        }
-
-        try {
-            const token = localStorage.getItem('token');
-
-            const res = await fetch('http://localhost:5000/api/appointments', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    patient_name: newAppointment.patient_name,
-                    patient_id: newAppointment.patient_id,
-                    appointment_time: newAppointment.appointment_time,
-                    appointment_date: newAppointment.appointment_date,
-                    appointment_type: newAppointment.appointment_type,
-                    status: newAppointment.status,
-                    case_id: newAppointment.case_id
-                })
-            });
-
-            if (res.ok) {
-                const result = await res.json();
-                setAppointments(prev => [...prev, result.appointment]);
-                setShowForm(false);
-                setNewAppointment({
-                    patient_name: '',
-                    patient_id: '',
-                    appointment_time: '',
-                    appointment_date: '',
-                    appointment_type: 'Consultation',
-                    status: 'Pending',
-                    case_id: ''
-                });
-                alert('Appointment added successfully!');
-            } else {
-                const errorData = await res.json();
-                alert(errorData.error || 'Failed to add appointment');
-            }
-        } catch (err) {
-            console.error('Error adding appointment:', err);
-            alert('Failed to connect to server');
-        }
-    };
-
-    const handleUpdateStatus = async (appointmentId: number, newStatus: string) => {
-        try {
-            const token = localStorage.getItem('token');
-
-            const res = await fetch(`http://localhost:5000/api/appointments/${appointmentId}/status`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ status: newStatus })
-            });
-
-            if (res.ok) {
-                setAppointments(prev =>
-                    prev.map(apt =>
-                        apt.id === appointmentId ? { ...apt, status: newStatus } : apt
-                    )
-                );
-            }
-        } catch (err) {
-            console.error('Error updating status:', err);
         }
     };
 
@@ -275,7 +150,6 @@ export default function DashboardPage() {
         });
     };
 
-    // Logout overlay screen
     if (loggingOut) {
         return (
             <div className={styles.logoutScreen}>
@@ -288,20 +162,13 @@ export default function DashboardPage() {
         );
     }
 
-    // Dashboard loading screen (same style as Sign Out)
     if (loading) {
         return (
             <div className={styles.logoutScreen}>
                 <div className={styles.logoutCard}>
                     <div className={styles.logoutSpinner} />
-
-                    <p className={styles.logoutText}>
-                        Loading dashboard...
-                    </p>
-
-                    <p className={styles.logoutSub}>
-                        Preparing your workspace, Dr. {getFirstName(doctor?.name)}
-                    </p>
+                    <p className={styles.logoutText}>Loading dashboard...</p>
+                    <p className={styles.logoutSub}>Preparing your workspace, Dr. {getFirstName(doctor?.name)}</p>
                 </div>
             </div>
         );
@@ -427,20 +294,10 @@ export default function DashboardPage() {
                                 <p className={styles.statValue}>{stats?.total_patients || 0}</p>
                             </div>
                         </div>
-                        <div className={styles.statCard}>
-                            <div className={styles.statIcon} style={{ backgroundColor: '#fef3c7', color: '#f59e0b' }}>
-                                <Calendar size={24} />
-                            </div>
-                            <div>
-                                <p className={styles.statLabel}>Today’s Appointments</p>
-                                <p className={styles.statValue}>{stats?.today_appointments || 0}</p>
-                            </div>
-                        </div>
                     </div>
                 )}
 
                 <div className={styles.featuresGrid}>
-
                     <Link href="/patient-management" className={styles.featureCard}>
                         <div className={styles.featureHeader}>
                             <div className={styles.featureIcon} style={{ backgroundColor: '#10b981' }}>
@@ -457,8 +314,6 @@ export default function DashboardPage() {
                             <li>Treatment plans</li>
                         </ul>
                     </Link>
-
-
 
                     <Link href="/image-enhancement" className={styles.featureCard}>
                         <div className={styles.featureHeader}>
@@ -512,117 +367,6 @@ export default function DashboardPage() {
                     </Link>
                 </div>
 
-                <div className={styles.tableSection}>
-                    <div className={styles.tableHeader}>
-                        <h3>Today’s Appointments & Patients</h3>
-                        <Link href="/appointments" className={styles.viewAllLink}>
-                            View All <ChevronRight size={16} />
-                        </Link>
-                    </div>
-
-                    <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
-                        <button className={styles.addButton} onClick={() => setShowForm(!showForm)}>
-                            + New Appointment
-                        </button>
-                    </div>
-
-                    {showForm && (
-                        <div className={styles.formContainer}>
-                            <h4>Add New Appointment</h4>
-                            <div className={styles.formGrid}>
-                                <input type="text" name="patient_name" placeholder="Patient Name *" value={newAppointment.patient_name} onChange={handleInputChange} className={styles.formInput} />
-                                <input type="text" name="patient_id" placeholder="Patient ID" value={newAppointment.patient_id} onChange={handleInputChange} className={styles.formInput} />
-                                <input type="date" name="appointment_date" value={newAppointment.appointment_date} onChange={handleInputChange} className={styles.formInput} />
-                                <input type="time" name="appointment_time" value={newAppointment.appointment_time} onChange={handleInputChange} className={styles.formInput} />
-                                <select name="appointment_type" value={newAppointment.appointment_type} onChange={handleInputChange} className={styles.formInput}>
-                                    <option value="Consultation">Consultation</option>
-                                    <option value="Follow-up">Follow-up</option>
-                                    <option value="Ultrasound">Ultrasound</option>
-                                    <option value="Biopsy">Biopsy</option>
-                                </select>
-                                <select name="status" value={newAppointment.status} onChange={handleInputChange} className={styles.formInput}>
-                                    <option value="Pending">Pending</option>
-                                    <option value="Confirmed">Confirmed</option>
-                                    <option value="Completed">Completed</option>
-                                    <option value="Cancelled">Cancelled</option>
-                                </select>
-                                <input type="text" name="case_id" placeholder="Case ID (optional)" value={newAppointment.case_id} onChange={handleInputChange} className={styles.formInput} />
-                                <div className={styles.formActions}>
-                                    <button onClick={handleAddAppointment} className={styles.saveBtn}>Save Appointment</button>
-                                    <button onClick={() => setShowForm(false)} className={styles.cancelBtn}>Cancel</button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className={styles.tableWrapper}>
-                        <table className={styles.appointmentsTable}>
-                            <thead>
-                            <tr>
-                                <th>Patient Name</th>
-                                <th>Time/Date</th>
-                                <th>Type</th>
-                                <th>Status</th>
-                                <th>Case ID</th>
-                                <th>Action</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {appointments.length > 0 ? (
-                                appointments.map((apt) => (
-                                    <tr key={apt.id}>
-                                        <td>
-                                            <div className={styles.patientInfo}>
-                                                <div className={styles.patientAvatar}>
-                                                    {apt.patient_name.split(' ').map(n => n[0]).join('')}
-                                                </div>
-                                                <div>
-                                                    <div className={styles.patientName}>{apt.patient_name}</div>
-                                                    <div className={styles.patientId}>ID: {apt.patient_id || 'N/A'}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            {apt.appointment_time}
-                                            {apt.appointment_date !== new Date().toISOString().split('T')[0] &&
-                                                ` (${new Date(apt.appointment_date).toLocaleDateString()})`
-                                            }
-                                        </td>
-                                        <td>
-                                            <span className={`${styles.badge} ${styles[apt.appointment_type.toLowerCase() + 'Badge'] || styles.consultationBadge}`}>
-                                                {apt.appointment_type}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <select
-                                                value={apt.status}
-                                                onChange={(e) => handleUpdateStatus(apt.id, e.target.value)}
-                                                className={`${styles.statusSelect} ${styles[apt.status.toLowerCase() + 'Select']}`}
-                                            >
-                                                <option value="Pending">Pending</option>
-                                                <option value="Confirmed">Confirmed</option>
-                                                <option value="Completed">Completed</option>
-                                                <option value="Cancelled">Cancelled</option>
-                                            </select>
-                                        </td>
-                                        <td><span className={styles.caseId}>#{apt.case_id}</span></td>
-                                        <td>
-                                            <Link href={`/cases/${apt.case_id}`} className={styles.viewBtn}>
-                                                View <ChevronRight size={14} />
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={6} className={styles.noData}>No appointments found for today</td>
-                                </tr>
-                            )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 {recentCases.length > 0 && (
                     <div className={styles.recentCasesSection}>
                         <h3>Recent Cases</h3>
@@ -630,7 +374,7 @@ export default function DashboardPage() {
                             {recentCases.map((caseItem) => (
                                 <Link href={`/cases/${caseItem.case_id}`} key={caseItem.id} className={styles.caseCard}>
                                     <div className={styles.caseHeader}>
-             ب                           <span className={styles.caseId}>#{caseItem.case_id}</span>
+                                        <span className={styles.caseId}>#{caseItem.case_id}</span>
                                         <span className={styles.caseDate}>{formatDate(caseItem.created_at)}</span>
                                     </div>
                                     <div className={styles.caseBody}>

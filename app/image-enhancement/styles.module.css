@@ -1,23 +1,154 @@
-/* ── Page ── */
-.page {
+/* ── Base ── */
+.container {
     min-height: 100vh;
     background: #f8fafc;
-    font-family: 'Merriweather', serif;
-    color: #1e293b;
 }
 
-/* ── Navbar ── */
-.navbar {
+/* ── Header (مطابق لـ Patient Management) ── */
+.header {
     background: white;
     border-bottom: 1px solid #e2e8f0;
-    padding: 0 2rem;
-    height: 60px;
+    padding: 1rem 2rem;
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
     position: sticky;
     top: 0;
     z-index: 100;
+}
+
+.logoArea {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #0099cc, #0077aa);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.logoTextArea {
+    display: flex;
+    flex-direction: column;
+}
+
+.logoMain {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.logoSub {
+    font-size: 0.7rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.profileCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
+    background: #f8fafc;
+    border-radius: 40px;
+    border: 1px solid #e2e8f0;
+}
+
+.avatarHeader {
+    width: 40px;
+    height: 40px;
+    background: #0099cc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.profileInfo {
+    text-align: right;
+}
+
+.profileName {
+    display: flex;
+    flex-direction: column;
+}
+
+.doctorName {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+.specialty {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.profileEmail {
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.iconButton {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: white;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iconButton:hover {
+    background: #f1f5f9;
+    color: #0099cc;
+    border-color: #0099cc;
+}
+
+/* ── Page Content ── */
+.pageContent {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.pageTopBar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.pageTitle {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
 }
 
 .backBtn {
@@ -34,6 +165,7 @@
     border: 1px solid #e2e8f0;
     background: #f8fafc;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .backBtn:hover {
@@ -43,61 +175,7 @@
     transform: translateX(-2px);
 }
 
-/* ── Main ── */
-.main {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-/* ── Page Header ── */
-.pageHeader {
-    margin-bottom: 2rem;
-}
-
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #e6f7fc;
-    border: 1px solid #b3e5f5;
-    border-radius: 100px;
-    padding: 4px 12px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #0077aa;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-}
-
-.badgeDot {
-    width: 6px;
-    height: 6px;
-    background: #0099cc;
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.7); }
-}
-
-.pageTitle {
-    font-size: 1.8rem;
-    font-weight: 600;
-    color: #1e293b;
-    margin: 0 0 4px;
-}
-
-.pageSub {
-    font-size: 0.95rem;
-    color: #64748b;
-    margin: 0;
-}
-
-/* ── Card ── */
+/* ── Upload Card ── */
 .card {
     background: white;
     border-radius: 20px;
@@ -112,23 +190,8 @@
     font-weight: 600;
     color: #1e293b;
     margin-bottom: 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
-.cardIcon {
-    width: 32px;
-    height: 32px;
-    background: #e6f7fc;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-}
-
-/* ── Upload Zone ── */
 .uploadZone {
     border: 2px dashed #cbd5e0;
     border-radius: 14px;
@@ -195,7 +258,7 @@
     font-weight: 500;
 }
 
-/* ── Button ── */
+/* ── Enhance Button ── */
 .enhanceBtn {
     width: 100%;
     margin-top: 1.2rem;
@@ -410,8 +473,11 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+    .header { flex-direction: column; gap: 1rem; padding: 1rem; }
+    .headerRight { width: 100%; justify-content: space-between; }
+    .profileCard { flex: 1; }
+    .pageContent { padding: 1rem; }
+    .pageTopBar { flex-wrap: wrap; }
     .resultsGrid { grid-template-columns: 1fr; }
-    .navbar { padding: 0 1rem; }
-    .main { padding: 1rem; }
 }

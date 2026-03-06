@@ -3,8 +3,10 @@
 import { Merriweather } from 'next/font/google';
 const merriweather = Merriweather({ subsets: ['latin'], weight: ['300', '400', '700', '900'] });
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './styles.module.css';
+import { Bell, LogOut, Heart, User } from 'lucide-react';
 
 interface EnhanceResponse {
     success: boolean;
@@ -14,7 +16,52 @@ interface EnhanceResponse {
     error?: string;
 }
 
+interface Doctor {
+    id: number;
+    name: string;
+    email: string;
+    specialty: string;
+}
+
+function SharedHeader({ doctor, onLogout }: { doctor: Doctor | null; onLogout: () => void }) {
+    const formatDoctorName = (name: string | undefined) => {
+        if (!name) return 'Doctor';
+        if (name.toLowerCase().startsWith('dr.') || name.toLowerCase().startsWith('dr ')) return name;
+        return `Dr. ${name}`;
+    };
+
+    return (
+        <header className={styles.header}>
+            <div className={styles.logoArea}>
+                <div className={styles.logo}><Heart size={28} /></div>
+                <div className={styles.logoTextArea}>
+                    <h1 className={styles.logoMain}>DIAGNOVATE</h1>
+                    <p className={styles.logoSub}>Thyroid Cancer Diagnostics</p>
+                </div>
+            </div>
+            <div className={styles.headerRight}>
+                <div className={styles.profileCard}>
+                    <div className={styles.avatarHeader}><User size={24} /></div>
+                    <div className={styles.profileInfo}>
+                        <div className={styles.profileName}>
+                            <span className={styles.doctorName}>{formatDoctorName(doctor?.name)}</span>
+                            <span className={styles.specialty}>{doctor?.specialty || 'Thyroid Specialist'}</span>
+                        </div>
+                        <div className={styles.profileEmail}>{doctor?.email || 'doctor@diagnovate.com'}</div>
+                    </div>
+                </div>
+                <div className={styles.actions}>
+                    <button className={styles.iconButton}><Bell size={20} /></button>
+                    <button onClick={onLogout} className={styles.iconButton}><LogOut size={20} /></button>
+                </div>
+            </div>
+        </header>
+    );
+}
+
 export default function ImageEnhancementPage() {
+    const router = useRouter();
+    const [doctor, setDoctor] = useState<Doctor | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string>('');
     const [originalSrc, setOriginalSrc] = useState<string>('');
@@ -24,6 +71,17 @@ export default function ImageEnhancementPage() {
     const [error, setError] = useState<string>('');
     const [dragOver, setDragOver] = useState<boolean>(false);
     const timerIds = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+    useEffect(() => {
+        const userData = localStorage.getItem('user');
+        if (userData) setDoctor(JSON.parse(userData));
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        router.push('/log-in');
+    };
 
     const handleFile = (file: File) => {
         setSelectedFile(file);
@@ -82,19 +140,16 @@ export default function ImageEnhancementPage() {
                 method: 'POST',
                 body: formData,
             });
-
             const data: EnhanceResponse = await response.json();
 
             if (response.status === 503 && data.loading) {
                 setError('Model is loading, please try again in 30 seconds');
                 return;
             }
-
             if (!response.ok) {
                 setError(data.error || 'Error: ' + response.status);
                 return;
             }
-
             if (data.success) {
                 clearTimers();
                 setProgress(100);
@@ -121,33 +176,20 @@ export default function ImageEnhancementPage() {
     ];
 
     return (
-        <div className={`${styles.page} ${merriweather.className}`}>
+        <div className={`${styles.container} ${merriweather.className}`}>
+            <SharedHeader doctor={doctor} onLogout={handleLogout} />
 
-            {/* Navbar */}
-            <header className={styles.navbar}>
-                <a href="/dashboard" className={styles.backBtn}>
-                    ← Back to Dashboard
-                </a>
-            </header>
-
-            {/* Main */}
-            <div className={styles.main}>
-
-                {/* Page Header */}
-                <div className={styles.pageHeader}>
-                    <div className={styles.badge}>
-                        <div className={styles.badgeDot} />
-                        AI-Powered
-                    </div>
-                    <h1 className={styles.pageTitle}>Ultrasound Enhancement</h1>
-                    <p className={styles.pageSub}>Transform medical scans into crystal-clear diagnostic quality</p>
+            <div className={styles.pageContent}>
+                <div className={styles.pageTopBar}>
+                    <a href="/dashboard" className={styles.backBtn}>
+                        ← Back to Dashboard
+                    </a>
+                    <h2 className={styles.pageTitle}>Ultrasound Enhancement</h2>
                 </div>
 
                 {/* Upload Card */}
                 <div className={styles.card}>
-                    <div className={styles.cardTitle}>
-                        Upload Image
-                    </div>
+                    <div className={styles.cardTitle}>Upload Image</div>
 
                     <div
                         className={`${styles.uploadZone} ${dragOver ? styles.dragOver : ''}`}
@@ -231,7 +273,6 @@ export default function ImageEnhancementPage() {
                         </div>
                     </div>
                 )}
-
             </div>
         </div>
     );
