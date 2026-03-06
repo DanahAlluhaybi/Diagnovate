@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 
 
-let requests: any[] = [
-];
+let requests: any[] = [];
 
 
 export async function GET() {
