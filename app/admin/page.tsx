@@ -26,9 +26,9 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
 
-
+  // جلب البيانات من API
   useEffect(() => {
-    fetch('/api/requests')
+    fetch('http://localhost:5000/api/requests')  // تأكد من أن الـ API متاح على هذا الرابط
       .then(res => res.json())
       .then(data => {
         setRequests(data);
@@ -45,22 +45,22 @@ export default function AdminPage() {
     }, 1500);
   };
 
-
+  // دالة لتحديث حالة الطلب إلى "Approved" أو "Rejected"
   const updateStatus = async (id: number, status: string) => {
-    await fetch('/api/requests', {
+    await fetch('http://localhost:5000/api/requests', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status })
     });
-    const updated = await fetch('/api/requests').then(res => res.json());
+    const updated = await fetch('http://localhost:5000/api/requests').then(res => res.json());
     setRequests(updated);
   };
 
-  const pending  = requests.filter(r => r.status === 'Pending').length;
+  const pending = requests.filter(r => r.status === 'Pending').length;
   const approved = requests.filter(r => r.status === 'Approved').length;
   const rejected = requests.filter(r => r.status === 'Rejected').length;
 
-
+  // شاشة التحميل عند بداية الصفحة
   if (loading) {
     return (
         <div className={styles.logoutScreen}>
@@ -73,7 +73,7 @@ export default function AdminPage() {
     );
   }
 
-
+  // شاشة "Signing out" عند الخروج
   if (loggingOut) {
     return (
         <div className={styles.logoutScreen}>
@@ -88,7 +88,6 @@ export default function AdminPage() {
 
   return (
       <div className={styles.container}>
-
         <header className={styles.header}>
           <div className={styles.logoArea}>
             <div className={styles.logo}>
@@ -128,9 +127,8 @@ export default function AdminPage() {
         <main className={styles.main}>
           <div className={styles.welcomeSection}>
             <div>
-              <h2 className={styles.greeting}>Welcome back, Admin</h2>
-              <p className={styles.
-date}>Manage doctor registrations and access approvals</p>
+<h2 className={styles.greeting}>Welcome back, Admin</h2>
+              <p className={styles.date}>Manage doctor registrations and access approvals</p>
             </div>
           </div>
 
