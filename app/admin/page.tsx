@@ -26,14 +26,15 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
 
+
   useEffect(() => {
     fetch('/api/requests')
-        .then(res => res.json())
-        .then(data => {
-          setRequests(data);
-          setTimeout(() => setLoading(false), 1500);
-        })
-        .catch(() => setLoading(false));
+      .then(res => res.json())
+      .then(data => {
+        setRequests(data);
+        setTimeout(() => setLoading(false), 1500);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const handleLogout = () => {
@@ -43,6 +44,7 @@ export default function AdminPage() {
       router.push('/log-in');
     }, 1500);
   };
+
 
   const updateStatus = async (id: number, status: string) => {
     await fetch('/api/requests', {
@@ -58,7 +60,7 @@ export default function AdminPage() {
   const approved = requests.filter(r => r.status === 'Approved').length;
   const rejected = requests.filter(r => r.status === 'Rejected').length;
 
-  // ✅ شاشة تحميل عند الدخول للداشبورد
+
   if (loading) {
     return (
         <div className={styles.logoutScreen}>
@@ -71,7 +73,7 @@ export default function AdminPage() {
     );
   }
 
-  // ✅ شاشة Signing out عند الخروج
+
   if (loggingOut) {
     return (
         <div className={styles.logoutScreen}>
@@ -124,11 +126,11 @@ export default function AdminPage() {
         </header>
 
         <main className={styles.main}>
-
           <div className={styles.welcomeSection}>
             <div>
               <h2 className={styles.greeting}>Welcome back, Admin</h2>
-              <p className={styles.date}>Manage doctor registrations and access approvals</p>
+              <p className={styles.
+date}>Manage doctor registrations and access approvals</p>
             </div>
           </div>
 
@@ -177,8 +179,8 @@ export default function AdminPage() {
                         background: req.status === 'Approved' ? '#dcfce7' : req.status === 'Rejected' ? '#fee2e2' : '#fef3c7',
                         color: req.status === 'Approved' ? '#166534' : req.status === 'Rejected' ? '#991b1b' : '#92400e'
                       }}>
-                    {req.status}
-                  </span>
+                        {req.status}
+                      </span>
                     </div>
 
                     <div className={styles.caseBody}>
