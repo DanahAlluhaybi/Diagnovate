@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
-import { Merriweather } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 
-const merriweather = Merriweather({
+const jakarta = Plus_Jakarta_Sans({
     subsets: ['latin'],
-    weight: ['300', '400', '700', '900'],
-    variable: '--font-merriweather',
+    weight: ['400', '500', '600', '700', '800'],
 });
 
 export const metadata: Metadata = {
@@ -13,14 +12,12 @@ export const metadata: Metadata = {
     description: 'AI-powered thyroid cancer diagnostics platform',
 };
 
-export default function RootLayout({
-                                       children,
-                                   }: {
-    children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="en" className={merriweather.variable}>
-        <body>{children}</body>
+        <html lang="en">
+        <body style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", margin: 0 }}>
+        {children}
+        </body>
         </html>
     );
 }

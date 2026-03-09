@@ -1,14 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&display=swap');
+/* ─────────────────────────────────────────────────────────────────
+   ADD THIS TO YOUR globals.css (or import in layout.tsx)
+   ───────────────────────────────────────────────────────────────── */
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Serif+Display:ital@0;1&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F0F4F8;
+  --surface: #FFFFFF;
+  --surface2: #F8FAFC;
+  --teal: #0D9488;
+  --teal-mid: #14B8A6;
+  --teal-light: #F0FDFA;
+  --purple: #7C3AED;
+  --amber: #F59E0B;
+  --sky: #0EA5E9;
+  --green: #10B981;
+  --red: #EF4444;
+  --text: #0F172A;
+  --text2: #334155;
+  --muted: #64748B;
+  --border: #E2E8F0;
+  --display: 'DM Serif Display', serif;
+  --body: 'Plus Jakarta Sans', sans-serif;
 }
 
-html,
 body {
-  font-family: 'Merriweather', Georgia, serif;
+  background: var(--bg);
+  font-family: var(--body);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* subtle dot pattern — site-wide */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle, #CBD5E1 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
 }

@@ -3,7 +3,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./styles.module.css";
-import { Bell, Calendar, LogOut, Heart, User, X } from "lucide-react";
+import { X } from "lucide-react";
+import Navbar from "@/components/Navbar";
 
 type Gender = "Male" | "Female";
 type Status = "Active" | "Inactive";
@@ -21,13 +22,6 @@ interface Patient {
     lastVisit: string;
     status: Status;
     condition: string;
-}
-
-interface Doctor {
-    id: number;
-    name: string;
-    email: string;
-    specialty: string;
 }
 
 const EMPTY_FORM = {
@@ -52,50 +46,6 @@ function getInitials(first: string, last: string) {
     return `${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase();
 }
 
-// ── Header ───
-interface HeaderProps {
-    doctor: Doctor | null;
-    onLogout: () => void;
-}
-
-function SharedHeader({ doctor, onLogout }: HeaderProps) {
-    const formatDoctorName = (name: string | undefined) => {
-        if (!name) return "Doctor";
-        if (name.toLowerCase().startsWith("dr.") || name.toLowerCase().startsWith("dr ")) return name;
-        return `Dr. ${name}`;
-    };
-
-    return (
-        <header className={styles.header}>
-            <div className={styles.logoArea}>
-                <div className={styles.logo}><Heart size={28} /></div>
-                <div className={styles.logoTextArea}>
-                    <h1 className={styles.logoMain}>DIAGNOVATE</h1>
-                    <p className={styles.logoSub}>Thyroid Cancer Diagnostics</p>
-                </div>
-            </div>
-            <div className={styles.headerRight}>
-                <div className={styles.profileCard}>
-                    <div className={styles.avatarHeader}><User size={24} /></div>
-                    <div className={styles.profileInfo}>
-                        <div className={styles.profileName}>
-                            <span className={styles.doctorName}>{formatDoctorName(doctor?.name)}</span>
-                            <span className={styles.specialty}>{doctor?.specialty || "Thyroid Specialist"}</span>
-                        </div>
-                        <div className={styles.profileEmail}>{doctor?.email || "doctor@diagnovate.com"}</div>
-                    </div>
-                </div>
-                <div className={styles.actions}>
-                    <button className={styles.iconButton}><Bell size={20} /></button>
-                    <button className={styles.iconButton}><Calendar size={20} /></button>
-                    <button onClick={onLogout} className={styles.iconButton}><LogOut size={20} /></button>
-                </div>
-            </div>
-        </header>
-    );
-}
-
-// ── Modal ─────────
 interface ModalProps {
     form: typeof EMPTY_FORM;
     formError: string;
@@ -110,22 +60,20 @@ function AddPatientModal({ form, formError, onChange, onSave, onClose }: ModalPr
             <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.modalHeader}>
                     <h3 className={styles.modalTitle}>Add New Patient</h3>
-                    <button className={styles.modalClose} onClick={onClose}>
-                        <X size={20} />
-                    </button>
+                    <button className={styles.modalClose} onClick={onClose}><X size={20} /></button>
                 </div>
 
                 {formError && <div className={styles.formError}>{formError}</div>}
 
                 <div className={styles.formGrid}>
                     {[
-                        { field: "firstName", label: "First Name *", placeholder: "First name", type: "text" },
-                        { field: "lastName",  label: "Last Name *",  placeholder: "Last name",  type: "text" },
-                        { field: "mrn",       label: "MRN *",        placeholder: "e.g. MRN-10027", type: "text" },
-                        { field: "age",       label: "Age *",        placeholder: "Age",        type: "number" },
-                        { field: "phone",     label: "Phone *",      placeholder: "+966 50 000 0000", type: "text" },
-                        { field: "email",     label: "Email",        placeholder: "patient@email.com", type: "email" },
-                        { field: "condition", label: "Condition",    placeholder: "e.g. Hypothyroidism", type: "text" },
+                        { field: "firstName", label: "First Name *", placeholder: "First name",          type: "text"   },
+                        { field: "lastName",  label: "Last Name *",  placeholder: "Last name",           type: "text"   },
+                        { field: "mrn",       label: "MRN *",        placeholder: "e.g. MRN-10027",      type: "text"   },
+                        { field: "age",       label: "Age *",        placeholder: "Age",                 type: "number" },
+                        { field: "phone",     label: "Phone *",      placeholder: "+966 50 000 0000",    type: "text"   },
+                        { field: "email",     label: "Email",        placeholder: "patient@email.com",   type: "email"  },
+                        { field: "condition", label: "Condition",    placeholder: "e.g. Hypothyroidism", type: "text"   },
                     ].map((item) => (
                         <div key={item.field} className={styles.formGroup}>
                             <label className={styles.formLabel}>{item.label}</label>
@@ -141,11 +89,7 @@ function AddPatientModal({ form, formError, onChange, onSave, onClose }: ModalPr
 
                     <div className={styles.formGroup}>
                         <label className={styles.formLabel}>Gender</label>
-                        <select
-                            className={styles.formInput}
-                            value={form.gender}
-                            onChange={(e) => onChange("gender", e.target.value)}
-                        >
+                        <select className={styles.formInput} value={form.gender} onChange={(e) => onChange("gender", e.target.value)}>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                         </select>
@@ -153,11 +97,7 @@ function AddPatientModal({ form, formError, onChange, onSave, onClose }: ModalPr
 
                     <div className={styles.formGroup}>
                         <label className={styles.formLabel}>Status</label>
-                        <select
-                            className={styles.formInput}
-                            value={form.status}
-                            onChange={(e) => onChange("status", e.target.value)}
-                        >
+                        <select className={styles.formInput} value={form.status} onChange={(e) => onChange("status", e.target.value)}>
                             <option value="Active">Active</option>
                             <option value="Inactive">Inactive</option>
                         </select>
@@ -178,39 +118,27 @@ function AddPatientModal({ form, formError, onChange, onSave, onClose }: ModalPr
     );
 }
 
-// ───────────────────────────────────────────────────
 export default function PatientManagementPage() {
     const router = useRouter();
-    const [patients, setPatients] = useState<Patient[]>([]);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [activeFilter, setActiveFilter] = useState("all");
-    const [currentView, setCurrentView] = useState<View>("list");
-    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-    const [form, setForm] = useState(EMPTY_FORM);
-    const [formError, setFormError] = useState("");
-    const [doctor, setDoctor] = useState<Doctor | null>(null);
-    const [showModal, setShowModal] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [patients,         setPatients]         = useState<Patient[]>([]);
+    const [searchQuery,      setSearchQuery]       = useState("");
+    const [activeFilter,     setActiveFilter]      = useState("all");
+    const [currentView,      setCurrentView]       = useState<View>("list");
+    const [selectedPatient,  setSelectedPatient]   = useState<Patient | null>(null);
+    const [form,             setForm]              = useState(EMPTY_FORM);
+    const [formError,        setFormError]         = useState("");
+    const [showModal,        setShowModal]         = useState(false);
+    const [loading,          setLoading]           = useState(false);
 
-    //  دالة جلب المرضى من API
     const fetchPatients = async () => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
             const response = await fetch('http://localhost:5000/api/patients', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
             });
-
             const result = await response.json();
-
-            if (result.success) {
-                setPatients(result.data);
-            } else {
-                console.error('Error fetching patients:', result.error);
-            }
+            if (result.success) setPatients(result.data);
         } catch (error) {
             console.error('Network error:', error);
         } finally {
@@ -218,51 +146,33 @@ export default function PatientManagementPage() {
         }
     };
 
-    // دالة إضافة مريض جديد
     const addPatientToAPI = async (patientData: any) => {
         try {
             const token = localStorage.getItem("token");
             const response = await fetch('http://localhost:5000/api/patients', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(patientData)
             });
-
-            const result = await response.json();
-            return result;
-        } catch (error) {
-            return { success: false, error: 'Network error' };
-        }
+            return await response.json();
+        } catch { return { success: false, error: 'Network error' }; }
     };
 
     useEffect(() => {
-        const userData = localStorage.getItem("user");
-        if (userData) setDoctor(JSON.parse(userData));
-
-        //  جلب المرضى عند تحميل الصفحة
+        const token = localStorage.getItem("token");
+        if (!token) { router.push("/log-in"); return; }
         fetchPatients();
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        router.push("/log-in");
-    };
-
-    const handleFormChange = (field: string, value: string) => {
-        setForm((prev) => ({ ...prev, [field]: value }));
-    };
+    const handleFormChange = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
 
     const filters = [
-        { id: "all", label: "All" },
-        { id: "male", label: "Male" },
+        { id: "all",    label: "All"    },
+        { id: "male",   label: "Male"   },
         { id: "female", label: "Female" },
-        { id: "0-18", label: "0-18" },
-        { id: "19-40", label: "19-40" },
-        { id: "40+", label: "40+" },
+        { id: "0-18",   label: "0-18"   },
+        { id: "19-40",  label: "19-40"  },
+        { id: "40+",    label: "40+"    },
     ];
 
     const filteredPatients = useMemo(() => {
@@ -274,43 +184,19 @@ export default function PatientManagementPage() {
                 p.phone.includes(q);
             const matchFilter =
                 activeFilter === "all" ||
-                (activeFilter === "male" && p.gender === "Male") ||
+                (activeFilter === "male"   && p.gender === "Male")   ||
                 (activeFilter === "female" && p.gender === "Female") ||
                 getAgeGroup(p.age) === activeFilter;
             return matchSearch && matchFilter;
         });
     }, [patients, searchQuery, activeFilter]);
 
-    function handleSelectPatient(patient: Patient) {
-        setSelectedPatient(patient);
-        setCurrentView("detail");
-    }
-
-    function handleOpenModal() {
-        setForm(EMPTY_FORM);
-        setFormError("");
-        setShowModal(true);
-    }
-
-    function handleCloseModal() {
-        setShowModal(false);
-        setFormError("");
-    }
-
-    function handleBack() {
-        setCurrentView("list");
-        setSelectedPatient(null);
-    }
-
-    // 🔥 دالة إضافة مريض معدلة
     async function handleAddPatient() {
         if (!form.firstName || !form.lastName || !form.mrn || !form.age || !form.phone) {
             setFormError("Please fill in all required fields.");
             return;
         }
-
         const result = await addPatientToAPI(form);
-
         if (result.success) {
             setPatients(prev => [result.data, ...prev]);
             setShowModal(false);
@@ -322,14 +208,14 @@ export default function PatientManagementPage() {
         }
     }
 
-    // ── Detail View ──────
+    // ── Detail View ──
     if (currentView === "detail" && selectedPatient) {
         return (
             <div className={styles.container}>
-                <SharedHeader doctor={doctor} onLogout={handleLogout} />
+                <Navbar />
                 <div className={styles.pageContent}>
                     <div className={styles.pageTopBar}>
-                        <button className={styles.backIconButton} onClick={handleBack}>
+                        <button className={styles.backIconButton} onClick={() => { setCurrentView("list"); setSelectedPatient(null); }}>
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                 <path d="M15 10H5M5 10L9 6M5 10L9 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
@@ -351,12 +237,12 @@ export default function PatientManagementPage() {
                         </div>
                         <div className={styles.detailGrid}>
                             {[
-                                { label: "Age",       value: `${selectedPatient.age} years` },
-                                { label: "Gender",    value: selectedPatient.gender },
-                                { label: "Phone",     value: selectedPatient.phone },
-                                { label: "Email",     value: selectedPatient.email || "—" },
-                                { label: "Condition", value: selectedPatient.condition || "—" },
-                                { label: "Last Visit",value: formatDate(selectedPatient.lastVisit) },
+                                { label: "Age",        value: `${selectedPatient.age} years`     },
+                                { label: "Gender",     value: selectedPatient.gender              },
+                                { label: "Phone",      value: selectedPatient.phone               },
+                                { label: "Email",      value: selectedPatient.email || "—"        },
+                                { label: "Condition",  value: selectedPatient.condition || "—"    },
+                                { label: "Last Visit", value: formatDate(selectedPatient.lastVisit) },
                             ].map((item) => (
                                 <div key={item.label} className={styles.detailItem}>
                                     <span className={styles.detailLabel}>{item.label}</span>
@@ -364,7 +250,7 @@ export default function PatientManagementPage() {
                                 </div>
                             ))}
                         </div>
-                        <button className={styles.backBtn} onClick={handleBack}>
+                        <button className={styles.backBtn} onClick={() => { setCurrentView("list"); setSelectedPatient(null); }}>
                             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                                 <path d="M11 4L5 9L11 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
@@ -376,10 +262,10 @@ export default function PatientManagementPage() {
         );
     }
 
-    // ── List View ───────────
+    // ── List View ──
     return (
         <div className={styles.container}>
-            <SharedHeader doctor={doctor} onLogout={handleLogout} />
+            <Navbar />
 
             {showModal && (
                 <AddPatientModal
@@ -387,15 +273,13 @@ export default function PatientManagementPage() {
                     formError={formError}
                     onChange={handleFormChange}
                     onSave={handleAddPatient}
-                    onClose={handleCloseModal}
+                    onClose={() => { setShowModal(false); setFormError(""); }}
                 />
             )}
 
             <div className={styles.pageContent}>
                 <div className={styles.pageTopBar}>
-                    <a href="/dashboard" className={styles.backBtn}>
-                        ← Back to Dashboard
-                    </a>
+                    <a href="/dashboard" className={styles.backBtn}>← Back to Dashboard</a>
                     <h2 className={styles.pageTitle}>Patient Management</h2>
                 </div>
 
@@ -430,7 +314,7 @@ export default function PatientManagementPage() {
                 </div>
 
                 <div className={styles.addSection}>
-                    <button className={styles.addButton} onClick={handleOpenModal}>
+                    <button className={styles.addButton} onClick={() => { setForm(EMPTY_FORM); setFormError(""); setShowModal(true); }}>
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                             <path d="M10 4V16M4 10H16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
                         </svg>
@@ -442,27 +326,16 @@ export default function PatientManagementPage() {
                     <table className={styles.table}>
                         <thead>
                         <tr>
-                            <th>Patient</th>
-                            <th>MRN</th>
-                            <th>Age / Gender</th>
-                            <th>Contact</th>
-                            <th>Last Visit</th>
-                            <th>Status</th>
-                            <th></th>
+                            <th>Patient</th><th>MRN</th><th>Age / Gender</th>
+                            <th>Contact</th><th>Last Visit</th><th>Status</th><th></th>
                         </tr>
                         </thead>
                         <tbody>
                         {loading ? (
-                            <tr>
-                                <td colSpan={7}>
-                                    <div className={styles.emptyState}>
-                                        <p>Loading patients...</p>
-                                    </div>
-                                </td>
-                            </tr>
+                            <tr><td colSpan={7}><div className={styles.emptyState}><p>Loading patients...</p></div></td></tr>
                         ) : filteredPatients.length > 0 ? (
                             filteredPatients.map((patient) => (
-                                <tr key={patient.id} className={styles.patientRow} onClick={() => handleSelectPatient(patient)}>
+                                <tr key={patient.id} className={styles.patientRow} onClick={() => { setSelectedPatient(patient); setCurrentView("detail"); }}>
                                     <td>
                                         <div className={styles.patientCell}>
                                             <div className={`${styles.avatar} ${patient.gender === "Female" ? styles.avatarFemale : styles.avatarMale}`}>
@@ -479,15 +352,12 @@ export default function PatientManagementPage() {
                                     <td className={styles.infoText}>{patient.phone}</td>
                                     <td className={styles.infoText}>{formatDate(patient.lastVisit)}</td>
                                     <td>
-                                            <span className={`${styles.statusBadge} ${patient.status === "Active" ? styles.statusActive : styles.statusInactive}`}>
-                                                {patient.status}
-                                            </span>
+                                        <span className={`${styles.statusBadge} ${patient.status === "Active" ? styles.statusActive : styles.statusInactive}`}>
+                                            {patient.status}
+                                        </span>
                                     </td>
                                     <td>
-                                        <button
-                                            className={styles.viewIconBtn}
-                                            onClick={(e) => { e.stopPropagation(); handleSelectPatient(patient); }}
-                                        >
+                                        <button className={styles.viewIconBtn} onClick={(e) => { e.stopPropagation(); setSelectedPatient(patient); setCurrentView("detail"); }}>
                                             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                                                 <path d="M2 9C2 9 4 3 9 3C14 3 16 9 16 9C16 9 14 15 9 15C4 15 2 9 2 9Z" stroke="#0099cc" strokeWidth="1.5"/>
                                                 <circle cx="9" cy="9" r="3" stroke="#0099cc" strokeWidth="1.5"/>
