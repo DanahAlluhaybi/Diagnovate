@@ -1,0 +1,341 @@
+/* ═══════════════════════════════════════════════════════════
+   DIAGNOVATE — UNIFIED NAVBAR
+   Navbar.module.css
+═══════════════════════════════════════════════════════════ */
+
+/* ── Logout overlay ─────────────────────────────────────── */
+.logoutOverlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(240, 244, 248, 0.92);
+    backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+.logoutCard {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 28px;
+    padding: 52px 64px;
+    text-align: center;
+    box-shadow: 0 32px 80px rgba(15,23,42,0.12);
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+}
+.logoutLogo {
+    width: 52px; height: 52px;
+    background: linear-gradient(145deg, #0D9488, #0891B2);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(13,148,136,0.3);
+    margin-bottom: 24px;
+}
+.logoutSpinner {
+    width: 38px; height: 38px;
+    border: 3px solid #F0FDFA;
+    border-top-color: #0D9488;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+    margin-bottom: 20px;
+}
+.logoutTitle {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: #0F172A;
+    margin: 0 0 6px; letter-spacing: -0.3px;
+}
+.logoutSub {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px; color: #64748B; margin: 0;
+}
+
+/* ── Nav shell ──────────────────────────────────────────── */
+.nav {
+    position: sticky; top: 0; z-index: 200;
+    height: 68px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(226,232,240,0.8);
+    transition: box-shadow 0.25s ease;
+}
+.navScrolled {
+    box-shadow: 0 1px 0 rgba(13,148,136,0.06), 0 8px 32px rgba(15,23,42,0.07);
+}
+.navInner {
+    height: 100%;
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+/* ── Logo ────────────────────────────────────────────────── */
+.logo {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none; flex-shrink: 0; margin-right: 44px;
+    transition: opacity 0.2s;
+}
+.logo:hover { opacity: 0.85; }
+
+.logoMark {
+    position: relative;
+    width: 42px; height: 42px;
+    background: linear-gradient(145deg, #0D9488 0%, #0891B2 60%, #0369A1 100%);
+    border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(13,148,136,0.32), inset 0 1px 0 rgba(255,255,255,0.18);
+    flex-shrink: 0;
+}
+.logoPulse {
+    position: absolute; inset: -4px;
+    border-radius: 17px;
+    border: 1.5px solid rgba(13,148,136,0.22);
+    animation: ringPulse 3.5s ease-in-out infinite;
+}
+
+.logoText { display: flex; flex-direction: column; line-height: 1; }
+.logoWordmark {
+    font-family: 'DM Serif Display', serif;
+    font-size: 21px; font-weight: 400;
+    color: #0F172A; letter-spacing: -0.3px;
+}
+.logoAccent {
+    background: linear-gradient(120deg, #0D9488, #0891B2);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.logoSub {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 9.5px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #94A3B8; margin-top: 3px;
+}
+
+/* ── Nav links ───────────────────────────────────────────── */
+.links {
+    display: flex; align-items: center; gap: 2px; flex: 1;
+}
+.link {
+    position: relative;
+    padding: 7px 14px;
+    border-radius: 9px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13.5px; font-weight: 500;
+    color: #64748B;
+    text-decoration: none;
+    transition: all 0.18s;
+    white-space: nowrap;
+}
+.link:hover { color: #0F172A; background: #F1F5F9; }
+.linkActive {
+    color: #0D9488 !important;
+    font-weight: 700;
+    background: #F0FDFA !important;
+}
+.linkDot {
+    position: absolute;
+    bottom: 5px; left: 50%;
+    transform: translateX(-50%);
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: #0D9488;
+}
+
+/* ── Right cluster ───────────────────────────────────────── */
+.right {
+    display: flex; align-items: center; gap: 8px;
+    margin-left: auto; flex-shrink: 0;
+}
+.divider {
+    width: 1px; height: 26px;
+    background: #E8EDF2; margin: 0 2px;
+    flex-shrink: 0;
+}
+
+/* Bell / icon button */
+.iconBtn {
+    position: relative;
+    width: 38px; height: 38px;
+    border: 1.5px solid #E8EDF2;
+    border-radius: 11px;
+    background: #F8FAFC;
+    color: #94A3B8;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s;
+}
+.iconBtn:hover    { background: #F0FDFA; color: #0D9488; border-color: #CCFBF1; }
+.iconBtnActive    { background: #F0FDFA !important; color: #0D9488 !important; border-color: #99F6E4 !important; }
+
+.notifDot {
+    position: absolute; top: 6px; right: 6px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #EF4444;
+    border: 2px solid white;
+    box-shadow: 0 0 6px rgba(239,68,68,0.5);
+}
+
+/* Profile button */
+.profileBtn {
+    display: flex; align-items: center; gap: 9px;
+    padding: 5px 10px 5px 14px;
+    background: white;
+    border: 1.5px solid #E8EDF2;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.profileBtn:hover { border-color: #CCFBF1; background: #F8FFFE; box-shadow: 0 2px 12px rgba(13,148,136,0.1); }
+
+.profileInfo { text-align: left; }
+.profileName {
+    display: block;
+    font-size: 12.5px; font-weight: 700; color: #0F172A; line-height: 1.25;
+}
+.profileRole {
+    display: block;
+    font-size: 10px; color: #94A3B8; line-height: 1;
+}
+.profileAvatar {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #0D9488, #7C3AED);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11.5px; font-weight: 800; color: white;
+    box-shadow: 0 2px 8px rgba(13,148,136,0.25);
+}
+
+/* ── Dropdowns ───────────────────────────────────────────── */
+.dropWrap { position: relative; }
+
+.dropdown {
+    position: absolute; top: calc(100% + 10px); right: 0;
+    background: white;
+    border: 1px solid #EBF0F5;
+    border-radius: 20px;
+    box-shadow: 0 20px 56px rgba(15,23,42,0.13), 0 4px 16px rgba(15,23,42,0.07);
+    z-index: 300; overflow: hidden;
+    animation: dropIn 0.2s cubic-bezier(0.16,1,0.3,1) both;
+}
+.dropdownBell { width: 300px; }
+.dropdownProf { width: 248px; }
+
+.dropHead {
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid #F1F5F9;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px; font-weight: 800;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    color: #475569;
+    display: flex; align-items: center; gap: 7px;
+}
+
+/* Empty bell state */
+.emptyDrop {
+    padding: 28px 18px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    text-align: center;
+}
+.emptyDropIcon {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: #F8FAFC; border: 1px solid #F1F5F9;
+    display: flex; align-items: center; justify-content: center; color: #CBD5E1;
+}
+.emptyDropTitle {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px; font-weight: 700; color: #475569; margin: 0;
+}
+.emptyDropSub {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11.5px; color: #94A3B8; margin: 0;
+}
+
+/* Notification item */
+.notifItem {
+    padding: 14px 18px;
+    display: flex; align-items: flex-start; gap: 12px;
+}
+.notifItemDot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #F59E0B; margin-top: 4px; flex-shrink: 0;
+    box-shadow: 0 0 6px rgba(245,158,11,0.4);
+}
+.notifItemTitle {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px; font-weight: 700; color: #0F172A;
+}
+.notifItemSub {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11.5px; color: #94A3B8; margin-top: 2px;
+}
+
+/* Profile dropdown header */
+.profDropHead {
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid #F1F5F9;
+    display: flex; align-items: center; gap: 12px;
+    background: linear-gradient(135deg, #F0FDFA, #F8FAFC);
+}
+.profDropAvatar {
+    width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+    background: linear-gradient(135deg, #0D9488, #0891B2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; color: white;
+    box-shadow: 0 4px 12px rgba(13,148,136,0.25);
+}
+.profDropName {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13.5px; font-weight: 700; color: #0F172A;
+}
+.profDropEmail {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px; color: #94A3B8; margin-top: 2px;
+}
+
+/* Menu items */
+.dropMenu { padding: 8px; }
+.menuItem {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 11px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13.5px; font-weight: 500; color: #334155;
+    cursor: pointer; transition: all 0.15s;
+    border: none; background: none; width: 100%;
+    text-align: left; text-decoration: none;
+}
+.menuItem:hover { background: #F8FAFC; color: #0D9488; }
+.menuItemDanger { color: #EF4444 !important; }
+.menuItemDanger:hover { background: #FFF1F2 !important; color: #EF4444 !important; }
+.menuSep { height: 1px; background: #F1F5F9; margin: 4px 0; }
+
+/* ── Animations ──────────────────────────────────────────── */
+@keyframes dropIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+@keyframes ringPulse {
+    0%,100% { opacity: 0.35; transform: scale(1); }
+    50%     { opacity: 0.8;  transform: scale(1.07); }
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .navInner { padding: 0 24px; }
+    .logo { margin-right: 28px; }
+}
+@media (max-width: 860px) {
+    .links { display: none; }
+    .logoSub { display: none; }
+}
+@media (max-width: 600px) {
+    .navInner { padding: 0 16px; }
+    .profileInfo { display: none; }
+    .profileBtn { padding: 4px 8px; border-radius: 50%; }
+    .profileAvatar { width: 36px; height: 36px; font-size: 13px; }
+}

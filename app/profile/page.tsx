@@ -6,8 +6,12 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 
 interface Doctor {
-    id: number; name: string; email: string;
-    specialty: string; phone: string; license_number: string;
+    id: number;
+    name: string;
+    email: string;
+    specialty: string;
+    phone: string;
+    license_number: string;
 }
 
 export default function ProfilePage() {
@@ -39,6 +43,11 @@ export default function ProfilePage() {
     const [emailNotifications,   setEmailNotifications]   = useState(false);
 
     useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
         fetchProfile();
         setTimeout(() => setVisible(true), 50);
     }, []);
@@ -47,7 +56,10 @@ export default function ProfilePage() {
         try {
             const token = localStorage.getItem('token');
             const response = await fetch('http://localhost:5000/api/profile', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
             const data = await response.json();
             if (data.success) {
@@ -56,45 +68,108 @@ export default function ProfilePage() {
                 setSpecialty(data.doctor.specialty || '');
                 setPhone(data.doctor.phone || '');
                 setLicenseNumber(data.doctor.license_number || '');
+            } else {
+                setError('Failed to load profile');
             }
-        } catch { setError('Failed to load profile'); }
-        finally  { setLoading(false); }
+        } catch (err) {
+            setError('Failed to connect to server');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleSave = async () => {
-        setSaving(true); setError(''); setSuccess('');
+        setSaving(true);
+        setError('');
+        setSuccess('');
+
         try {
             const token = localStorage.getItem('token');
+            if (!token) {
+                setError('Please login again');
+                setSaving(false);
+                return;
+            }
+
+            // بيانات مبسطة للاختبار - اسم وتخصص فقط
+            const updateData = {
+                name: name || doctor?.name || "Doctor",
+                specialty: specialty || doctor?.specialty || "Specialist"
+            };
+
+            console.log('📤 Sending to backend:', updateData);
+
             const res = await fetch('http://localhost:5000/api/profile', {
                 method: 'PUT',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, specialty, phone, license_number: licenseNumber })
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updateData)
             });
+
             const data = await res.json();
-            if (data.success) { setDoctor(data.doctor); setSuccess('Profile updated successfully'); setTimeout(() => setSuccess(''), 3000); }
-            else { setError(data.error || 'Failed to update'); }
-        } catch { setError('Failed to connect to server'); }
-        finally  { setSaving(false); }
+            console.log('📥 Response from backend:', data);
+
+            if (data.success) {
+                setDoctor(data.doctor);
+                setSuccess('Profile updated successfully');
+                setTimeout(() => setSuccess(''), 3000);
+            } else {
+                setError(data.error || 'Failed to update');
+                console.error('❌ Backend error:', data.error);
+            }
+        } catch (err) {
+            console.error('❌ Network error:', err);
+            setError('Failed to connect to server');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handlePasswordChange = async () => {
-        setPasswordError(''); setPasswordSuccess('');
-        if (newPassword !== confirmPassword) { setPasswordError('Passwords do not match'); return; }
-        if (newPassword.length < 6) { setPasswordError('Password must be at least 6 characters'); return; }
+        setPasswordError('');
+        setPasswordSuccess('');
+
+        if (newPassword !== confirmPassword) {
+            setPasswordError('Passwords do not match');
+            return;
+        }
+        if (newPassword.length < 6) {
+            setPasswordError('Password must be at least 6 characters');
+            return;
+        }
+
         try {
             const token = localStorage.getItem('token');
             const res = await fetch('http://localhost:5000/api/profile', {
                 method: 'PUT',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ current_password: currentPassword, new_password: newPassword })
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    current_password: currentPassword,
+                    new_password: newPassword
+                })
             });
+
             const data = await res.json();
             if (data.success) {
                 setPasswordSuccess('Password changed successfully');
-                setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
-                setTimeout(() => { setShowPasswordModal(false); setPasswordSuccess(''); }, 2000);
-            } else { setPasswordError(data.error || 'Failed to change password'); }
-        } catch { setPasswordError('Failed to connect to server'); }
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+                setTimeout(() => {
+                    setShowPasswordModal(false);
+                    setPasswordSuccess('');
+                }, 2000);
+            } else {
+                setPasswordError(data.error || 'Failed to change password');
+            }
+        } catch {
+            setPasswordError('Failed to connect to server');
+        }
     };
 
     const getInitials = (n: string) => n.split(' ').map(x => x[0]).join('').toUpperCase().slice(0, 2);
@@ -416,27 +491,55 @@ export default function ProfilePage() {
                                         <div className="pf-form-grid">
                                             <div className="pf-form-group">
                                                 <label className="pf-label">Full Name</label>
-                                                <input className="pf-input" value={name} onChange={e => setName(e.target.value)} placeholder="Dr. John Doe" />
+                                                <input
+                                                    className="pf-input"
+                                                    value={name}
+                                                    onChange={e => setName(e.target.value)}
+                                                    placeholder="Dr. John Doe"
+                                                />
                                             </div>
                                             <div className="pf-form-group">
                                                 <label className="pf-label">Specialty</label>
-                                                <input className="pf-input" value={specialty} onChange={e => setSpecialty(e.target.value)} placeholder="Thyroid Specialist" />
+                                                <input
+                                                    className="pf-input"
+                                                    value={specialty}
+                                                    onChange={e => setSpecialty(e.target.value)}
+                                                    placeholder="Thyroid Specialist"
+                                                />
                                             </div>
                                             <div className="pf-form-group full">
                                                 <label className="pf-label">Email</label>
-                                                <input className="pf-input" value={doctor?.email || ''} disabled />
+                                                <input
+                                                    className="pf-input"
+                                                    value={doctor?.email || ''}
+                                                    disabled
+                                                />
                                                 <span className="pf-field-note">Contact support to change email</span>
                                             </div>
                                             <div className="pf-form-group">
                                                 <label className="pf-label">Phone Number</label>
-                                                <input className="pf-input" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+966 5X XXX XXXX" />
+                                                <input
+                                                    className="pf-input"
+                                                    value={phone}
+                                                    onChange={e => setPhone(e.target.value)}
+                                                    placeholder="+966 5X XXX XXXX"
+                                                />
                                             </div>
                                             <div className="pf-form-group">
                                                 <label className="pf-label">Medical License</label>
-                                                <input className="pf-input" value={licenseNumber} onChange={e => setLicenseNumber(e.target.value)} placeholder="e.g. SA-12345" />
+                                                <input
+                                                    className="pf-input"
+                                                    value={licenseNumber}
+                                                    onChange={e => setLicenseNumber(e.target.value)}
+                                                    placeholder="e.g. SA-12345"
+                                                />
                                             </div>
                                         </div>
-                                        <button className="pf-save-btn" onClick={handleSave} disabled={saving}>
+                                        <button
+                                            className="pf-save-btn"
+                                            onClick={handleSave}
+                                            disabled={saving}
+                                        >
                                             {saving ? 'Saving…' : 'Save Changes'}
                                         </button>
                                     </div>
@@ -446,9 +549,7 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-                {/* ── MODALS ── */}
-
-                {/* Preferences */}
+                {/* MODALS */}
                 {showPrefsModal && (
                     <div className="pf-modal-overlay" onClick={() => setShowPrefsModal(false)}>
                         <div className="pf-modal" onClick={e => e.stopPropagation()}>
@@ -463,14 +564,25 @@ export default function ProfilePage() {
                                 <label className="pf-label" style={{ marginBottom:8, display:'block' }}>Display Theme</label>
                                 <div className="pf-theme-opts">
                                     {(['Light','Dark','System'] as const).map(t => (
-                                        <button key={t} className={`pf-theme-btn${theme === t ? ' active' : ''}`} onClick={() => setTheme(t)}>
+                                        <button
+                                            key={t}
+                                            className={`pf-theme-btn${theme === t ? ' active' : ''}`}
+                                            onClick={() => setTheme(t)}
+                                        >
                                             {t === 'Light' ? <Sun size={18}/> : t === 'Dark' ? <Moon size={18}/> : <Monitor size={18}/>}
                                             {t}
                                         </button>
                                     ))}
                                 </div>
-                                <button className="pf-save-btn" style={{ marginTop:24, width:'100%', justifyContent:'center' }}
-                                        onClick={() => { setShowPrefsModal(false); setSuccess('Preferences saved'); setTimeout(() => setSuccess(''), 3000); }}>
+                                <button
+                                    className="pf-save-btn"
+                                    style={{ marginTop:24, width:'100%', justifyContent:'center' }}
+                                    onClick={() => {
+                                        setShowPrefsModal(false);
+                                        setSuccess('Preferences saved');
+                                        setTimeout(() => setSuccess(''), 3000);
+                                    }}
+                                >
                                     Save Preferences
                                 </button>
                             </div>
@@ -478,7 +590,6 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-                {/* Notifications */}
                 {showNotifModal && (
                     <div className="pf-modal-overlay" onClick={() => setShowNotifModal(false)}>
                         <div className="pf-modal" onClick={e => e.stopPropagation()}>
@@ -501,13 +612,24 @@ export default function ProfilePage() {
                                             <div className="pf-notif-desc">{n.desc}</div>
                                         </div>
                                         <label className="pf-toggle">
-                                            <input type="checkbox" checked={n.val} onChange={e => n.set(e.target.checked)} />
+                                            <input
+                                                type="checkbox"
+                                                checked={n.val}
+                                                onChange={e => n.set(e.target.checked)}
+                                            />
                                             <span className="pf-toggle-sl" />
                                         </label>
                                     </div>
                                 ))}
-                                <button className="pf-save-btn" style={{ marginTop:20, width:'100%', justifyContent:'center' }}
-                                        onClick={() => { setShowNotifModal(false); setSuccess('Notification settings saved'); setTimeout(() => setSuccess(''), 3000); }}>
+                                <button
+                                    className="pf-save-btn"
+                                    style={{ marginTop:20, width:'100%', justifyContent:'center' }}
+                                    onClick={() => {
+                                        setShowNotifModal(false);
+                                        setSuccess('Notification settings saved');
+                                        setTimeout(() => setSuccess(''), 3000);
+                                    }}
+                                >
                                     Save Settings
                                 </button>
                             </div>
@@ -515,7 +637,6 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-                {/* Password */}
                 {showPasswordModal && (
                     <div className="pf-modal-overlay" onClick={() => setShowPasswordModal(false)}>
                         <div className="pf-modal" onClick={e => e.stopPropagation()}>
@@ -536,10 +657,21 @@ export default function ProfilePage() {
                                 ].map(f => (
                                     <div key={f.label} className="pf-modal-fg">
                                         <label className="pf-label" style={{ marginBottom:7, display:'block' }}>{f.label}</label>
-                                        <input className="pf-input" style={{ width:'100%' }} type="password" value={f.val} onChange={e => f.set(e.target.value)} placeholder={f.ph} />
+                                        <input
+                                            className="pf-input"
+                                            style={{ width:'100%' }}
+                                            type="password"
+                                            value={f.val}
+                                            onChange={e => f.set(e.target.value)}
+                                            placeholder={f.ph}
+                                        />
                                     </div>
                                 ))}
-                                <button className="pf-save-btn" style={{ marginTop:20, width:'100%', justifyContent:'center' }} onClick={handlePasswordChange}>
+                                <button
+                                    className="pf-save-btn"
+                                    style={{ marginTop:20, width:'100%', justifyContent:'center' }}
+                                    onClick={handlePasswordChange}
+                                >
                                     Update Password
                                 </button>
                             </div>

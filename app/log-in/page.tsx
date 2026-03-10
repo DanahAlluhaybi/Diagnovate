@@ -1,462 +1,219 @@
 'use client';
 
 import { useState, Suspense } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Eye, EyeOff, ArrowRight, Loader2, Activity, Shield, Zap } from 'lucide-react';
 import { auth } from '@/lib/api';
-import { Mail, Lock, Eye, EyeOff, ChevronLeft } from 'lucide-react';
+
+// No more <style> block — all classes live in auth-shared.css + globals.css
 
 function LoginForm() {
-    const router = useRouter();
+    const router       = useRouter();
     const searchParams = useSearchParams();
-    const role = searchParams.get('role') || 'doctor';
+    const role         = (searchParams.get('role') as 'admin' | 'doctor') ?? 'doctor';
+    const isAdmin      = role === 'admin';
 
-    const [email, setEmail]       = useState('');
+    const [email,    setEmail]    = useState('');
     const [password, setPassword] = useState('');
-    const [showPass, setShowPass] = useState(false);
-    const [error, setError]       = useState('');
-    const [loading, setLoading]   = useState(false);
+    const [show,     setShow]     = useState(false);
+    const [loading,  setLoading]  = useState(false);
+    const [error,    setError]    = useState('');
 
-    const isAdmin = role === 'admin';
-    const accentColor  = isAdmin ? '#3B82F6' : '#0D9488';
-    const accentLight  = isAdmin ? '#EFF6FF' : '#F0FDFA';
-    const accentBorder = isAdmin ? '#BFDBFE' : '#99F6E4';
-    const gradient     = isAdmin
-        ? 'linear-gradient(135deg, #1E3A8A, #3B82F6)'
-        : 'linear-gradient(135deg, #0D9488, #0891B2)';
-
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-        setError('');
+        setError(''); setLoading(true);
         try {
-            const data = await auth.login({ email, password });
-            localStorage.setItem('token', data.access_token);
-            localStorage.setItem('user', JSON.stringify(data.doctor));
+            const raw  = await auth.login(email, password);
+            const data = typeof raw === 'string' ? { token: raw, user: null } : raw;
+            if (!data?.token) throw new Error('Login failed. Please check your credentials.');
+            localStorage.setItem('token', data.token);
+            if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
             router.push(isAdmin ? '/admin' : '/dashboard');
-        } catch (err) {
-            setError(err.message || 'Invalid email or password');
-        } finally {
-            setLoading(false);
-        }
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Invalid credentials. Please try again.');
+        } finally { setLoading(false); }
     };
 
+    // Role-specific colour tokens applied via inline CSS variables
+    const roleVars = isAdmin
+        ? { '--role-color': '#1E40AF', '--role-bg': '#EFF6FF', '--role-ring': '#BFDBFE' }
+        : { '--role-color': 'var(--teal)', '--role-bg': 'var(--teal-light)', '--role-ring': 'var(--teal-ring)' };
+
     return (
-        <>
-            <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+        <div className="auth-page" style={roleVars as React.CSSProperties}>
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+            {/* ══ LEFT PANEL ══ */}
+            <div className="auth-left">
+                <div className="auth-left__dots" />
+                <span className="auth-left__blob auth-left__blob--1" />
+                <span className="auth-left__blob auth-left__blob--2" />
+                <span className="auth-left__blob auth-left__blob--3" />
 
-        :root {
-          --bg: #F0F4F8;
-          --surface: #FFFFFF;
-          --text: #0F172A;
-          --text2: #334155;
-          --muted: #64748B;
-          --border: #E2E8F0;
-          --body: 'Plus Jakarta Sans', sans-serif;
-          --display: 'DM Serif Display', serif;
-        }
+                {/* Logo */}
+                <Link href="/" className="auth-logo">
+                    <div className="auth-logo__mark">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white" />
+                        </svg>
+                    </div>
+                    <span className="auth-logo__word">Diagno<span>vate</span></span>
+                </Link>
 
-        body { background: var(--bg); font-family: var(--body); -webkit-font-smoothing: antialiased; }
+                {/* Body */}
+                <div className="auth-left__body">
+                    <div className="auth-left__badge">
+                        <span className="auth-left__badge-dot" />
+                        AI Thyroid Diagnostics
+                    </div>
+                    <h1 className="auth-left__h1">
+                        The future of<br />
+                        <em>thyroid</em><br />
+                        diagnostics.
+                    </h1>
+                    <p className="auth-left__sub">
+                        AI-powered platform combining image enhancement, diagnostic intelligence, and clinical workflows.
+                    </p>
+                    <div className="auth-stats">
+                        {[
+                            { icon: <Activity size={17} />, val: '98.7%', lbl: 'Diagnostic Accuracy' },
+                            { icon: <Zap size={17} />,      val: '< 2s',  lbl: 'Real-Time Analysis' },
+                            { icon: <Shield size={17} />,   val: 'HIPAA', lbl: 'Compliant & Secure' },
+                        ].map((s, i) => (
+                            <div className="auth-stat" key={i}>
+                                <div className="auth-stat__icon">{s.icon}</div>
+                                <div>
+                                    <div className="auth-stat__val">{s.val}</div>
+                                    <div className="auth-stat__lbl">{s.lbl}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
 
-        .lp-wrap {
-          min-height: 100vh;
-          position: relative;
-          display: flex; flex-direction: column;
-        }
+                {/* Footer */}
+                <div className="auth-left__foot">
+                    {['HIPAA', 'ICCR', 'WHO', 'TI-RADS', 'GDPR'].map(t => (
+                        <span key={t} className="auth-compliance">{t}</span>
+                    ))}
+                </div>
+            </div>
 
-        .lp-wrap::before {
-          content: '';
-          position: fixed; inset: 0;
-          background-image: radial-gradient(circle, #CBD5E1 1px, transparent 1px);
-          background-size: 28px 28px;
-          opacity: 0.45;
-          pointer-events: none; z-index: 0;
-        }
-
-        .lp-blob1 {
-          position: fixed; width: 700px; height: 700px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(13,148,136,0.09) 0%, transparent 65%);
-          top: -250px; right: -200px; pointer-events: none; z-index: 0;
-        }
-        .lp-blob2 {
-          position: fixed; width: 500px; height: 500px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 65%);
-          bottom: -150px; left: -100px; pointer-events: none; z-index: 0;
-        }
-
-        /* NAV */
-        .lp-nav {
-          position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-          height: 68px;
-          display: flex; align-items: center; justify-content: space-between;
-          padding: 0 48px;
-          background: rgba(255,255,255,0.85);
-          backdrop-filter: blur(20px);
-          border-bottom: 1px solid var(--border);
-        }
-
-        .lp-logo {
-          display: flex; align-items: center; gap: 10px;
-          font-family: var(--body); font-weight: 800; font-size: 17px;
-          text-decoration: none; color: var(--text); letter-spacing: -0.2px;
-        }
-
-        .lp-logo-mark {
-          width: 36px; height: 36px;
-          border-radius: 10px;
-          display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 4px 12px rgba(13,148,136,0.3);
-        }
-
-        .lp-back {
-          display: inline-flex; align-items: center; gap: 7px;
-          background: white; border: 1.5px solid var(--border);
-          color: var(--muted); font-family: var(--body); font-size: 13px; font-weight: 600;
-          padding: 8px 16px; border-radius: 10px; cursor: pointer;
-          text-decoration: none; transition: all 0.2s;
-        }
-        .lp-back:hover { color: #0D9488; border-color: #99F6E4; background: #F0FDFA; }
-
-        /* MAIN — split layout */
-        .lp-main {
-          position: relative; z-index: 1;
-          min-height: 100vh;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          padding-top: 68px;
-        }
-
-        /* LEFT PANEL */
-        .lp-left {
-          display: flex; align-items: center; justify-content: center;
-          padding: 60px 64px;
-          background: white;
-          border-right: 1px solid var(--border);
-        }
-
-        .lp-left-inner { max-width: 360px; width: 100%; }
-
-        .lp-role-badge {
-          display: inline-flex; align-items: center; gap: 8px;
-          font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
-          padding: 6px 14px; border-radius: 100px; margin-bottom: 28px;
-        }
-
-        .lp-role-dot { width: 6px; height: 6px; border-radius: 50%; animation: blink 2s ease-in-out infinite; }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-        .lp-h1 {
-          font-family: var(--display); font-size: 38px; font-weight: 400;
-          letter-spacing: -0.5px; color: var(--text); line-height: 1.15;
-          margin-bottom: 12px;
-        }
-
-        .lp-sub {
-          font-size: 14px; color: var(--muted); line-height: 1.65; margin-bottom: 40px;
-        }
-
-        /* Features list on left */
-        .lp-features { display: flex; flex-direction: column; gap: 12px; }
-
-        .lp-feature {
-          display: flex; align-items: flex-start; gap: 12px;
-          padding: 14px 16px;
-          border-radius: 12px; background: #F8FAFC;
-          border: 1px solid var(--border);
-          min-height: 70px;
-        }
-
-        .lp-feature-ic {
-          width: 32px; height: 32px; border-radius: 9px;
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0;
-        }
-
-        .lp-feature-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
-        .lp-feature-sub   { font-size: 12px; color: var(--muted); line-height: 1.4; }
-
-        /* RIGHT PANEL — form */
-        .lp-right {
-          display: flex; align-items: center; justify-content: center;
-          padding: 60px 64px;
-          background: var(--bg);
-        }
-
-        .lp-form-box { max-width: 400px; width: 100%; }
-
-        .lp-form-title {
-          font-family: var(--display); font-size: 26px; font-weight: 400;
-          color: var(--text); margin-bottom: 6px; letter-spacing: -0.3px;
-        }
-
-        .lp-form-sub { font-size: 13.5px; color: var(--muted); margin-bottom: 32px; }
-
-        .lp-error {
-          background: #FFF1F2; border: 1px solid #FECDD3; color: #E11D48;
-          padding: 12px 16px; border-radius: 10px; font-size: 13px;
-          margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
-        }
-
-        /* Input group */
-        .lp-input-group { margin-bottom: 18px; }
-
-        .lp-label {
-          display: block; font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
-          text-transform: uppercase; color: var(--text2); margin-bottom: 7px;
-        }
-
-        .lp-input-wrap { position: relative; }
-
-        .lp-input {
-          width: 100%; height: 48px;
-          background: white; border: 1.5px solid var(--border);
-          border-radius: 12px; padding: 0 44px 0 44px;
-          font-family: var(--body); font-size: 14px; color: var(--text);
-          outline: none; transition: all 0.2s;
-        }
-
-        .lp-input::placeholder { color: #94A3B8; }
-
-        .lp-input:focus {
-          border-color: var(--accent);
-          box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
-        }
-
-        .lp-input-icon {
-          position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-          pointer-events: none; color: #94A3B8; transition: color 0.2s;
-        }
-
-        .lp-input:focus ~ .lp-input-icon { color: var(--accent); }
-
-        .lp-eye {
-          position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-          background: none; border: none; cursor: pointer; color: #94A3B8;
-          padding: 0; display: flex; align-items: center;
-          transition: color 0.2s;
-        }
-        .lp-eye:hover { color: var(--text2); }
-
-        .lp-forgot {
-          display: block; text-align: right; font-size: 12px; font-weight: 600;
-          margin-top: 6px; text-decoration: none; transition: opacity 0.2s;
-        }
-        .lp-forgot:hover { opacity: 0.7; }
-
-        .lp-submit {
-          width: 100%; height: 50px; margin-top: 8px;
-          border: none; border-radius: 12px; cursor: pointer;
-          font-family: var(--body); font-size: 15px; font-weight: 700;
-          color: white; letter-spacing: 0.2px;
-          transition: all 0.22s; position: relative; overflow: hidden;
-        }
-
-        .lp-submit::after {
-          content: ''; position: absolute; inset: 0;
-          background: rgba(255,255,255,0.12); opacity: 0; transition: opacity 0.2s;
-        }
-        .lp-submit:hover::after { opacity: 1; }
-        .lp-submit:hover { transform: translateY(-2px); }
-
-        .lp-submit:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
-
-        .lp-signup-row {
-          margin-top: 24px; text-align: center;
-          font-size: 13.5px; color: var(--muted);
-        }
-        .lp-signup-row a { font-weight: 700; text-decoration: none; transition: opacity 0.2s; }
-        .lp-signup-row a:hover { opacity: 0.75; }
-
-        .lp-divider {
-          display: flex; align-items: center; gap: 12px;
-          margin: 24px 0; color: var(--border);
-          font-size: 12px; color: var(--muted);
-        }
-        .lp-divider::before, .lp-divider::after {
-          content: ''; flex: 1; height: 1px; background: var(--border);
-        }
-
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(18px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .lp-animate { animation: fadeUp 0.5s ease both; }
-        .lp-animate-2 { animation: fadeUp 0.5s 0.1s ease both; }
-
-        @media (max-width: 900px) {
-          .lp-main { grid-template-columns: 1fr; }
-          .lp-left { display: none; }
-          .lp-right { padding: 40px 24px; }
-          .lp-nav { padding: 0 20px; }
-        }
-      `}</style>
-
-            <div className="lp-wrap" style={{'--accent': accentColor}}>
-                <div className="lp-blob1"/><div className="lp-blob2"/>
-
-                {/* NAV */}
-                <nav className="lp-nav">
-                    <a href="/" className="lp-logo">
-                        <div className="lp-logo-mark" style={{background: gradient}}>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white"/>
-                            </svg>
-                        </div>
-                        {'DIAGNO'}<span style={{color: accentColor}}>{'VATE'}</span>
-                    </a>
-                    <a href="/role" className="lp-back">
-                        <ChevronLeft size={15}/> Back
-                    </a>
+            {/* ══ RIGHT PANEL ══ */}
+            <div className="auth-right">
+                <nav className="auth-right__nav">
+                    <Link href="/"       className="auth-right__nav-link">Home</Link>
+                    <Link href="/about"  className="auth-right__nav-link">About</Link>
+                    <Link href="/contact"className="auth-right__nav-link">Contact</Link>
                 </nav>
 
-                {/* SPLIT */}
-                <div className="lp-main">
+                <div className="auth-form-area">
+                    <div className="auth-form-inner">
 
-                    {/* LEFT — branding side */}
-                    <div className="lp-left">
-                        <div className="lp-left-inner lp-animate">
-                            <div
-                                className="lp-role-badge"
-                                style={{background: accentLight, border:`1px solid ${accentBorder}`, color: accentColor}}
-                            >
-                                <span className="lp-role-dot" style={{background: accentColor}}/>
-                                {isAdmin ? 'Administrator Access' : 'Doctor Access'}
-                            </div>
-
-                            <h1 className="lp-h1">
-                                {isAdmin ? 'Manage the\nplatform.' : 'Diagnose\nsmarter.'}
-                            </h1>
-                            <p className="lp-sub">
-                                {isAdmin
-                                    ? 'Full control over doctor registrations, system activity, and platform settings.'
-                                    : 'AI-powered thyroid diagnostics, patient management, and real-time image analysis.'}
-                            </p>
-
-                            <div className="lp-features">
-                                {(isAdmin ? [
-                                    {title:'Doctor Management', sub:'Approve and manage doctor accounts', emoji:'👤'},
-                                    {title:'System Monitoring', sub:'Track activity and platform health', emoji:'📊'},
-                                    {title:'Secure Access', sub:'Role-based permission system', emoji:'🔒'},
-                                ] : [
-                                    {title:'AI Diagnostics', sub:'Real-time thyroid nodule analysis', emoji:'🧠'},
-                                    {title:'Image Enhancement', sub:'Crystal-clear ultrasound quality', emoji:'🔬'},
-                                    {title:'Smart Reports', sub:'AI-assisted clinical documentation', emoji:'📋'},
-                                ]).map((f, i) => (
-                                    <div className="lp-feature" key={i}>
-                                        <div
-                                            className="lp-feature-ic"
-                                            style={{background: accentLight, border:`1px solid ${accentBorder}`}}
-                                        >
-                                            <span style={{fontSize:16}}>{f.emoji}</span>
-                                        </div>
-                                        <div>
-                                            <div className="lp-feature-title">{f.title}</div>
-                                            <div className="lp-feature-sub">{f.sub}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                        {/* Role badge */}
+                        <div
+                            className="auth-role-badge"
+                            style={{ background: 'var(--role-bg)', border: '1px solid var(--role-ring)', color: 'var(--role-color)' }}
+                        >
+                            <span className="auth-role-badge__dot" style={{ background: 'var(--role-color)' }} />
+                            {isAdmin ? 'Admin Portal' : 'Doctor Portal'}
                         </div>
-                    </div>
 
-                    {/* RIGHT — form */}
-                    <div className="lp-right">
-                        <div className="lp-form-box lp-animate-2">
-                            <div className="lp-form-title">Sign in</div>
-                            <div className="lp-form-sub">
-                                {isAdmin ? 'Administrator portal' : 'Welcome back, Doctor'}
+                        <h2 className="auth-form-h2">Welcome back.</h2>
+                        <p className="auth-form-sub">
+                            Sign in to your clinical workspace.{' '}
+                            {!isAdmin && <Link href="/sign-up">New doctor?</Link>}
+                        </p>
+
+                        <form onSubmit={handleSubmit}>
+                            <div className="auth-fields">
+
+                                {/* Email */}
+                                <div className="auth-field">
+                                    <label className="dv-label">Email Address</label>
+                                    <div className="auth-iw">
+                                        <span className="auth-iw__icon">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="2" /><polyline points="2,4 12,13 22,4" /></svg>
+                                        </span>
+                                        <input
+                                            className="dv-input"
+                                            type="email" placeholder="doctor@hospital.com"
+                                            value={email} onChange={e => setEmail(e.target.value)}
+                                            required autoFocus
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Password */}
+                                <div className="auth-field">
+                                    <label className="dv-label">Password</label>
+                                    <div className="auth-iw">
+                                        <span className="auth-iw__icon">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                        </span>
+                                        <input
+                                            className={`dv-input auth-iw__input--pw`}
+                                            type={show ? 'text' : 'password'}
+                                            placeholder="••••••••"
+                                            value={password} onChange={e => setPassword(e.target.value)}
+                                            required
+                                        />
+                                        <button type="button" className="auth-eye" onClick={() => setShow(v => !v)}>
+                                            {show ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div className="auth-forgot-row">
+                                <Link href="/forgot-password" className="auth-forgot">Forgot password?</Link>
                             </div>
 
                             {error && (
-                                <div className="lp-error">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#E11D48" strokeWidth="2"/><path d="M12 8v4M12 16h.01" stroke="#E11D48" strokeWidth="2" strokeLinecap="round"/></svg>
+                                <div className="dv-alert dv-alert-error" style={{ marginTop: 14 }}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                                     {error}
                                 </div>
                             )}
 
-                            <form onSubmit={handleSubmit}>
-                                <div className="lp-input-group">
-                                    <label className="lp-label">Email Address</label>
-                                    <div className="lp-input-wrap">
-                                        <input
-                                            type="email"
-                                            className="lp-input"
-                                            value={email}
-                                            onChange={e => { setEmail(e.target.value); setError(''); }}
-                                            placeholder="doctor@hospital.com"
-                                            required
-                                        />
-                                        <span className="lp-input-icon"><Mail size={16}/></span>
-                                    </div>
-                                </div>
+                            <button
+                                type="submit" className="auth-btn-primary" disabled={loading}
+                                style={{ marginTop: 20 }}
+                            >
+                                {loading
+                                    ? <><Loader2 size={17} style={{ animation: 'spinIcon .75s linear infinite' }} />Signing in...</>
+                                    : <>Sign In <ArrowRight size={16} /></>
+                                }
+                            </button>
+                        </form>
 
-                                <div className="lp-input-group">
-                                    <label className="lp-label">Password</label>
-                                    <div className="lp-input-wrap">
-                                        <input
-                                            type={showPass ? 'text' : 'password'}
-                                            className="lp-input"
-                                            value={password}
-                                            onChange={e => { setPassword(e.target.value); setError(''); }}
-                                            placeholder="••••••••"
-                                            required
-                                        />
-                                        <span className="lp-input-icon"><Lock size={16}/></span>
-                                        <button
-                                            type="button"
-                                            className="lp-eye"
-                                            onClick={() => setShowPass(v => !v)}
-                                        >
-                                            {showPass ? <EyeOff size={16}/> : <Eye size={16}/>}
-                                        </button>
-                                    </div>
-                                    <a href="#" className="lp-forgot" style={{color: accentColor}}>
-                                        Forgot password?
-                                    </a>
-                                </div>
+                        {!isAdmin && (
+                            <>
+                                <div className="auth-divider">or</div>
+                                <Link href="/sign-up" className="auth-btn-ghost">
+                                    Create a new doctor account <ArrowRight size={15} />
+                                </Link>
+                            </>
+                        )}
 
-                                <button
-                                    type="submit"
-                                    className="lp-submit"
-                                    disabled={loading}
-                                    style={{
-                                        background: gradient,
-                                        boxShadow: `0 6px 20px ${accentColor}35`,
-                                    }}
-                                >
-                                    {loading ? 'Signing in…' : 'Sign In'}
-                                </button>
-                            </form>
-
-                            {!isAdmin && (
-                                <>
-                                    <div className="lp-divider">or</div>
-                                    <p className="lp-signup-row">
-                                        Don't have an account?{' '}
-                                        <a href="/sign-up" style={{color: accentColor}}>Create account</a>
-                                    </p>
-                                </>
-                            )}
+                        <div className="auth-switch-row">
+                            <Link
+                                href={isAdmin ? '/log-in?role=doctor' : '/log-in?role=admin'}
+                                className="auth-switch-btn"
+                            >
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v2a4 4 0 0 1-4 4H3" /></svg>
+                                Switch to {isAdmin ? 'Doctor' : 'Admin'} Login
+                            </Link>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 
 export default function LoginPage() {
-    return (
-        <Suspense fallback={
-            <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#F0F4F8',fontFamily:'Plus Jakarta Sans,sans-serif',color:'#64748B',fontSize:14}}>
-                Loading…
-            </div>
-        }>
-            <LoginForm />
-        </Suspense>
-    );
+    return <Suspense><LoginForm /></Suspense>;
 }
