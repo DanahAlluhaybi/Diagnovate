@@ -5,11 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Loader2, RotateCcw } from 'lucide-react';
 
-// No more <style> block — all classes live in auth-card.css + globals.css
-
-export default function EmailVerificationPage() {
+export default function PhoneVerificationPage() {
     const router = useRouter();
-    const [code,    setCode]    = useState(['', '', '', '', '', '']);
+    const [code, setCode]     = useState(['', '', '', '', '', '']);
     const [loading, setLoading] = useState(false);
     const [done,    setDone]    = useState(false);
     const [error,   setError]   = useState('');
@@ -28,9 +26,11 @@ export default function EmailVerificationPage() {
         const next = [...code]; next[i] = val.slice(-1); setCode(next);
         if (val && i < 5) refs[i + 1].current?.focus();
     };
+
     const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
         if (e.key === 'Backspace' && !code[i] && i > 0) refs[i - 1].current?.focus();
     };
+
     const handlePaste = (e: React.ClipboardEvent) => {
         e.preventDefault();
         const digits = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6).split('');
@@ -62,7 +62,6 @@ export default function EmailVerificationPage() {
 
     return (
         <div className="acard-page">
-
             {/* Ambient glows */}
             <span className="acard-page__glow acard-page__glow--teal" />
             <span className="acard-page__glow acard-page__glow--purple" />
@@ -79,17 +78,16 @@ export default function EmailVerificationPage() {
                     <span className="acard-nav__word">Diagno<span>vate</span></span>
                 </Link>
                 <div className="acard-nav__links">
-                    <Link href="/"       className="acard-nav__link">Home</Link>
-                    <Link href="/about"  className="acard-nav__link">About</Link>
-                    <Link href="/contact"className="acard-nav__link">Contact</Link>
-                    <Link href="/log-in" className="acard-nav__cta">Sign In <ArrowRight size={14} /></Link>
+                    <Link href="/"        className="acard-nav__link">Home</Link>
+                    <Link href="/about"   className="acard-nav__link">About</Link>
+                    <Link href="/contact" className="acard-nav__link">Contact</Link>
+                    <Link href="/log-in"  className="acard-nav__cta">Sign In <ArrowRight size={14} /></Link>
                 </div>
             </nav>
 
             {/* ── Card ── */}
             <div className="acard-wrap">
                 <div className="acard">
-
                     {/* Logo */}
                     <Link href="/" className="acard-logo">
                         <div className="acard-logo__mark">
@@ -100,26 +98,26 @@ export default function EmailVerificationPage() {
                         <span className="acard-logo__word">Diagno<span>vate</span></span>
                     </Link>
 
-                    {/* ─── Verify state ─── */}
                     {!done ? (
                         <>
-                            {/* Icon */}
                             <div className="acard-icon acard-icon--teal">
                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="1.8" strokeLinecap="round">
-                                    <rect x="2" y="4" width="20" height="16" rx="3" />
-                                    <polyline points="2,4 12,13 22,4" />
+                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                                    <line x1="12" y1="18" x2="12.01" y2="18" />
                                 </svg>
                             </div>
 
                             <div className="acard-status acard-status--teal">
                                 <span className="acard-status__dot" />
-                                Email Verification
+                                Phone Verification
                             </div>
 
-                            <h2 className="acard-h2">Check your inbox.</h2>
+                            <h2 className="acard-h2">Check your phone.</h2>
                             <p className="acard-p" style={{ marginBottom: 20 }}>
-                                We sent a 6-digit code to your email.<br />Enter it below to continue.
+                                We sent a 6-digit code to your phone number.<br />Enter it below to continue.
                             </p>
+
+
                             {/* OTP boxes */}
                             <div className="verify-code-row" onPaste={handlePaste}>
                                 {code.map((d, i) => (
@@ -150,7 +148,7 @@ export default function EmailVerificationPage() {
                             {resent && (
                                 <div className="dv-alert dv-alert-success" style={{ marginBottom: 16 }}>
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                                    New code sent to your email.
+                                    New code sent to your phone.
                                 </div>
                             )}
 
@@ -181,15 +179,12 @@ export default function EmailVerificationPage() {
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6" /></svg>
                                 Back to sign up
                             </Link>
-
-                            <Link href="/phone-verification" className="verify-back" style={{ marginTop: 8 }}>
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                                Verify with phone instead
+                            <Link href="/email-verification" className="verify-back" style={{ marginTop: 8 }}>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="3"/><polyline points="2,4 12,13 22,4"/></svg>
+                                Verify with email instead
                             </Link>
                         </>
                     ) : (
-
-
                         /* ─── Success state ─── */
                         <div className="verify-success">
                             <div className="verify-success__ring">
@@ -197,9 +192,9 @@ export default function EmailVerificationPage() {
                                     <polyline className="verify-check" points="20 6 9 17 4 12" />
                                 </svg>
                             </div>
-                            <h2 className="acard-h2">Email verified!</h2>
+                            <h2 className="acard-h2">Phone verified!</h2>
                             <p className="acard-p">
-                                Your email has been confirmed.<br />
+                                Your phone number has been confirmed.<br />
                                 Your account is now pending admin approval.
                             </p>
                             <Link href="/pending-approval" className="acard-btn" style={{ marginTop: 8 }}>
