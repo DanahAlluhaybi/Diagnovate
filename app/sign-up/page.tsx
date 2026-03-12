@@ -29,6 +29,18 @@ export default function SignUpPage() {
         if (!form.firstName || !form.lastName || !form.email || !form.phone || !form.idNumber) {
             setError('Please fill in all required fields.'); return;
         }
+        const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+        if (!emailValid) {
+            setError('Please enter a valid email address.'); return;
+        }
+        const phoneValid = /^05\d{8}$/.test(form.phone);
+        if (!phoneValid) {
+            setError('Phone number must start with 05 and be 10 digits.'); return;
+        }
+        const idValid = /^\d{10}$/.test(form.idNumber);
+        if (!idValid) {
+            setError('ID number must be 10 digits.'); return;
+        }
         setError(''); setStep(1);
     };
 
