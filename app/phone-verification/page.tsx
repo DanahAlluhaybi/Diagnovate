@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Loader2, RotateCcw } from 'lucide-react';
+import { auth } from '@/lib/api';
 
 export default function PhoneVerificationPage() {
     const router = useRouter();
@@ -39,11 +40,13 @@ export default function PhoneVerificationPage() {
         setCode(next);
         refs[Math.min(digits.length, 5)].current?.focus();
     };
-
     const handleVerify = async () => {
         setError(''); setLoading(true);
         try {
-            await new Promise(r => setTimeout(r, 1200)); // replace with real API call
+            const identifier = new URLSearchParams(window.location.search).get('identifier') ?? '';
+            const data = await auth.verifyOTP(identifier, code.join(''));
+            localStorage.setItem('token', data.token);
+            if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
             setDone(true);
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Invalid code. Please try again.');

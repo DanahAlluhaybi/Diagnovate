@@ -67,6 +67,7 @@ export default function SignUpPage() {
                 license_number: form.idNumber
             });
 
+            localStorage.setItem('userEmail', form.email);
             router.push('/email-verification');
 
         } catch (err: unknown) {

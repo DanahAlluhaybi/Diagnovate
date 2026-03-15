@@ -24,9 +24,16 @@ function LoginForm() {
         e.preventDefault();
         setError(''); setLoading(true);
         try {
-            const raw  = await auth.login(email, password);
-            const data = typeof raw === 'string' ? { token: raw, user: null } : raw;
-            if (!data?.token) throw new Error('Login failed. Please check your credentials.');
+            const data = await auth.login(email, password);
+
+            if (data.requiresOTP) {
+                if (data.channel === 'email') {
+                    router.push(`/email-verification?identifier=${encodeURIComponent(data.identifier)}`);
+                } else {
+                    router.push(`/phone-verification?identifier=${encodeURIComponent(data.identifier)}`);
+                }
+                return;
+            }
             localStorage.setItem('token', data.token);
             if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
             router.push(isAdmin ? '/admin' : '/dashboard');

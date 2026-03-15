@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Loader2, RotateCcw } from 'lucide-react';
+import { auth } from '@/lib/api';
 
 // No more <style> block — all classes live in auth-card.css + globals.css
 
@@ -39,17 +40,19 @@ export default function EmailVerificationPage() {
         setCode(next);
         refs[Math.min(digits.length, 5)].current?.focus();
     };
-
     const handleVerify = async () => {
         setError(''); setLoading(true);
         try {
-            await new Promise(r => setTimeout(r, 1200)); // replace with real API call
+            const identifier = new URLSearchParams(window.location.search).get('identifier')
+                ?? localStorage.getItem('userEmail')
+                ?? '';            const data = await auth.verifyOTP(identifier, code.join(''));
+            localStorage.setItem('token', data.token);
+            if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
             setDone(true);
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Invalid code. Please try again.');
         } finally { setLoading(false); }
     };
-
     const handleResend = () => {
         setCode(['', '', '', '', '', '']);
         setError('');
@@ -182,10 +185,21 @@ export default function EmailVerificationPage() {
                                 Back to sign up
                             </Link>
 
-                            <Link href="/phone-verification" className="verify-back" style={{ marginTop: 8 }}>
+                            <button
+                                className="verify-back"
+                                style={{ marginTop: 8 }}
+                                onClick={async () => {
+                                    try {
+                                        const identifier = new URLSearchParams(window.location.search).get('identifier') ?? localStorage.getItem('userEmail') ?? '';                                        const res = await auth.sendPhoneOtp(identifier);
+                                        router.push(`/phone-verification?identifier=${encodeURIComponent(res.identifier)}`);
+                                    } catch (err) {
+                                        setError(err instanceof Error ? err.message : 'Failed to send phone OTP');
+                                    }
+                                }}
+                            >
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
                                 Verify with phone instead
-                            </Link>
+                            </button>
                         </>
                     ) : (
 
