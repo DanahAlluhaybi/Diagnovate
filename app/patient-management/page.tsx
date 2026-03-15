@@ -3,14 +3,13 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './styles.module.css';
-import { X, ArrowLeft, Search, UserPlus, Scan } from 'lucide-react';
+import { X, ArrowLeft, Search, UserPlus, Scan, Trash2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
 type Gender = 'Male' | 'Female';
 type Status = 'Active' | 'Inactive';
 type View   = 'list' | 'detail';
 type Tab    = 'info' | 'images';
-
 type ScanType = 'Ultrasound' | 'CT Scan' | 'MRI' | 'X-Ray';
 
 const SCAN_TYPE_STYLES: Record<string, { color: string; bg: string; border: string }> = {
@@ -21,55 +20,35 @@ const SCAN_TYPE_STYLES: Record<string, { color: string; bg: string; border: stri
 };
 
 interface MedicalImage {
-    id: string;
-    date: string;
-    type: ScanType;
-    label: string;
-    enhanced: boolean;
-    enhancedSrc?: string;
-    originalSrc?: string;
+    id: string; date: string; type: ScanType; label: string;
+    enhanced: boolean; enhancedSrc?: string; originalSrc?: string;
 }
-
 interface Patient {
     id: string; mrn: string; firstName: string; lastName: string;
     age: number; gender: Gender; phone: string; email: string;
-    lastVisit: string; status: Status; condition: string;
-    images?: MedicalImage[];
+    lastVisit: string; status: Status; condition: string; images?: MedicalImage[];
 }
-
 const EMPTY_FORM = {
     firstName:'', lastName:'', mrn:'', age:'',
     gender:'Male' as Gender, phone:'', email:'',
     condition:'', status:'Active' as Status,
 };
 
-// ── Load images saved from Image Enhancement page ──
-// Searches by patient.id AND patient.mrn so either key works
-function loadImagesForPatient(patient: { id: string; mrn: string }): MedicalImage[] {
+import { loadImages, deleteImage } from '@/lib/imageStorage';
+
+async function loadImagesForPatient(patient: { id: string; mrn: string }): Promise<MedicalImage[]> {
     try {
-        const all = JSON.parse(localStorage.getItem('patient_images') || '{}');
-        // Merge results from both keys, deduplicate by image id
-        const fromId  = all[patient.id]  || [];
-        const fromMrn = all[patient.mrn] || [];
-        const merged  = [...fromId, ...fromMrn];
-        const unique  = merged.filter((img, idx, arr) => arr.findIndex(x => x.id === img.id) === idx);
-        return unique.map((img: any): MedicalImage => ({
-            id:          img.id,
-            date:        img.date,
-            type:        img.type as ScanType,
-            label:       img.label,
-            enhanced:    img.isEnhanced ?? true,
-            enhancedSrc: img.enhancedSrc,
-            originalSrc: img.originalSrc,
+        const raw = await loadImages(patient.mrn, patient.id);
+        return raw.map((img: any): MedicalImage => ({
+            id: img.id, date: img.date, type: img.type as ScanType,
+            label: img.label, enhanced: img.isEnhanced ?? true,
+            enhancedSrc: img.enhancedSrc, originalSrc: img.originalSrc,
         }));
     } catch { return []; }
 }
-
-// ── Fallback mock images (shown when no real images saved yet) ──
-const mockImages = (patientId: string): MedicalImage[] => [
-    { id: `IMG-${patientId}-001`, date: '2025-03-01', type: 'Ultrasound', label: 'Right lobe longitudinal', enhanced: false },
-    { id: `IMG-${patientId}-002`, date: '2024-11-15', type: 'CT Scan',    label: 'Neck cross-section',      enhanced: false },
-];
+async function deleteImageFromStorage(patient: { id: string; mrn: string }, imageId: string) {
+    await deleteImage(patient.mrn, patient.id, imageId);
+}
 
 const getAgeGroup = (age: number) => age <= 18 ? '0-18' : age <= 40 ? '19-40' : '40+';
 const formatDate  = (d: string)   => new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
@@ -79,17 +58,19 @@ export default function PatientManagementPage() {
     const router       = useRouter();
     const searchParams = useSearchParams();
 
-    const [patients,        setPatients]       = useState<Patient[]>([]);
-    const [searchQuery,     setSearchQuery]    = useState('');
-    const [activeFilter,    setActiveFilter]   = useState('all');
-    const [currentView,     setCurrentView]    = useState<View>('list');
-    const [selectedPatient, setSelectedPatient]= useState<Patient | null>(null);
-    const [activeTab,       setActiveTab]      = useState<Tab>('info');
-    const [form,            setForm]           = useState(EMPTY_FORM);
-    const [formError,       setFormError]      = useState('');
-    const [showModal,       setShowModal]      = useState(false);
-    const [loading,         setLoading]        = useState(false);
-    const [editingStatus,   setEditingStatus]  = useState(false);
+    const [patients,        setPatients]        = useState<Patient[]>([]);
+    const [searchQuery,     setSearchQuery]     = useState('');
+    const [activeFilter,    setActiveFilter]    = useState('all');
+    const [currentView,     setCurrentView]     = useState<View>('list');
+    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+    const [activeTab,       setActiveTab]       = useState<Tab>('info');
+    const [form,            setForm]            = useState(EMPTY_FORM);
+    const [formError,       setFormError]       = useState('');
+    const [showModal,       setShowModal]       = useState(false);
+    const [loading,         setLoading]         = useState(false);
+    const [editingStatus,   setEditingStatus]   = useState(false);
+    const [localImages,     setLocalImages]     = useState<MedicalImage[]>([]);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
     const fetchPatients = async () => {
         try {
@@ -99,13 +80,7 @@ export default function PatientManagementPage() {
                 headers: { Authorization:`Bearer ${token}`, 'Content-Type':'application/json' },
             });
             const result = await res.json();
-            if (result.success) {
-                const enriched = result.data.map((p: Patient) => ({
-                    ...p,
-                    images: loadImagesForPatient(p).length > 0 ? loadImagesForPatient(p) : (p.images ?? mockImages(p.id)),
-                }));
-                setPatients(enriched);
-            }
+            if (result.success) setPatients(result.data);
         } catch (e) { console.error('Network error:', e); }
         finally { setLoading(false); }
     };
@@ -127,7 +102,11 @@ export default function PatientManagementPage() {
         fetchPatients();
     }, []);
 
-    // ── Deep-link from dashboard: /patient-management?patientId=XXX&tab=images ──
+    useEffect(() => {
+        if (selectedPatient) loadImagesForPatient(selectedPatient).then(setLocalImages);
+        else setLocalImages([]);
+    }, [selectedPatient]);
+
     useEffect(() => {
         const patientId = searchParams.get('patientId');
         const tab       = (searchParams.get('tab') as Tab) || 'info';
@@ -163,14 +142,12 @@ export default function PatientManagementPage() {
         }
         const result = await addPatientToAPI(form);
         if (result.success) {
-            const enriched = { ...result.data, images: mockImages(result.data.id) };
-            setPatients(prev => [enriched, ...prev]);
-            setShowModal(false); setSelectedPatient(enriched);
+            setPatients(prev => [result.data, ...prev]);
+            setShowModal(false); setSelectedPatient(result.data);
             setCurrentView('detail'); setActiveTab('info'); setFormError('');
         } else { setFormError(result.error || 'Failed to add patient'); }
     }
 
-    // Update patient status locally + call API
     const updatePatientStatus = async (patientId: string, newStatus: Status) => {
         setPatients(prev => prev.map(p => p.id === patientId ? { ...p, status: newStatus } : p));
         setSelectedPatient(prev => prev ? { ...prev, status: newStatus } : prev);
@@ -185,33 +162,38 @@ export default function PatientManagementPage() {
         } catch (e) { console.error('Failed to update status:', e); }
     };
 
+    const handleDeleteImage = async (imageId: string) => {
+        if (!selectedPatient) return;
+        await deleteImageFromStorage(selectedPatient, imageId);
+        setLocalImages(prev => prev.filter(i => i.id !== imageId));
+        setConfirmDeleteId(null);
+    };
+
     const openPatient = (p: Patient, tab: Tab = 'info') => {
         setSelectedPatient(p); setCurrentView('detail'); setActiveTab(tab);
     };
+    const goBack = () => {
+        setCurrentView('list'); setSelectedPatient(null);
+        setActiveTab('info'); setConfirmDeleteId(null);
+    };
 
-    const goBack = () => { setCurrentView('list'); setSelectedPatient(null); setActiveTab('info'); };
-
-    /* ════════════════════════════════════════
+    /* ══════════════════════════════════════════
        DETAIL VIEW
-    ════════════════════════════════════════ */
+    ══════════════════════════════════════════ */
     if (currentView === 'detail' && selectedPatient) {
-        // Always read fresh from localStorage so newly saved images appear immediately
-        const lsImages = loadImagesForPatient(selectedPatient);
-        const images   = lsImages.length > 0 ? lsImages : (selectedPatient.images ?? []);
-
+        const images = localImages;
         return (
             <div className={styles.container}>
                 <Navbar />
                 <div className={styles.pageContent}>
-
                     <div className={styles.featureHeader}>
                         <button className={styles.backBtn} onClick={goBack}>
                             <ArrowLeft size={13} /> Patients
                         </button>
-                        <h2 className={styles.pageTitle}>Patient Details</h2>
+                        <div className={styles.eyebrow}><span className={styles.eyebrowDot} />Patient Records</div>
+                        <h2 className={styles.pageTitle}>Patient <em>Details</em></h2>
                     </div>
 
-                    {/* Profile strip */}
                     <div className={styles.profileStrip}>
                         <div className={`${styles.avatarLg} ${selectedPatient.gender === 'Female' ? styles.female : styles.male}`}>
                             {getInitials(selectedPatient.firstName, selectedPatient.lastName)}
@@ -237,23 +219,19 @@ export default function PatientManagementPage() {
                         </div>
                     </div>
 
-                    {/* Tab bar */}
                     <div className={styles.tabBar}>
                         {([
                             { id:'info',   label:'Personal Info',  icon:'👤' },
                             { id:'images', label:'Medical Images', icon:'🔬' },
                         ] as { id: Tab; label: string; icon: string }[]).map(t => (
-                            <button
-                                key={t.id}
-                                className={`${styles.tabBtn} ${activeTab === t.id ? styles.tabBtnActive : ''}`}
-                                onClick={() => setActiveTab(t.id)}
-                            >
+                            <button key={t.id}
+                                    className={`${styles.tabBtn} ${activeTab === t.id ? styles.tabBtnActive : ''}`}
+                                    onClick={() => setActiveTab(t.id)}>
                                 {t.icon} {t.label}
                             </button>
                         ))}
                     </div>
 
-                    {/* ── Personal Info ── */}
                     {activeTab === 'info' && (
                         <div className={styles.detailCard}>
                             <div className={styles.detailGrid}>
@@ -270,20 +248,17 @@ export default function PatientManagementPage() {
                                         <span className={styles.detailValue}>{item.value}</span>
                                     </div>
                                 ))}
-
-                                {/* Editable Status */}
                                 <div className={styles.detailItem}>
                                     <span className={styles.detailLabel}>Status</span>
                                     {editingStatus ? (
                                         <div className={styles.statusEditRow}>
                                             {(['Active','Inactive'] as Status[]).map(s => (
-                                                <button
-                                                    key={s}
-                                                    className={`${styles.statusOption} ${selectedPatient.status === s ? styles.statusOptionActive : ''}`}
-                                                    style={selectedPatient.status === s ? (s === 'Active'
-                                                        ? { background:'#F0FDFA', color:'#0D9488', borderColor:'#99F6E4' }
-                                                        : { background:'#F8FAFC', color:'#64748B', borderColor:'#CBD5E1' }) : {}}
-                                                    onClick={() => updatePatientStatus(selectedPatient.id, s)}
+                                                <button key={s}
+                                                        className={`${styles.statusOption} ${selectedPatient.status === s ? styles.statusOptionActive : ''}`}
+                                                        style={selectedPatient.status === s ? (s === 'Active'
+                                                            ? { background:'#F0FDFA', color:'#0D9488', borderColor:'#99F6E4' }
+                                                            : { background:'#F8FAFC', color:'#64748B', borderColor:'#CBD5E1' }) : {}}
+                                                        onClick={() => updatePatientStatus(selectedPatient.id, s)}
                                                 >{s}</button>
                                             ))}
                                             <button className={styles.statusCancelBtn} onClick={() => setEditingStatus(false)}>Cancel</button>
@@ -293,9 +268,7 @@ export default function PatientManagementPage() {
                                             <span className={`${styles.badge} ${selectedPatient.status === 'Active' ? styles.active : styles.inactive}`}>
                                                 {selectedPatient.status}
                                             </span>
-                                            <button className={styles.statusEditBtn} onClick={() => setEditingStatus(true)}>
-                                                Edit
-                                            </button>
+                                            <button className={styles.statusEditBtn} onClick={() => setEditingStatus(true)}>Edit</button>
                                         </div>
                                     )}
                                 </div>
@@ -303,7 +276,6 @@ export default function PatientManagementPage() {
                         </div>
                     )}
 
-                    {/* ── Medical Images ── */}
                     {activeTab === 'images' && (
                         <div className={styles.imagesSection}>
                             {images.length === 0 ? (
@@ -315,38 +287,26 @@ export default function PatientManagementPage() {
                                     </p>
                                 </div>
                             ) : (
-                                // Group images by scan type
                                 (() => {
                                     const types = ['Ultrasound','CT Scan','MRI','X-Ray'] as const;
-                                    const groups = types
-                                        .map(t => ({ type: t, imgs: images.filter(i => i.type === t) }))
-                                        .filter(g => g.imgs.length > 0);
+                                    const groups = types.map(t => ({ type: t, imgs: images.filter(i => i.type === t) })).filter(g => g.imgs.length > 0);
                                     return (
                                         <div className={styles.imagesByType}>
                                             {groups.map(group => {
                                                 const st = SCAN_TYPE_STYLES[group.type] ?? { color:'#64748B', bg:'#F8FAFC', border:'#E2E8F0' };
                                                 return (
                                                     <div key={group.type} className={styles.typeGroup}>
-                                                        {/* Type header */}
                                                         <div className={styles.typeGroupHead}>
-                                                            <span className={styles.typeGroupBadge} style={{ background:st.bg, color:st.color, borderColor:st.border }}>
-                                                                {group.type}
-                                                            </span>
+                                                            <span className={styles.typeGroupBadge} style={{ background:st.bg, color:st.color, borderColor:st.border }}>{group.type}</span>
                                                             <span className={styles.typeGroupCount}>{group.imgs.length} scan{group.imgs.length !== 1 ? 's' : ''}</span>
                                                             <div className={styles.typeGroupLine} style={{ background:`linear-gradient(to right,${st.border},transparent)` }} />
                                                         </div>
-                                                        {/* Images grid */}
                                                         <div className={styles.imagesGrid}>
                                                             {group.imgs.map(img => (
                                                                 <div key={img.id} className={styles.imgCard}>
-                                                                    {/* Real image or placeholder */}
                                                                     {img.enhancedSrc || img.originalSrc ? (
                                                                         <div className={styles.imgRealWrap}>
-                                                                            <img
-                                                                                src={img.enhancedSrc || img.originalSrc}
-                                                                                alt={img.label}
-                                                                                className={styles.imgReal}
-                                                                            />
+                                                                            <img src={img.enhancedSrc || img.originalSrc} alt={img.label} className={styles.imgReal} />
                                                                             {img.enhanced && <div className={styles.enhancedBadge}>✦ AI Enhanced</div>}
                                                                         </div>
                                                                     ) : (
@@ -363,6 +323,19 @@ export default function PatientManagementPage() {
                                                                             <span className={styles.imgDate}>{formatDate(img.date)}</span>
                                                                             <span className={styles.imgId}>{img.id}</span>
                                                                         </div>
+                                                                        {confirmDeleteId === img.id ? (
+                                                                            <div className={styles.deleteConfirm}>
+                                                                                <span className={styles.deleteConfirmText}>Delete this scan?</span>
+                                                                                <div className={styles.deleteConfirmBtns}>
+                                                                                    <button className={styles.deleteConfirmYes} onClick={() => handleDeleteImage(img.id)}>Yes, delete</button>
+                                                                                    <button className={styles.deleteConfirmNo} onClick={() => setConfirmDeleteId(null)}>Cancel</button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <button className={styles.deleteImgBtn} onClick={() => setConfirmDeleteId(img.id)}>
+                                                                                <Trash2 size={13} /> Delete
+                                                                            </button>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                             ))}
@@ -376,19 +349,17 @@ export default function PatientManagementPage() {
                             )}
                         </div>
                     )}
-
                 </div>
             </div>
         );
     }
 
-    /* ════════════════════════════════════════
+    /* ══════════════════════════════════════════
        LIST VIEW
-    ════════════════════════════════════════ */
+    ══════════════════════════════════════════ */
     return (
         <div className={styles.container}>
             <Navbar />
-
             {showModal && (
                 <div className={styles.overlay} onClick={() => { setShowModal(false); setFormError(''); }}>
                     <div className={styles.modal} onClick={e => e.stopPropagation()}>
@@ -409,11 +380,9 @@ export default function PatientManagementPage() {
                             ].map(item => (
                                 <div key={item.field} className={styles.formGroup}>
                                     <label className={styles.formLabel}>{item.label}</label>
-                                    <input
-                                        className={styles.formInput} type={item.type} placeholder={item.placeholder}
-                                        value={(form as any)[item.field]}
-                                        onChange={e => setForm(p => ({ ...p, [item.field]: e.target.value }))}
-                                    />
+                                    <input className={styles.formInput} type={item.type} placeholder={item.placeholder}
+                                           value={(form as any)[item.field]}
+                                           onChange={e => setForm(p => ({ ...p, [item.field]: e.target.value }))} />
                                 </div>
                             ))}
                             <div className={styles.formGroup}>
@@ -431,9 +400,7 @@ export default function PatientManagementPage() {
                         </div>
                         <div className={styles.modalFoot}>
                             <button className={styles.cancelBtn} onClick={() => { setShowModal(false); setFormError(''); }}>Cancel</button>
-                            <button className={styles.saveBtn} onClick={handleAddPatient}>
-                                <UserPlus size={15} /> Save Patient
-                            </button>
+                            <button className={styles.saveBtn} onClick={handleAddPatient}><UserPlus size={15} /> Save Patient</button>
                         </div>
                     </div>
                 </div>
@@ -442,25 +409,23 @@ export default function PatientManagementPage() {
             <div className={styles.pageContent}>
                 <div className={styles.featureHeader}>
                     <a href="/dashboard" className={styles.backBtn}><ArrowLeft size={13} /> Dashboard</a>
-                    <h1 className={styles.pageTitle}>Patient Management</h1>
+                    <div className={styles.eyebrow}><span className={styles.eyebrowDot} />Patient Records</div>
+                    <h1 className={styles.pageTitle}>Patient <em>Management</em></h1>
                 </div>
 
                 <div className={styles.searchCard}>
                     <div className={styles.searchWrapper}>
                         <Search size={16} className={styles.searchIcon} />
-                        <input
-                            type="text" placeholder="Search by name, MRN, or phone..."
-                            className={styles.searchInput} value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
-                        />
+                        <input type="text" placeholder="Search by name, MRN, or phone..."
+                               className={styles.searchInput} value={searchQuery}
+                               onChange={e => setSearchQuery(e.target.value)} />
                         {searchQuery && <button className={styles.clearBtn} onClick={() => setSearchQuery('')}>✕</button>}
                     </div>
                     <div className={styles.filterRow}>
                         {filters.map(f => (
                             <button key={f.id}
                                     className={`${styles.filterChip} ${activeFilter === f.id ? styles.filterChipActive : ''}`}
-                                    onClick={() => setActiveFilter(f.id)}
-                            >{f.label}</button>
+                                    onClick={() => setActiveFilter(f.id)}>{f.label}</button>
                         ))}
                     </div>
                 </div>

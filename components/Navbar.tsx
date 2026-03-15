@@ -44,11 +44,17 @@ export default function Navbar({ pendingCount = 0, variant }: NavbarProps) {
     const bellRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        try {
-            const stored = localStorage.getItem('user');
-            if (stored) setUser(JSON.parse(stored));
-        } catch {}
+        const loadUser = () => {
+            try {
+                const stored = localStorage.getItem('user');
+                if (stored) setUser(JSON.parse(stored));
+            } catch {}
+        };
+        loadUser();
         setRole(variant ?? (pathname?.startsWith('/admin') ? 'admin' : 'doctor'));
+        // ← استمع للتحديثات من صفحة الـ profile
+        window.addEventListener('user-updated', loadUser);
+        return () => window.removeEventListener('user-updated', loadUser);
     }, [variant, pathname]);
 
     useEffect(() => {

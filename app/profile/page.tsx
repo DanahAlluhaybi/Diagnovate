@@ -91,13 +91,12 @@ export default function ProfilePage() {
                 return;
             }
 
-            // بيانات مبسطة للاختبار - اسم وتخصص فقط
             const updateData = {
-                name: name || doctor?.name || "Doctor",
-                specialty: specialty || doctor?.specialty || "Specialist"
+                name:           name           || doctor?.name      || 'Doctor',
+                specialty:      specialty      || doctor?.specialty  || 'Specialist',
+                phone:          phone          || '',
+                license_number: licenseNumber  || '',
             };
-
-            console.log('📤 Sending to backend:', updateData);
 
             const res = await fetch('http://localhost:5002/api/profile', {
                 method: 'PUT',
@@ -109,18 +108,31 @@ export default function ProfilePage() {
             });
 
             const data = await res.json();
-            console.log('📥 Response from backend:', data);
 
             if (data.success) {
                 setDoctor(data.doctor);
+                setName(data.doctor.name || '');
+                setSpecialty(data.doctor.specialty || '');
+                setPhone(data.doctor.phone || '');
+                setLicenseNumber(data.doctor.license_number || '');
+
+                // ← حدّث localStorage عشان الـ Navbar يشوف الاسم الجديد فوراً
+                const current = JSON.parse(localStorage.getItem('user') || '{}');
+                localStorage.setItem('user', JSON.stringify({
+                    ...current,
+                    name:      data.doctor.name,
+                    specialty: data.doctor.specialty,
+                    email:     data.doctor.email,
+                }));
+                // ← أبلّغ الـ Navbar بالتحديث
+                window.dispatchEvent(new Event('user-updated'));
+
                 setSuccess('Profile updated successfully');
                 setTimeout(() => setSuccess(''), 3000);
             } else {
                 setError(data.error || 'Failed to update');
-                console.error('❌ Backend error:', data.error);
             }
         } catch (err) {
-            console.error('❌ Network error:', err);
             setError('Failed to connect to server');
         } finally {
             setSaving(false);
@@ -136,7 +148,7 @@ export default function ProfilePage() {
             return;
         }
         if (newPassword.length < 6) {
-            setPasswordError('Passٌword must be at least 6 characters');
+            setPasswordError('Password must be at least 6 characters');
             return;
         }
 
@@ -204,10 +216,8 @@ export default function ProfilePage() {
           top: -200px; right: -150px; pointer-events: none; z-index: 0;
         }
 
-        /* MAIN */
         .pf-main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 48px 48px 80px; }
 
-        /* Page header */
         .pf-page-head {
           margin-bottom: 40px;
           opacity: 0; transform: translateY(20px);
@@ -233,11 +243,9 @@ export default function ProfilePage() {
         .pf-h1 { font-family: var(--display); font-size: 36px; color: var(--text); letter-spacing: -0.3px; margin-bottom: 6px; }
         .pf-sub { font-size: 14px; color: var(--muted); }
 
-        /* Alerts */
         .pf-success { background: #F0FDFA; border: 1px solid #99F6E4; color: #0D9488; padding: 13px 16px; border-radius: 12px; font-size: 13.5px; font-weight: 600; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
         .pf-error   { background: #FFF1F2; border: 1px solid #FECDD3; color: #E11D48; padding: 13px 16px; border-radius: 12px; font-size: 13.5px; font-weight: 600; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
 
-        /* Grid */
         .pf-grid {
           display: grid; grid-template-columns: 300px 1fr; gap: 24px;
           opacity: 0; transform: translateY(20px);
@@ -245,7 +253,6 @@ export default function ProfilePage() {
         }
         .pf-grid.visible { opacity: 1; transform: translateY(0); }
 
-        /* Card */
         .pf-card {
           background: white; border: 1px solid var(--border); border-radius: 20px;
           overflow: hidden; box-shadow: 0 2px 16px rgba(15,23,42,0.05);
@@ -253,7 +260,6 @@ export default function ProfilePage() {
         }
         .pf-card:last-child { margin-bottom: 0; }
 
-        /* Avatar card */
         .pf-avatar-card {
           padding: 36px 24px; text-align: center;
           background: linear-gradient(160deg, #F0FDFA 0%, white 60%);
@@ -279,7 +285,6 @@ export default function ProfilePage() {
           padding: 5px 12px; border-radius: 100px;
         }
 
-        /* Settings card */
         .pf-settings-head {
           padding: 18px 20px 14px;
           border-bottom: 1px solid #F1F5F9;
@@ -307,7 +312,6 @@ export default function ProfilePage() {
         .pf-setting-desc  { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
         .pf-setting-arrow { color: #CBD5E1; }
 
-        /* Form card */
         .pf-form-head {
           padding: 20px 28px 16px; border-bottom: 1px solid #F1F5F9;
           display: flex; align-items: center; gap: 9px;
@@ -339,7 +343,6 @@ export default function ProfilePage() {
         .pf-save-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(13,148,136,0.4); }
         .pf-save-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
 
-        /* Modal */
         .pf-modal-overlay {
           position: fixed; inset: 0; background: rgba(15,23,42,0.4);
           backdrop-filter: blur(8px); z-index: 500;
@@ -375,7 +378,6 @@ export default function ProfilePage() {
         .pf-modal-fg { margin-bottom: 16px; }
         .pf-modal-fg:last-child { margin-bottom: 0; }
 
-        /* Theme buttons */
         .pf-theme-opts { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 10px; }
         .pf-theme-btn {
           display: flex; flex-direction: column; align-items: center; gap: 6px;
@@ -387,7 +389,6 @@ export default function ProfilePage() {
         .pf-theme-btn:hover { border-color: #CCFBF1; color: #0D9488; background: #F0FDFA; }
         .pf-theme-btn.active { border-color: #0D9488; color: #0D9488; background: #F0FDFA; }
 
-        /* Toggle */
         .pf-notif-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #F8FAFC; }
         .pf-notif-item:last-child { border-bottom: none; }
         .pf-notif-title { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
@@ -416,8 +417,6 @@ export default function ProfilePage() {
 
             <div className="pf-wrap">
                 <div className="pf-blob1" />
-
-                {/* NAVBAR */}
                 <Navbar />
 
                 {loading ? (
@@ -429,7 +428,6 @@ export default function ProfilePage() {
                 ) : (
                     <div className="pf-main">
 
-                        {/* PAGE HEADER */}
                         <div className={`pf-page-head${visible ? ' visible' : ''}`}>
                             <Link href="/dashboard" className="pf-back">
                                 <ArrowLeft size={13} /> Dashboard
@@ -442,12 +440,10 @@ export default function ProfilePage() {
                         {success && <div className="pf-success">✓ {success}</div>}
                         {error   && <div className="pf-error">⚠ {error}</div>}
 
-                        {/* GRID */}
                         <div className={`pf-grid${visible ? ' visible' : ''}`}>
 
                             {/* LEFT */}
                             <div>
-                                {/* Avatar */}
                                 <div className="pf-card">
                                     <div className="pf-avatar-card">
                                         <div className="pf-av">{doctor ? getInitials(doctor.name) : 'DR'}</div>
@@ -459,15 +455,14 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
 
-                                {/* Settings */}
                                 <div className="pf-card">
                                     <div className="pf-settings-head">
                                         <Settings size={13} /> Settings
                                     </div>
                                     {[
-                                        { icon: <Monitor size={15} />, title: 'System Preferences', desc: `Theme: ${theme}`,           onClick: () => setShowPrefsModal(true) },
-                                        { icon: <Bell size={15} />,    title: 'Notifications',       desc: `${activeNotifCount} active`, onClick: () => setShowNotifModal(true) },
-                                        { icon: <Lock size={15} />,    title: 'Security',             desc: 'Change your password',      onClick: () => setShowPasswordModal(true) },
+                                        { icon: <Monitor size={15} />, title: 'System Preferences', desc: `Theme: ${theme}`,            onClick: () => setShowPrefsModal(true)    },
+                                        { icon: <Bell size={15} />,    title: 'Notifications',       desc: `${activeNotifCount} active`, onClick: () => setShowNotifModal(true)    },
+                                        { icon: <Lock size={15} />,    title: 'Security',             desc: 'Change your password',       onClick: () => setShowPasswordModal(true) },
                                     ].map((item, i) => (
                                         <button key={i} className="pf-setting-item" onClick={item.onClick}>
                                             <div className="pf-setting-left">
@@ -491,55 +486,27 @@ export default function ProfilePage() {
                                         <div className="pf-form-grid">
                                             <div className="pf-form-group">
                                                 <label className="pf-label">Full Name</label>
-                                                <input
-                                                    className="pf-input"
-                                                    value={name}
-                                                    onChange={e => setName(e.target.value)}
-                                                    placeholder="Dr. John Doe"
-                                                />
+                                                <input className="pf-input" value={name} onChange={e => setName(e.target.value)} placeholder="Dr. John Doe" />
                                             </div>
                                             <div className="pf-form-group">
                                                 <label className="pf-label">Specialty</label>
-                                                <input
-                                                    className="pf-input"
-                                                    value={specialty}
-                                                    onChange={e => setSpecialty(e.target.value)}
-                                                    placeholder="Thyroid Specialist"
-                                                />
+                                                <input className="pf-input" value={specialty} onChange={e => setSpecialty(e.target.value)} placeholder="Thyroid Specialist" />
                                             </div>
                                             <div className="pf-form-group full">
                                                 <label className="pf-label">Email</label>
-                                                <input
-                                                    className="pf-input"
-                                                    value={doctor?.email || ''}
-                                                    disabled
-                                                />
+                                                <input className="pf-input" value={doctor?.email || ''} disabled />
                                                 <span className="pf-field-note">Contact support to change email</span>
                                             </div>
                                             <div className="pf-form-group">
                                                 <label className="pf-label">Phone Number</label>
-                                                <input
-                                                    className="pf-input"
-                                                    value={phone}
-                                                    onChange={e => setPhone(e.target.value)}
-                                                    placeholder="+966 5X XXX XXXX"
-                                                />
+                                                <input className="pf-input" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+966 5X XXX XXXX" />
                                             </div>
                                             <div className="pf-form-group">
                                                 <label className="pf-label">Medical License</label>
-                                                <input
-                                                    className="pf-input"
-                                                    value={licenseNumber}
-                                                    onChange={e => setLicenseNumber(e.target.value)}
-                                                    placeholder="e.g. SA-12345"
-                                                />
+                                                <input className="pf-input" value={licenseNumber} onChange={e => setLicenseNumber(e.target.value)} placeholder="e.g. SA-12345" />
                                             </div>
                                         </div>
-                                        <button
-                                            className="pf-save-btn"
-                                            onClick={handleSave}
-                                            disabled={saving}
-                                        >
+                                        <button className="pf-save-btn" onClick={handleSave} disabled={saving}>
                                             {saving ? 'Saving…' : 'Save Changes'}
                                         </button>
                                     </div>
@@ -564,25 +531,14 @@ export default function ProfilePage() {
                                 <label className="pf-label" style={{ marginBottom:8, display:'block' }}>Display Theme</label>
                                 <div className="pf-theme-opts">
                                     {(['Light','Dark','System'] as const).map(t => (
-                                        <button
-                                            key={t}
-                                            className={`pf-theme-btn${theme === t ? ' active' : ''}`}
-                                            onClick={() => setTheme(t)}
-                                        >
+                                        <button key={t} className={`pf-theme-btn${theme === t ? ' active' : ''}`} onClick={() => setTheme(t)}>
                                             {t === 'Light' ? <Sun size={18}/> : t === 'Dark' ? <Moon size={18}/> : <Monitor size={18}/>}
                                             {t}
                                         </button>
                                     ))}
                                 </div>
-                                <button
-                                    className="pf-save-btn"
-                                    style={{ marginTop:24, width:'100%', justifyContent:'center' }}
-                                    onClick={() => {
-                                        setShowPrefsModal(false);
-                                        setSuccess('Preferences saved');
-                                        setTimeout(() => setSuccess(''), 3000);
-                                    }}
-                                >
+                                <button className="pf-save-btn" style={{ marginTop:24, width:'100%', justifyContent:'center' }}
+                                        onClick={() => { setShowPrefsModal(false); setSuccess('Preferences saved'); setTimeout(() => setSuccess(''), 3000); }}>
                                     Save Preferences
                                 </button>
                             </div>
@@ -612,24 +568,13 @@ export default function ProfilePage() {
                                             <div className="pf-notif-desc">{n.desc}</div>
                                         </div>
                                         <label className="pf-toggle">
-                                            <input
-                                                type="checkbox"
-                                                checked={n.val}
-                                                onChange={e => n.set(e.target.checked)}
-                                            />
+                                            <input type="checkbox" checked={n.val} onChange={e => n.set(e.target.checked)} />
                                             <span className="pf-toggle-sl" />
                                         </label>
                                     </div>
                                 ))}
-                                <button
-                                    className="pf-save-btn"
-                                    style={{ marginTop:20, width:'100%', justifyContent:'center' }}
-                                    onClick={() => {
-                                        setShowNotifModal(false);
-                                        setSuccess('Notification settings saved');
-                                        setTimeout(() => setSuccess(''), 3000);
-                                    }}
-                                >
+                                <button className="pf-save-btn" style={{ marginTop:20, width:'100%', justifyContent:'center' }}
+                                        onClick={() => { setShowNotifModal(false); setSuccess('Notification settings saved'); setTimeout(() => setSuccess(''), 3000); }}>
                                     Save Settings
                                 </button>
                             </div>
@@ -648,7 +593,7 @@ export default function ProfilePage() {
                                 <button className="pf-modal-close" onClick={() => setShowPasswordModal(false)}><X size={14} /></button>
                             </div>
                             <div className="pf-modal-body">
-                                {passwordError   && <div className="pf-error" style={{ marginBottom:16 }}>⚠ {passwordError}</div>}
+                                {passwordError   && <div className="pf-error"   style={{ marginBottom:16 }}>⚠ {passwordError}</div>}
                                 {passwordSuccess && <div className="pf-success" style={{ marginBottom:16 }}>✓ {passwordSuccess}</div>}
                                 {[
                                     { label:'Current Password', val:currentPassword, set:setCurrentPassword, ph:'Enter current password' },
@@ -657,21 +602,11 @@ export default function ProfilePage() {
                                 ].map(f => (
                                     <div key={f.label} className="pf-modal-fg">
                                         <label className="pf-label" style={{ marginBottom:7, display:'block' }}>{f.label}</label>
-                                        <input
-                                            className="pf-input"
-                                            style={{ width:'100%' }}
-                                            type="password"
-                                            value={f.val}
-                                            onChange={e => f.set(e.target.value)}
-                                            placeholder={f.ph}
-                                        />
-                           f         </div>
+                                        <input className="pf-input" style={{ width:'100%' }} type="password"
+                                               value={f.val} onChange={e => f.set(e.target.value)} placeholder={f.ph} />
+                                    </div>
                                 ))}
-                                <button
-                                    className="pf-save-btn"
-                                    style={{ marginTop:20, width:'100%', justifyContent:'center' }}
-                                    onClick={handlePasswordChange}
-                                >
+                                <button className="pf-save-btn" style={{ marginTop:20, width:'100%', justifyContent:'center' }} onClick={handlePasswordChange}>
                                     Update Password
                                 </button>
                             </div>
