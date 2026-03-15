@@ -14,23 +14,16 @@ interface EnhanceResponse {
 }
 
 interface SavedImage {
-    id: string;
-    patientId: string;
-    type: ScanType;
-    date: string;
-    label: string;
-    originalSrc: string;
-    enhancedSrc: string;
-    isEnhanced: boolean;
+    id: string; patientId: string; type: ScanType;
+    date: string; label: string;
+    originalSrc: string; enhancedSrc: string; isEnhanced: boolean;
 }
 
-type ScanType = 'Ultrasound' | 'CT Scan' | 'MRI' | 'X-Ray';
+type ScanType = 'Ultrasound' | 'CT Scan';
 
 const SCAN_TYPES: { value: ScanType; color: string; bg: string; border: string }[] = [
     { value: 'Ultrasound', color: '#0D9488', bg: '#F0FDFA', border: '#99F6E4' },
     { value: 'CT Scan',    color: '#0891B2', bg: '#F0F9FF', border: '#BAE6FD' },
-    { value: 'MRI',        color: '#7C3AED', bg: '#F5F3FF', border: '#DDD6FE' },
-    { value: 'X-Ray',      color: '#F59E0B', bg: '#FFFBEB', border: '#FDE68A' },
 ];
 
 const PROCESS_STEPS = [
@@ -44,15 +37,14 @@ const PROCESS_STEPS = [
 const fmtSize = (b: number) =>
     b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
 
-// ── localStorage helpers ──────────────────────────────
 function loadPatientImages(): Record<string, SavedImage[]> {
     try { return JSON.parse(localStorage.getItem('patient_images') || '{}'); }
     catch { return {}; }
 }
 
-function saveImageToPatient(patientId: string, image: SavedImage) {
+function saveImageToPatient(mrn: string, image: SavedImage) {
     const all = loadPatientImages();
-    all[patientId] = [image, ...(all[patientId] || [])];
+    all[mrn] = [image, ...(all[mrn] || [])];
     localStorage.setItem('patient_images', JSON.stringify(all));
 }
 
@@ -68,38 +60,31 @@ export default function ImageEnhancementPage() {
     const [error,        setError]        = useState('');
     const [dragOver,     setDragOver]     = useState(false);
 
-    // Patient suggestions
-    const [allPatients,       setAllPatients]      = useState<{id:string; mrn:string; name:string}[]>([]);
-    const [showSuggest,       setShowSuggest]      = useState(false);
-    const [selectedPatientRef, setSelectedPatientRef] = useState<{id:string; mrn:string} | null>(null);
+    const [allPatients,        setAllPatients]        = useState<{id:string; mrn:string; name:string}[]>([]);
+    const [showSuggest,        setShowSuggest]        = useState(false);
+    // selectedPatientRef now stores both id and mrn
+    const [selectedPatientRef, setSelectedPatientRef] = useState<{id:string; mrn:string; name:string} | null>(null);
 
-    // New fields
-    const [patientId,    setPatientId]    = useState('');
-    const [scanType,     setScanType]     = useState<ScanType>('Ultrasound');
-    const [scanLabel,    setScanLabel]    = useState('');
-    const [savedOk,      setSavedOk]      = useState(false);
+    const [patientId, setPatientId] = useState('');
+    const [scanType,  setScanType]  = useState<ScanType>('Ultrasound');
+    const [scanLabel, setScanLabel] = useState('');
+    const [savedOk,   setSavedOk]   = useState(false);
 
     const timerIds = useRef<ReturnType<typeof setTimeout>[]>([]);
 
     useEffect(() => {
         if (!localStorage.getItem('token')) router.push('/log-in');
-        // Load patients list for suggestions
         try {
             const token = localStorage.getItem('token');
-            fetch('http://localhost:5000/api/patients', {
+            fetch('http://localhost:5002/api/patients', {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-            })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success && Array.isArray(data.data)) {
-                        setAllPatients(data.data.map((p: any) => ({
-                            id:   p.id,
-                            mrn:  p.mrn,
-                            name: `${p.firstName} ${p.lastName}`,
-                        })));
-                    }
-                })
-                .catch(() => {});
+            }).then(r => r.json()).then(data => {
+                if (data.success && Array.isArray(data.data)) {
+                    setAllPatients(data.data.map((p: any) => ({
+                        id: p.id, mrn: p.mrn, name: `${p.firstName} ${p.lastName}`,
+                    })));
+                }
+            }).catch(() => {});
         } catch {}
     }, []);
 
@@ -132,7 +117,7 @@ export default function ImageEnhancementPage() {
         const fd = new FormData();
         fd.append('image', selectedFile);
         try {
-            const res  = await fetch('http://localhost:5000/api/enhance', { method: 'POST', body: fd });
+            const res  = await fetch('http://localhost:5002/api/enhance', { method: 'POST', body: fd });
             const data: EnhanceResponse = await res.json();
             if (res.status === 503 && data.loading) { setError('Model is loading, please try again in 30 seconds.'); return; }
             if (!res.ok) { setError(data.error || `Error ${res.status}`); return; }
@@ -141,24 +126,20 @@ export default function ImageEnhancementPage() {
                 setTimeout(() => {
                     setOriginalSrc(data.original);
                     setEnhancedSrc(data.enhanced);
-                    // Auto-save to patient if ID provided
                     if (patientId.trim()) {
+                        // Always use MRN as the key — fall back to whatever was typed if no patient was selected from dropdown
+                        const mrn = selectedPatientRef?.mrn || patientId.trim();
                         const img: SavedImage = {
-                            id:          `IMG-${Date.now()}`,
-                            patientId:   patientId.trim(),
-                            type:        scanType,
-                            date:        new Date().toISOString(),
-                            label:       scanLabel.trim() || `${scanType} scan`,
+                            id: `IMG-${Date.now()}`,
+                            patientId: mrn,          // key is always MRN
+                            type: scanType,
+                            date: new Date().toISOString(),
+                            label: scanLabel.trim() || `${scanType} scan`,
                             originalSrc: data.original,
                             enhancedSrc: data.enhanced,
-                            isEnhanced:  true,
+                            isEnhanced: true,
                         };
-                        // Save under mrn (what user typed)
-                        saveImageToPatient(patientId.trim(), img);
-                        // Also save under numeric id if picked from dropdown
-                        if (selectedPatientRef && selectedPatientRef.id !== patientId.trim()) {
-                            saveImageToPatient(selectedPatientRef.id, img);
-                        }
+                        saveImageToPatient(mrn, img);
                         setSavedOk(true);
                     }
                 }, 400);
@@ -173,26 +154,15 @@ export default function ImageEnhancementPage() {
         <div className={s.wrap}>
             <Navbar />
             <main className={s.main}>
-
-                {/* ── Header ── */}
                 <div className={s.featureHeader}>
-                    <Link href="/dashboard" className={s.backBtn}>
-                        <ArrowLeft size={13} /> Dashboard
-                    </Link>
-                    <div className={s.eyebrow}>
-                        <span className={s.eyebrowDot} />
-                        AI-Powered
-                    </div>
+                    <Link href="/dashboard" className={s.backBtn}><ArrowLeft size={13} /> Dashboard</Link>
+                    <div className={s.eyebrow}><span className={s.eyebrowDot} />AI-Powered</div>
                     <h1 className={s.pageTitle}>Image <em>Enhancement</em></h1>
                 </div>
 
-                {/* ── Grid ── */}
                 <div className={s.contentGrid}>
-
-                    {/* LEFT */}
                     <div>
-
-                        {/* ── Patient & Scan Info card ── */}
+                        {/* Patient & Scan Info */}
                         <div className={s.card} style={{ marginBottom: 16 }}>
                             <div className={s.cardHead}>
                                 <div className={s.cardIcon} style={{ background: 'linear-gradient(135deg,#334155,#475569)' }}>
@@ -202,21 +172,21 @@ export default function ImageEnhancementPage() {
                                 <span className={s.optionalBadge}>Optional</span>
                             </div>
                             <div className={s.cardBody}>
-
-                                {/* Patient ID with suggestions */}
                                 <div className={s.fieldGroup} style={{ position:'relative' }}>
-                                    <label className={s.fieldLabel}>Patient ID</label>
+                                    <label className={s.fieldLabel}>Patient</label>
                                     <input
-                                        className={s.fieldInput}
-                                        type="text"
+                                        className={s.fieldInput} type="text"
                                         placeholder="Search by name or MRN..."
-                                        value={patientId}
-                                        autoComplete="off"
-                                        onChange={e => { setPatientId(e.target.value); setSelectedPatientRef(null); setSavedOk(false); setShowSuggest(true); }}
+                                        value={patientId} autoComplete="off"
+                                        onChange={e => {
+                                            setPatientId(e.target.value);
+                                            setSelectedPatientRef(null);   // clear selection on manual edit
+                                            setSavedOk(false);
+                                            setShowSuggest(true);
+                                        }}
                                         onFocus={() => setShowSuggest(true)}
                                         onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
                                     />
-                                    {/* Dropdown suggestions */}
                                     {showSuggest && patientId.trim() && (() => {
                                         const q = patientId.toLowerCase();
                                         const matches = allPatients.filter(p =>
@@ -225,11 +195,14 @@ export default function ImageEnhancementPage() {
                                         return matches.length > 0 ? (
                                             <div className={s.suggestDropdown}>
                                                 {matches.map(p => (
-                                                    <button
-                                                        key={p.id}
-                                                        className={s.suggestItem}
-                                                        onMouseDown={() => { setPatientId(p.mrn); setSelectedPatientRef({id:p.id, mrn:p.mrn}); setShowSuggest(false); setSavedOk(false); }}
-                                                    >
+                                                    <button key={p.id} className={s.suggestItem}
+                                                            onMouseDown={() => {
+                                                                // Show name in input, store full ref with mrn
+                                                                setPatientId(p.mrn);
+                                                                setSelectedPatientRef({ id: p.id, mrn: p.mrn, name: p.name });
+                                                                setShowSuggest(false);
+                                                                setSavedOk(false);
+                                                            }}>
                                                         <span className={s.suggestName}>{p.name}</span>
                                                         <span className={s.suggestMrn}>{p.mrn}</span>
                                                     </button>
@@ -237,28 +210,25 @@ export default function ImageEnhancementPage() {
                                             </div>
                                         ) : null;
                                     })()}
-                                    {patientId.trim() && (
+                                    {/* Show selected patient name as confirmation */}
+                                    {selectedPatientRef && (
                                         <p className={s.fieldHint}>
-                                            Image will be saved automatically to this patient's record after enhancement.
+                                            ✓ {selectedPatientRef.name} — Image will be saved automatically after enhancement.
                                         </p>
+                                    )}
+                                    {!selectedPatientRef && patientId.trim() && (
+                                        <p className={s.fieldHint}>Image will be saved automatically to this patient's record after enhancement.</p>
                                     )}
                                 </div>
 
-                                {/* Scan Type */}
                                 <div className={s.fieldGroup}>
                                     <label className={s.fieldLabel}>Scan Type</label>
                                     <div className={s.typeGrid}>
                                         {SCAN_TYPES.map(t => (
-                                            <button
-                                                key={t.value}
-                                                className={`${s.typeBtn} ${scanType === t.value ? s.typeBtnActive : ''}`}
-                                                style={scanType === t.value ? {
-                                                    background: t.bg,
-                                                    borderColor: t.border,
-                                                    color: t.color,
-                                                } : {}}
-                                                onClick={() => setScanType(t.value)}
-                                            >
+                                            <button key={t.value}
+                                                    className={`${s.typeBtn} ${scanType === t.value ? s.typeBtnActive : ''}`}
+                                                    style={scanType === t.value ? { background: t.bg, borderColor: t.border, color: t.color } : {}}
+                                                    onClick={() => setScanType(t.value)}>
                                                 {scanType === t.value && <Check size={12} />}
                                                 {t.value}
                                             </button>
@@ -266,40 +236,26 @@ export default function ImageEnhancementPage() {
                                     </div>
                                 </div>
 
-                                {/* Scan Label */}
                                 <div className={s.fieldGroup} style={{ marginBottom: 0 }}>
                                     <label className={s.fieldLabel}>Scan Label <span className={s.fieldOptional}>(optional)</span></label>
-                                    <input
-                                        className={s.fieldInput}
-                                        type="text"
-                                        placeholder={`e.g. Right lobe longitudinal`}
-                                        value={scanLabel}
-                                        onChange={e => setScanLabel(e.target.value)}
-                                    />
+                                    <input className={s.fieldInput} type="text"
+                                           placeholder="e.g. Right lobe longitudinal"
+                                           value={scanLabel} onChange={e => setScanLabel(e.target.value)} />
                                 </div>
-
                             </div>
                         </div>
 
-                        {/* ── Upload card ── */}
+                        {/* Upload card */}
                         <div className={s.card}>
                             <div className={s.cardHead}>
-                                <div className={s.cardIcon}>
-                                    <Camera size={18} color="white" />
-                                </div>
+                                <div className={s.cardIcon}><Camera size={18} color="white" /></div>
                                 <span className={s.cardTitle}>Upload Scan</span>
-                                {/* Show selected scan type pill */}
-                                <span className={s.scanTypePill} style={{ background: activeType.bg, color: activeType.color, borderColor: activeType.border }}>
-                                    {scanType}
-                                </span>
+                                <span className={s.scanTypePill} style={{ background: activeType.bg, color: activeType.color, borderColor: activeType.border }}>{scanType}</span>
                             </div>
                             <div className={s.cardBody}>
-                                <div
-                                    className={`${s.uploadZone} ${dragOver ? s.dragOver : ''}`}
-                                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                                    onDragLeave={() => setDragOver(false)}
-                                    onDrop={handleDrop}
-                                >
+                                <div className={`${s.uploadZone} ${dragOver ? s.dragOver : ''}`}
+                                     onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                                     onDragLeave={() => setDragOver(false)} onDrop={handleDrop}>
                                     <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
                                     {preview ? (
                                         <>
@@ -317,10 +273,7 @@ export default function ImageEnhancementPage() {
                                 </div>
 
                                 <button className={s.enhanceBtn} onClick={handleEnhance} disabled={!selectedFile || loading}>
-                                    {loading
-                                        ? <><span className={s.btnSpinner} />Enhancing...</>
-                                        : <><Zap size={15} />Enhance {scanType}</>
-                                    }
+                                    {loading ? <><span className={s.btnSpinner} />Enhancing...</> : <><Zap size={15} />Enhance {scanType}</>}
                                 </button>
 
                                 {(loading || progress > 0) && (
@@ -339,14 +292,17 @@ export default function ImageEnhancementPage() {
                                     </div>
                                 )}
 
-                                {/* Saved confirmation */}
                                 {savedOk && (
                                     <div className={s.savedBox}>
                                         <Check size={14} />
-                                        Saved to patient <strong>{patientId}</strong> — view in Patient Management
-                                        <Link href={`/patient-management?patientId=${patientId}&tab=images`} className={s.savedLink}>
+                                        Saved to patient <strong>{selectedPatientRef?.name || patientId}</strong>
+                                        {' '}({selectedPatientRef?.mrn || patientId})
+                                        <button className={s.savedLink}
+                                                onClick={() => router.push(
+                                                    `/patient-management?patientId=${encodeURIComponent(selectedPatientRef?.mrn || patientId.trim())}&tab=images`
+                                                )}>
                                             View →
-                                        </Link>
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -358,19 +314,13 @@ export default function ImageEnhancementPage() {
                                 <div className={s.secHead}>
                                     <span className={s.secLabel}>Results</span>
                                     <div className={s.secLine} />
-                                    <span className={s.secType} style={{ background: activeType.bg, color: activeType.color, borderColor: activeType.border }}>
-                                        {scanType}
-                                    </span>
+                                    <span className={s.secType} style={{ background: activeType.bg, color: activeType.color, borderColor: activeType.border }}>{scanType}</span>
                                 </div>
                                 <div className={s.resultsGrid}>
                                     <div className={s.imgCard}>
-                                        <div className={s.imgHeader}>
-                                            <div className={s.imgDot} /><span className={s.imgLabel}>Original</span>
-                                        </div>
+                                        <div className={s.imgHeader}><div className={s.imgDot} /><span className={s.imgLabel}>Original</span></div>
                                         <img src={originalSrc} alt="Original" className={s.imgResult} />
-                                        <a href={originalSrc} download="original.png" className={s.downloadBtn}>
-                                            <Download size={12} /> Download Original
-                                        </a>
+                                        <a href={originalSrc} download="original.png" className={s.downloadBtn}><Download size={12} /> Download Original</a>
                                     </div>
                                     <div className={`${s.imgCard} ${s.imgCardEnhanced}`}>
                                         <div className={s.imgHeader}>
@@ -379,16 +329,14 @@ export default function ImageEnhancementPage() {
                                             <span className={s.imgBadge}>AI</span>
                                         </div>
                                         <img src={enhancedSrc} alt="Enhanced" className={s.imgResult} />
-                                        <a href={enhancedSrc} download="enhanced.png" className={`${s.downloadBtn} ${s.downloadBtnTeal}`}>
-                                            <Download size={12} /> Download Enhanced
-                                        </a>
+                                        <a href={enhancedSrc} download="enhanced.png" className={`${s.downloadBtn} ${s.downloadBtnTeal}`}><Download size={12} /> Download Enhanced</a>
                                     </div>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* RIGHT — Sidebar */}
+                    {/* Sidebar */}
                     <div className={s.sidebar}>
                         <div className={s.infoCard}>
                             <div className={s.infoCardHead}>
@@ -401,7 +349,7 @@ export default function ImageEnhancementPage() {
                                 <div className={s.howList}>
                                     {[
                                         { n:'1', t:'Patient Info', d:'Enter the Patient ID and select the scan type' },
-                                        { n:'2', t:'Upload',       d:'Drop your scan — Ultrasound, CT, MRI, or X-Ray' },
+                                        { n:'2', t:'Upload',       d:'Drop your Ultrasound or CT scan' },
                                         { n:'3', t:'Enhance',      d:'AI improves quality using deep learning' },
                                         { n:'4', t:'Auto-save',    d:'Image saved to patient record automatically' },
                                     ].map(st => (
@@ -414,7 +362,6 @@ export default function ImageEnhancementPage() {
                             </div>
                         </div>
 
-                        {/* Scan types legend */}
                         <div className={s.infoCard}>
                             <div className={s.infoCardHead}>
                                 <div className={s.infoCardIcon} style={{ background:'rgba(8,145,178,.08)', border:'1px solid #BAE6FD' }}>
@@ -427,15 +374,11 @@ export default function ImageEnhancementPage() {
                                     {[
                                         { type:'Ultrasound', desc:'Thyroid nodule assessment & soft tissue imaging' },
                                         { type:'CT Scan',    desc:'Cross-sectional anatomy & lesion detection' },
-                                        { type:'MRI',        desc:'Soft tissue contrast & neurological imaging' },
-                                        { type:'X-Ray',      desc:'Bone structure & chest cavity screening' },
                                     ].map(item => {
                                         const t = SCAN_TYPES.find(t => t.value === item.type)!;
                                         return (
                                             <div key={item.type} className={s.scanTypeItem}>
-                                                <span className={s.scanTypeTag} style={{ background: t.bg, color: t.color, borderColor: t.border }}>
-                                                    {item.type}
-                                                </span>
+                                                <span className={s.scanTypeTag} style={{ background: t.bg, color: t.color, borderColor: t.border }}>{item.type}</span>
                                                 <span className={s.scanTypeDesc}>{item.desc}</span>
                                             </div>
                                         );

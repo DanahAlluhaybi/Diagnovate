@@ -98,7 +98,7 @@ export default function AIDiagnosisPage() {
         if (!localStorage.getItem('token')) router.push('/log-in');
         try {
             const token = localStorage.getItem('token');
-            fetch('http://localhost:5000/api/patients', {
+            fetch('http://localhost:5002/api/patients', {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             })
                 .then(r => r.json())
