@@ -55,7 +55,7 @@ export default function ProfilePage() {
     const fetchProfile = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/profile', {
+            const response = await fetch('http://localhost:5002/api/profile', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -99,7 +99,7 @@ export default function ProfilePage() {
 
             console.log('📤 Sending to backend:', updateData);
 
-            const res = await fetch('http://localhost:5000/api/profile', {
+            const res = await fetch('http://localhost:5002/api/profile', {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -136,13 +136,13 @@ export default function ProfilePage() {
             return;
         }
         if (newPassword.length < 6) {
-            setPasswordError('Password must be at least 6 characters');
+            setPasswordError('Passٌword must be at least 6 characters');
             return;
         }
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/profile', {
+            const res = await fetch('http://localhost:5002/api/profile', {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -665,7 +665,7 @@ export default function ProfilePage() {
                                             onChange={e => f.set(e.target.value)}
                                             placeholder={f.ph}
                                         />
-                                    </div>
+                           f         </div>
                                 ))}
                                 <button
                                     className="pf-save-btn"

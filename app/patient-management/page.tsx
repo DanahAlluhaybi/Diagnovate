@@ -95,7 +95,7 @@ export default function PatientManagementPage() {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const res   = await fetch('http://localhost:5000/api/patients', {
+            const res   = await fetch('http://localhost:5002/api/patients', {
                 headers: { Authorization:`Bearer ${token}`, 'Content-Type':'application/json' },
             });
             const result = await res.json();
@@ -113,7 +113,7 @@ export default function PatientManagementPage() {
     const addPatientToAPI = async (data: any) => {
         try {
             const token = localStorage.getItem('token');
-            const res   = await fetch('http://localhost:5000/api/patients', {
+            const res   = await fetch('http://localhost:5002/api/patients', {
                 method:'POST',
                 headers: { Authorization:`Bearer ${token}`, 'Content-Type':'application/json' },
                 body: JSON.stringify(data),
@@ -177,7 +177,7 @@ export default function PatientManagementPage() {
         setEditingStatus(false);
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:5000/api/patients/${patientId}`, {
+            await fetch(`http://localhost:5002/api/patients/${patientId}`, {
                 method: 'PATCH',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),

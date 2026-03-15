@@ -6,8 +6,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, ArrowRight, Loader2, Activity, Shield, Zap } from 'lucide-react';
 import { auth } from '@/lib/api';
 
-// No more <style> block — all classes live in auth-shared.css + globals.css
-
 function LoginForm() {
     const router       = useRouter();
     const searchParams = useSearchParams();
@@ -27,15 +25,20 @@ function LoginForm() {
             const raw  = await auth.login(email, password);
             const data = typeof raw === 'string' ? { token: raw, user: null } : raw;
             if (!data?.token) throw new Error('Login failed. Please check your credentials.');
+
+            // حفظ الـ token
             localStorage.setItem('token', data.token);
-            if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
+
+            // ── الإصلاح: الباك يرجع 'user' أو 'doctor' — نتعامل مع الاثنين ──
+            const userObj = data.user ?? (raw as any)?.doctor ?? null;
+            if (userObj) localStorage.setItem('user', JSON.stringify(userObj));
+
             router.push(isAdmin ? '/admin' : '/dashboard');
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Invalid credentials. Please try again.');
         } finally { setLoading(false); }
     };
 
-    // Role-specific colour tokens applied via inline CSS variables
     const roleVars = isAdmin
         ? { '--role-color': '#1E40AF', '--role-bg': '#EFF6FF', '--role-ring': '#BFDBFE' }
         : { '--role-color': 'var(--teal)', '--role-bg': 'var(--teal-light)', '--role-ring': 'var(--teal-ring)' };
@@ -50,7 +53,6 @@ function LoginForm() {
                 <span className="auth-left__blob auth-left__blob--2" />
                 <span className="auth-left__blob auth-left__blob--3" />
 
-                {/* Logo */}
                 <Link href="/" className="auth-logo">
                     <div className="auth-logo__mark">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -60,7 +62,6 @@ function LoginForm() {
                     <span className="auth-logo__word">Diagno<span>vate</span></span>
                 </Link>
 
-                {/* Body */}
                 <div className="auth-left__body">
                     <div className="auth-left__badge">
                         <span className="auth-left__badge-dot" />
@@ -91,7 +92,6 @@ function LoginForm() {
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="auth-left__foot">
                     {['HIPAA', 'ICCR', 'WHO', 'TI-RADS', 'GDPR'].map(t => (
                         <span key={t} className="auth-compliance">{t}</span>
@@ -102,15 +102,14 @@ function LoginForm() {
             {/* ══ RIGHT PANEL ══ */}
             <div className="auth-right">
                 <nav className="auth-right__nav">
-                    <Link href="/"       className="auth-right__nav-link">Home</Link>
-                    <Link href="/about"  className="auth-right__nav-link">About</Link>
-                    <Link href="/contact"className="auth-right__nav-link">Contact</Link>
+                    <Link href="/"        className="auth-right__nav-link">Home</Link>
+                    <Link href="/about"   className="auth-right__nav-link">About</Link>
+                    <Link href="/contact" className="auth-right__nav-link">Contact</Link>
                 </nav>
 
                 <div className="auth-form-area">
                     <div className="auth-form-inner">
 
-                        {/* Role badge */}
                         <div
                             className="auth-role-badge"
                             style={{ background: 'var(--role-bg)', border: '1px solid var(--role-ring)', color: 'var(--role-color)' }}
@@ -128,7 +127,6 @@ function LoginForm() {
                         <form onSubmit={handleSubmit}>
                             <div className="auth-fields">
 
-                                {/* Email */}
                                 <div className="auth-field">
                                     <label className="dv-label">Email Address</label>
                                     <div className="auth-iw">
@@ -144,7 +142,6 @@ function LoginForm() {
                                     </div>
                                 </div>
 
-                                {/* Password */}
                                 <div className="auth-field">
                                     <label className="dv-label">Password</label>
                                     <div className="auth-iw">
@@ -152,7 +149,7 @@ function LoginForm() {
                                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                                         </span>
                                         <input
-                                            className={`dv-input auth-iw__input--pw`}
+                                            className="dv-input auth-iw__input--pw"
                                             type={show ? 'text' : 'password'}
                                             placeholder="••••••••"
                                             value={password} onChange={e => setPassword(e.target.value)}
