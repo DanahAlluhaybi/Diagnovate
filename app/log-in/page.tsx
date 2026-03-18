@@ -22,16 +22,18 @@ function LoginForm() {
         e.preventDefault();
         setError(''); setLoading(true);
         try {
-            const raw  = await auth.login(email, password);
+            const raw = isAdmin ? await auth.adminLogin(email, password) : await auth.login(email, password);
             const data = typeof raw === 'string' ? { token: raw, user: null } : raw;
             if (!data?.token) throw new Error('Login failed. Please check your credentials.');
 
-            // حفظ الـ token
-            localStorage.setItem('token', data.token);
-
-            // ── الإصلاح: الباك يرجع 'user' أو 'doctor' — نتعامل مع الاثنين ──
-            const userObj = data.user ?? (raw as any)?.doctor ?? null;
-            if (userObj) localStorage.setItem('user', JSON.stringify(userObj));
+            if (isAdmin) {
+                localStorage.setItem('admin_token', data.token);
+                if (data.user) localStorage.setItem('admin_user', JSON.stringify(data.user));
+            } else {
+                localStorage.setItem('token', data.token);
+                const userObj = data.user ?? (raw as any)?.doctor ?? null;
+                if (userObj) localStorage.setItem('user', JSON.stringify(userObj));
+            }
 
             router.push(isAdmin ? '/admin' : '/dashboard');
         } catch (err: unknown) {
