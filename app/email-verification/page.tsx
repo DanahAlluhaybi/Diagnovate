@@ -4,8 +4,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Loader2, RotateCcw } from 'lucide-react';
-
-// No more <style> block — all classes live in auth-card.css + globals.css
+import { auth } from '@/lib/api';
 
 export default function EmailVerificationPage() {
     const router = useRouter();
@@ -15,23 +14,25 @@ export default function EmailVerificationPage() {
     const [error,   setError]   = useState('');
     const [resent,  setResent]  = useState(false);
 
-    const r0 = useRef<HTMLInputElement>(null);
-    const r1 = useRef<HTMLInputElement>(null);
-    const r2 = useRef<HTMLInputElement>(null);
-    const r3 = useRef<HTMLInputElement>(null);
-    const r4 = useRef<HTMLInputElement>(null);
-    const r5 = useRef<HTMLInputElement>(null);
+    const r0 = useRef(null);
+    const r1 = useRef(null);
+    const r2 = useRef(null);
+    const r3 = useRef(null);
+    const r4 = useRef(null);
+    const r5 = useRef(null);
     const refs = [r0, r1, r2, r3, r4, r5];
 
-    const handleChange = (i: number, val: string) => {
+    const handleChange = (i, val) => {
         if (!/^\d*$/.test(val)) return;
         const next = [...code]; next[i] = val.slice(-1); setCode(next);
         if (val && i < 5) refs[i + 1].current?.focus();
     };
-    const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
+
+    const handleKeyDown = (i, e) => {
         if (e.key === 'Backspace' && !code[i] && i > 0) refs[i - 1].current?.focus();
     };
-    const handlePaste = (e: React.ClipboardEvent) => {
+
+    const handlePaste = (e) => {
         e.preventDefault();
         const digits = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6).split('');
         const next = Array(6).fill('');
@@ -40,22 +41,44 @@ export default function EmailVerificationPage() {
         refs[Math.min(digits.length, 5)].current?.focus();
     };
 
+    // ✅ متصل بالباك إند الحقيقي
     const handleVerify = async () => {
-        setError(''); setLoading(true);
+        setError('');
+        setLoading(true);
         try {
-            await new Promise(r => setTimeout(r, 1200)); // replace with real API call
+            const identifier = localStorage.getItem('otp_identifier') || '';
+            const otp_code   = code.join('');
+
+            if (!identifier) {
+                setError('Session expired. Please sign up again.');
+                return;
+            }
+
+            await auth.verifyOtp(identifier, otp_code);
+
             setDone(true);
-        } catch (err: unknown) {
+            setTimeout(() => router.push('/pending-approval'), 1500);
+
+        } catch (err) {
             setError(err instanceof Error ? err.message : 'Invalid code. Please try again.');
-        } finally { setLoading(false); }
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleResend = () => {
+    // ✅ إعادة إرسال OTP حقيقي
+    const handleResend = async () => {
         setCode(['', '', '', '', '', '']);
         setError('');
-        setResent(true);
-        r0.current?.focus();
-        setTimeout(() => setResent(false), 4000);
+        try {
+            const identifier = localStorage.getItem('otp_identifier') || '';
+            await auth.resendOtp(identifier);
+            setResent(true);
+            r0.current?.focus();
+            setTimeout(() => setResent(false), 4000);
+        } catch (err) {
+            setError('Failed to resend code. Please try again.');
+        }
     };
 
     const filled = code.filter(Boolean).length;
@@ -63,11 +86,9 @@ export default function EmailVerificationPage() {
     return (
         <div className="acard-page">
 
-            {/* Ambient glows */}
             <span className="acard-page__glow acard-page__glow--teal" />
             <span className="acard-page__glow acard-page__glow--purple" />
 
-            {/* ── Navbar ── */}
             <nav className="acard-nav">
                 <Link href="/" className="acard-nav__logo">
                     <div className="acard-nav__mark">
@@ -79,18 +100,16 @@ export default function EmailVerificationPage() {
                     <span className="acard-nav__word">Diagno<span>vate</span></span>
                 </Link>
                 <div className="acard-nav__links">
-                    <Link href="/"       className="acard-nav__link">Home</Link>
-                    <Link href="/about"  className="acard-nav__link">About</Link>
-                    <Link href="/contact"className="acard-nav__link">Contact</Link>
-                    <Link href="/log-in" className="acard-nav__cta">Sign In <ArrowRight size={14} /></Link>
+                    <Link href="/"        className="acard-nav__link">Home</Link>
+                    <Link href="/about"   className="acard-nav__link">About</Link>
+                    <Link href="/contact" className="acard-nav__link">Contact</Link>
+                    <Link href="/log-in"  className="acard-nav__cta">Sign In <ArrowRight size={14} /></Link>
                 </div>
             </nav>
 
-            {/* ── Card ── */}
             <div className="acard-wrap">
                 <div className="acard">
 
-                    {/* Logo */}
                     <Link href="/" className="acard-logo">
                         <div className="acard-logo__mark">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -100,35 +119,36 @@ export default function EmailVerificationPage() {
                         <span className="acard-logo__word">Diagno<span>vate</span></span>
                     </Link>
 
-                    {/* ─── Verify state ─── */}
                     {!done ? (
                         <>
-                            {/* Icon */}
                             <div className="acard-icon acard-icon--teal">
                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="1.8" strokeLinecap="round">
-                                    <rect x="2" y="4" width="20" height="16" rx="3" />
-                                    <polyline points="2,4 12,13 22,4" />
+                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                                    <line x1="12" y1="18" x2="12.01" y2="18"/>
                                 </svg>
                             </div>
 
                             <div className="acard-status acard-status--teal">
                                 <span className="acard-status__dot" />
-                                Email Verification
+                                Phone Verification
                             </div>
 
-                            <h2 className="acard-h2">Check your inbox.</h2>
+                            <h2 className="acard-h2">Check your phone.</h2>
                             <p className="acard-p" style={{ marginBottom: 20 }}>
-                                We sent a 6-digit code to your email.<br />Enter it below to continue.
+                                We sent a 6-digit code to your phone number.<br />
+                                Enter it below to continue.
                             </p>
-                            {/* OTP boxes */}
+
                             <div className="verify-code-row" onPaste={handlePaste}>
                                 {code.map((d, i) => (
                                     <input
                                         key={i}
                                         ref={refs[i]}
                                         className={`verify-box${d ? ' verify-box--filled' : ''}`}
-                                        type="text" inputMode="numeric"
-                                        maxLength={1} value={d}
+                                        type="text"
+                                        inputMode="numeric"
+                                        maxLength={1}
+                                        value={d}
                                         onChange={e => handleChange(i, e.target.value)}
                                         onKeyDown={e => handleKeyDown(i, e)}
                                         autoFocus={i === 0}
@@ -137,20 +157,28 @@ export default function EmailVerificationPage() {
                             </div>
 
                             <p className="verify-hint">
-                                {filled === 6 ? '✓ Ready to verify' : `${6 - filled} digit${6 - filled !== 1 ? 's' : ''} remaining`}
+                                {filled === 6
+                                    ? '✓ Ready to verify'
+                                    : `${6 - filled} digit${6 - filled !== 1 ? 's' : ''} remaining`}
                             </p>
 
                             {error && (
                                 <div className="dv-alert dv-alert-error">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <line x1="12" y1="8" x2="12" y2="12" />
+                                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                                    </svg>
                                     {error}
                                 </div>
                             )}
 
                             {resent && (
                                 <div className="dv-alert dv-alert-success" style={{ marginBottom: 16 }}>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                                    New code sent to your email.
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                    New code sent to your phone.
                                 </div>
                             )}
 
@@ -178,28 +206,22 @@ export default function EmailVerificationPage() {
                             </button>
 
                             <Link href="/sign-up" className="verify-back">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6" /></svg>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                                    <polyline points="15 18 9 12 15 6" />
+                                </svg>
                                 Back to sign up
-                            </Link>
-
-                            <Link href="/phone-verification" className="verify-back" style={{ marginTop: 8 }}>
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                                Verify with phone instead
                             </Link>
                         </>
                     ) : (
-
-
-                        /* ─── Success state ─── */
                         <div className="verify-success">
                             <div className="verify-success__ring">
                                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <polyline className="verify-check" points="20 6 9 17 4 12" />
                                 </svg>
                             </div>
-                            <h2 className="acard-h2">Email verified!</h2>
+                            <h2 className="acard-h2">Phone verified!</h2>
                             <p className="acard-p">
-                                Your email has been confirmed.<br />
+                                Your phone number has been confirmed.<br />
                                 Your account is now pending admin approval.
                             </p>
                             <Link href="/pending-approval" className="acard-btn" style={{ marginTop: 8 }}>

@@ -6,8 +6,6 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, ArrowRight, ArrowLeft, Loader2, Check } from 'lucide-react';
 import { auth } from '@/lib/api';
 
-// No more <style> block — all classes live in auth-shared.css + globals.css
-
 const SPECIALTIES = ['Pathology', 'Radiology', 'Endocrinology', 'Surgery', 'Oncology', 'General Practice'];
 
 export default function SignUpPage() {
@@ -33,9 +31,10 @@ export default function SignUpPage() {
         if (!emailValid) {
             setError('Please enter a valid email address.'); return;
         }
-        const phoneValid = /^05\d{8}$/.test(form.phone);
+        // ✅ FIX: يقبل 05XXXXXXXX أو +966XXXXXXXXX
+        const phoneValid = /^\+9665\d{8}$/.test(form.phone);
         if (!phoneValid) {
-            setError('Phone number must start with 05 and be 10 digits.'); return;
+            setError('Enter phone as +966XXXXXXXXX'); return;
         }
         const idValid = /^\d{10}$/.test(form.idNumber);
         if (!idValid) {
@@ -54,16 +53,13 @@ export default function SignUpPage() {
         setLoading(true);
 
         try {
-            // ✅ دمج الاسم الأول والأخير في حقل name واحد
             const fullName = `${form.firstName} ${form.lastName}`.trim();
-
-            // ✅ إرسال البيانات بالشكل الذي ينتظره الباك اند
             await auth.signup({
-                name: fullName,
-                email: form.email,
-                password: form.password,
-                specialty: form.specialty,
-                phone: form.phone,
+                name:           fullName,
+                email:          form.email,
+                password:       form.password,
+                specialty:      form.specialty,
+                phone:          form.phone,
                 license_number: form.idNumber
             });
 
@@ -76,7 +72,6 @@ export default function SignUpPage() {
         }
     };
 
-    // Password strength
     const pw     = form.password;
     const pwStr  = !pw ? 0 : pw.length < 6 ? 1 : pw.length < 8 ? 2 : /[^a-zA-Z0-9]/.test(pw) ? 4 : 3;
     const pwMeta = [null,
@@ -86,7 +81,6 @@ export default function SignUpPage() {
         { c: '#0D9488', l: 'Strong' },
     ];
 
-    // Left panel content per step
     const leftContent = [
         {
             title: <>Join the future<br />of <em>thyroid</em><br />diagnostics.</>,
@@ -124,7 +118,6 @@ export default function SignUpPage() {
                 <span className="auth-left__blob auth-left__blob--2" />
                 <span className="auth-left__blob auth-left__blob--3" />
 
-                {/* Logo */}
                 <Link href="/" className="auth-logo">
                     <div className="auth-logo__mark">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -134,10 +127,7 @@ export default function SignUpPage() {
                     <span className="auth-logo__word">Diagno<span>vate</span></span>
                 </Link>
 
-                {/* Body */}
                 <div className="auth-left__body">
-
-                    {/* Step progress */}
                     <div className="auth-steps">
                         {['Personal Info', 'Account Setup'].map((s, i) => {
                             const state = stepStates(i);
@@ -173,7 +163,6 @@ export default function SignUpPage() {
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="auth-left__foot">
                     {['HIPAA', 'ICCR', 'WHO', 'TI-RADS', 'GDPR'].map(t => (
                         <span key={t} className="auth-compliance">{t}</span>
@@ -184,9 +173,9 @@ export default function SignUpPage() {
             {/* ══ RIGHT PANEL ══ */}
             <div className="auth-right">
                 <nav className="auth-right__nav">
-                    <Link href="/"       className="auth-right__nav-link">Home</Link>
-                    <Link href="/about"  className="auth-right__nav-link">About</Link>
-                    <Link href="/contact"className="auth-right__nav-link">Contact</Link>
+                    <Link href="/"        className="auth-right__nav-link">Home</Link>
+                    <Link href="/about"   className="auth-right__nav-link">About</Link>
+                    <Link href="/contact" className="auth-right__nav-link">Contact</Link>
                 </nav>
 
                 <div className="auth-form-area">
@@ -238,7 +227,8 @@ export default function SignUpPage() {
                                             <span className="auth-iw__icon">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7A2 2 0 0 1 22 16.9z" /></svg>
                                             </span>
-                                            <input className="dv-input" placeholder="+966 5x xxx xxxx" value={form.phone} onChange={set('phone')} />
+                                            {/* ✅ FIX: placeholder واضح يقبل الصيغتين */}
+                                            <input className="dv-input" placeholder="+9665XXXXXXXX" value={form.phone} onChange={set('phone')} />
                                         </div>
                                     </div>
                                     <div className="auth-field">
@@ -274,7 +264,6 @@ export default function SignUpPage() {
 
                             <form className="auth-fields" onSubmit={handleSubmit}>
 
-                                {/* Specialty */}
                                 <div className="auth-field">
                                     <label className="dv-label">Specialty</label>
                                     <div className="auth-iw">
@@ -288,7 +277,6 @@ export default function SignUpPage() {
                                     </div>
                                 </div>
 
-                                {/* Password */}
                                 <div className="auth-field">
                                     <label className="dv-label">Password</label>
                                     <div className="auth-iw">
@@ -324,7 +312,6 @@ export default function SignUpPage() {
                                     )}
                                 </div>
 
-                                {/* Confirm password */}
                                 <div className="auth-field">
                                     <label className="dv-label">Confirm Password</label>
                                     <div className="auth-iw">
