@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './styles.module.css';
 import { X, ArrowLeft, Search, UserPlus, Scan, Trash2 } from 'lucide-react';
@@ -54,7 +54,7 @@ const getAgeGroup = (age: number) => age <= 18 ? '0-18' : age <= 40 ? '19-40' : 
 const formatDate  = (d: string)   => new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
 const getInitials = (f: string, l: string) => `${f[0]??''}${l[0]??''}`.toUpperCase();
 
-export default function PatientManagementPage() {
+function PatientManagementPage() {
     const router       = useRouter();
     const searchParams = useSearchParams();
 
@@ -177,9 +177,6 @@ export default function PatientManagementPage() {
         setActiveTab('info'); setConfirmDeleteId(null);
     };
 
-    /* ══════════════════════════════════════════
-       DETAIL VIEW
-    ══════════════════════════════════════════ */
     if (currentView === 'detail' && selectedPatient) {
         const images = localImages;
         return (
@@ -255,9 +252,6 @@ export default function PatientManagementPage() {
                                             {(['Active','Inactive'] as Status[]).map(s => (
                                                 <button key={s}
                                                         className={`${styles.statusOption} ${selectedPatient.status === s ? styles.statusOptionActive : ''}`}
-                                                        style={selectedPatient.status === s ? (s === 'Active'
-                                                            ? { background:'#F0FDFA', color:'#0D9488', borderColor:'#99F6E4' }
-                                                            : { background:'#F8FAFC', color:'#64748B', borderColor:'#CBD5E1' }) : {}}
                                                         onClick={() => updatePatientStatus(selectedPatient.id, s)}
                                                 >{s}</button>
                                             ))}
@@ -282,9 +276,6 @@ export default function PatientManagementPage() {
                                 <div className={styles.emptyTab}>
                                     <Scan size={40} strokeWidth={1.2} color="#CBD5E1" />
                                     <p>No medical images yet</p>
-                                    <p style={{ fontSize:13, color:'#94A3B8', margin:0 }}>
-                                        Enhance an image in Image Enhancement and assign this patient's ID
-                                    </p>
                                 </div>
                             ) : (
                                 (() => {
@@ -299,7 +290,6 @@ export default function PatientManagementPage() {
                                                         <div className={styles.typeGroupHead}>
                                                             <span className={styles.typeGroupBadge} style={{ background:st.bg, color:st.color, borderColor:st.border }}>{group.type}</span>
                                                             <span className={styles.typeGroupCount}>{group.imgs.length} scan{group.imgs.length !== 1 ? 's' : ''}</span>
-                                                            <div className={styles.typeGroupLine} style={{ background:`linear-gradient(to right,${st.border},transparent)` }} />
                                                         </div>
                                                         <div className={styles.imagesGrid}>
                                                             {group.imgs.map(img => (
@@ -311,21 +301,16 @@ export default function PatientManagementPage() {
                                                                         </div>
                                                                     ) : (
                                                                         <div className={styles.imgCanvas}>
-                                                                            <div className={styles.imgNoise} />
                                                                             <Scan size={24} color="rgba(255,255,255,0.35)" />
-                                                                            {img.enhanced && <div className={styles.enhancedBadge}>✦ AI Enhanced</div>}
                                                                         </div>
                                                                     )}
                                                                     <div className={styles.imgMeta}>
-                                                                        <div className={styles.imgTypeTag} style={{ background:st.bg, color:st.color, borderColor:st.border }}>{img.type}</div>
                                                                         <div className={styles.imgDesc}>{img.label}</div>
                                                                         <div className={styles.imgFooter}>
                                                                             <span className={styles.imgDate}>{formatDate(img.date)}</span>
-                                                                            <span className={styles.imgId}>{img.id}</span>
                                                                         </div>
                                                                         {confirmDeleteId === img.id ? (
                                                                             <div className={styles.deleteConfirm}>
-                                                                                <span className={styles.deleteConfirmText}>Delete this scan?</span>
                                                                                 <div className={styles.deleteConfirmBtns}>
                                                                                     <button className={styles.deleteConfirmYes} onClick={() => handleDeleteImage(img.id)}>Yes, delete</button>
                                                                                     <button className={styles.deleteConfirmNo} onClick={() => setConfirmDeleteId(null)}>Cancel</button>
@@ -354,9 +339,6 @@ export default function PatientManagementPage() {
         );
     }
 
-    /* ══════════════════════════════════════════
-       LIST VIEW
-    ══════════════════════════════════════════ */
     return (
         <div className={styles.container}>
             <Navbar />
@@ -370,13 +352,13 @@ export default function PatientManagementPage() {
                         {formError && <div className={styles.formErr}>{formError}</div>}
                         <div className={styles.formGrid}>
                             {[
-                                { field:'firstName', label:'First Name *', placeholder:'First name',          type:'text'   },
-                                { field:'lastName',  label:'Last Name *',  placeholder:'Last name',           type:'text'   },
-                                { field:'mrn',       label:'MRN *',        placeholder:'e.g. MRN-10027',      type:'text'   },
-                                { field:'age',       label:'Age *',        placeholder:'Age',                 type:'number' },
-                                { field:'phone',     label:'Phone *',      placeholder:'+966 50 000 0000',    type:'text'   },
-                                { field:'email',     label:'Email',        placeholder:'patient@email.com',   type:'email'  },
-                                { field:'condition', label:'Condition',    placeholder:'e.g. Hypothyroidism', type:'text'   },
+                                { field:'firstName', label:'First Name *', placeholder:'First name',        type:'text'   },
+                                { field:'lastName',  label:'Last Name *',  placeholder:'Last name',         type:'text'   },
+                                { field:'mrn',       label:'MRN *',        placeholder:'e.g. MRN-10027',    type:'text'   },
+                                { field:'age',       label:'Age *',        placeholder:'Age',               type:'number' },
+                                { field:'phone',     label:'Phone *',      placeholder:'+966 50 000 0000',  type:'text'   },
+                                { field:'email',     label:'Email',        placeholder:'patient@email.com', type:'email'  },
+                                { field:'condition', label:'Condition',    placeholder:'e.g. Hypothyroidism',type:'text'  },
                             ].map(item => (
                                 <div key={item.field} className={styles.formGroup}>
                                     <label className={styles.formLabel}>{item.label}</label>
@@ -476,20 +458,22 @@ export default function PatientManagementPage() {
                         )) : (
                             <tr><td colSpan={7}>
                                 <div className={styles.empty}>
-                                    <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                                        <circle cx="24" cy="24" r="20" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="4 4"/>
-                                        <path d="M24 16V24M24 32H24.02" stroke="#CBD5E1" strokeWidth="2" strokeLinecap="round"/>
-                                    </svg>
                                     <p>{searchQuery ? `No results for "${searchQuery}"` : 'No patients yet'}</p>
-                                    <p className={styles.emptySubtitle}>Add a new patient to get started</p>
                                 </div>
                             </td></tr>
                         )}
                         </tbody>
                     </table>
-                    {filtered.length > 0 && <div className={styles.tableFooter}>Showing {filtered.length} of {patients.length} patients</div>}
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function Page() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <PatientManagementPage />
+        </Suspense>
     );
 }
