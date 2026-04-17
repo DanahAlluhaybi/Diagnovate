@@ -14,25 +14,25 @@ export default function EmailVerificationPage() {
     const [error,   setError]   = useState('');
     const [resent,  setResent]  = useState(false);
 
-    const r0 = useRef(null);
-    const r1 = useRef(null);
-    const r2 = useRef(null);
-    const r3 = useRef(null);
-    const r4 = useRef(null);
-    const r5 = useRef(null);
+    const r0 = useRef<HTMLInputElement>(null);
+    const r1 = useRef<HTMLInputElement>(null);
+    const r2 = useRef<HTMLInputElement>(null);
+    const r3 = useRef<HTMLInputElement>(null);
+    const r4 = useRef<HTMLInputElement>(null);
+    const r5 = useRef<HTMLInputElement>(null);
     const refs = [r0, r1, r2, r3, r4, r5];
 
-    const handleChange = (i, val) => {
+    const handleChange = (i: number, val: string) => {
         if (!/^\d*$/.test(val)) return;
         const next = [...code]; next[i] = val.slice(-1); setCode(next);
         if (val && i < 5) refs[i + 1].current?.focus();
     };
 
-    const handleKeyDown = (i, e) => {
+    const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
         if (e.key === 'Backspace' && !code[i] && i > 0) refs[i - 1].current?.focus();
     };
 
-    const handlePaste = (e) => {
+    const handlePaste = (e: React.ClipboardEvent) => {
         e.preventDefault();
         const digits = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6).split('');
         const next = Array(6).fill('');
@@ -41,7 +41,6 @@ export default function EmailVerificationPage() {
         refs[Math.min(digits.length, 5)].current?.focus();
     };
 
-    // ✅ متصل بالباك إند الحقيقي
     const handleVerify = async () => {
         setError('');
         setLoading(true);
@@ -66,7 +65,6 @@ export default function EmailVerificationPage() {
         }
     };
 
-    // ✅ إعادة إرسال OTP حقيقي
     const handleResend = async () => {
         setCode(['', '', '', '', '', '']);
         setError('');
