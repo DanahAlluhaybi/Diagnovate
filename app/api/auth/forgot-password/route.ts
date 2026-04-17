@@ -16,7 +16,7 @@ export async function POST(req: Request) {
         },
     });
 
-    const resetLink = `https://diagnovate-41rg.vercel.app/reset-password?email=${email}`;
+    const resetLink = `https://diagnovate.org/reset-password?email=${email}`;
 
     try {
         await transporter.sendMail({
