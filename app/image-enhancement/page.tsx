@@ -76,7 +76,7 @@ export default function ImageEnhancementPage() {
         if (!localStorage.getItem('token')) router.push('/log-in');
         try {
             const token = localStorage.getItem('token');
-            fetch('http://localhost:5002/api/patients', {
+            fetch('https://diagnovate-backend-production.up.railway.app/api/patients', {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             }).then(r => r.json()).then(data => {
                 if (data.success && Array.isArray(data.data)) {
@@ -117,7 +117,7 @@ export default function ImageEnhancementPage() {
         const fd = new FormData();
         fd.append('image', selectedFile);
         try {
-            const res  = await fetch('http://localhost:5002/api/enhance', { method: 'POST', body: fd });
+            const res  = await fetch('https://diagnovate-backend-production.up.railway.app/api/enhance', { method: 'POST', body: fd });
             const data: EnhanceResponse = await res.json();
             if (res.status === 503 && data.loading) { setError('Model is loading, please try again in 30 seconds.'); return; }
             if (!res.ok) { setError(data.error || `Error ${res.status}`); return; }

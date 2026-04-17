@@ -22,7 +22,7 @@ function ResetForm() {
         if (pw.length < 8)   { setError('Password must be at least 8 characters.'); return; }
         setError(''); setLoading(true);
         // TODO: replace with real API call
-        // await fetch('http://localhost:5002/api/auth/reset-password', { method:'POST', body: JSON.stringify({ token, password: pw }) })
+        // await fetch('https://diagnovate-backend-production.up.railway.app/api/auth/reset-password', { method:'POST', body: JSON.stringify({ token, password: pw }) })
         setTimeout(() => { setLoading(false); setDone(true); }, 1200);
     };
 

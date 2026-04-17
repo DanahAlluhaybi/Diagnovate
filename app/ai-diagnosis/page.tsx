@@ -88,7 +88,7 @@ export default function AIDiagnosisPage() {
         if (!localStorage.getItem('token')) router.push('/log-in');
         try {
             const token = localStorage.getItem('token');
-            fetch('http://localhost:5002/api/patients', {
+            fetch('https://diagnovate-backend-production.up.railway.app/api/patients', {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             })
                 .then(r => r.json())
@@ -178,7 +178,7 @@ export default function AIDiagnosisPage() {
                 psych:               'f',
             };
 
-            const res = await fetch('http://localhost:5002/api/diagnosis/predict', {
+            const res = await fetch('https://diagnovate-backend-production.up.railway.app/api/diagnosis/predict', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
