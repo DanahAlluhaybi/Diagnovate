@@ -9,8 +9,9 @@ import {
     UserCheck, UserX, LogOut, RefreshCw,
 } from 'lucide-react';
 import s from './styles.module.css';
+import { BASE } from '@/lib/api';
 
-const API_BASE_URL = 'https://diagnovate-backend-production-f341.up.railway.app/api';
+const API_BASE_URL = `${BASE}/api`;
 
 // ─── TYPES ──────────────
 interface AdminStats {

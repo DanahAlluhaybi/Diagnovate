@@ -7,6 +7,7 @@ import { Camera, Upload, Zap, ArrowLeft, Download, Info, CheckCircle2, User, Che
 import s from './styles.module.css';
 import ProgressBar from '@/components/progressBar';
 import Navbar from '@/components/Navbar';
+import { BASE } from '@/lib/api';
 
 interface EnhanceResponse {
     success: boolean; original: string; enhanced: string;
@@ -76,7 +77,7 @@ export default function ImageEnhancementPage() {
         if (!localStorage.getItem('token')) router.push('/log-in');
         try {
             const token = localStorage.getItem('token');
-            fetch('https://diagnovate-backend-production-f341.up.railway.app/api/patients', {
+            fetch(`${BASE}/api/patients`, {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             }).then(r => r.json()).then(data => {
                 if (data.success && Array.isArray(data.data)) {
@@ -117,7 +118,7 @@ export default function ImageEnhancementPage() {
         const fd = new FormData();
         fd.append('image', selectedFile);
         try {
-            const res  = await fetch('https://diagnovate-backend-production-f341.up.railway.app/api/enhance', { method: 'POST', body: fd });
+            const res  = await fetch(`${BASE}/api/enhance`, { method: 'POST', body: fd });
             const data: EnhanceResponse = await res.json();
             if (res.status === 503 && data.loading) { setError('Model is loading, please try again in 30 seconds.'); return; }
             if (!res.ok) { setError(data.error || `Error ${res.status}`); return; }

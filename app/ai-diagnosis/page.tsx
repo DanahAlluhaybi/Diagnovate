@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import s from './styles.module.css';
 import Navbar from '@/components/Navbar';
+import { BASE } from '@/lib/api';
 
 type InputMode  = 'image' | 'lab' | 'both';
 type AIModel    = 'Auto' | 'CNN' | 'RandomForest' | 'DecisionTree';
@@ -88,7 +89,7 @@ export default function AIDiagnosisPage() {
         if (!localStorage.getItem('token')) router.push('/log-in');
         try {
             const token = localStorage.getItem('token');
-            fetch('https://diagnovate-backend-production-f341.up.railway.app/api/patients', {
+            fetch(`${BASE}/api/patients`, {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             })
                 .then(r => r.json())
@@ -178,7 +179,7 @@ export default function AIDiagnosisPage() {
                 psych:               'f',
             };
 
-            const res = await fetch('https://diagnovate-backend-production-f341.up.railway.app/api/diagnosis/predict', {
+            const res = await fetch(`${BASE}/api/diagnosis/predict`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

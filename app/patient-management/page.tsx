@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './styles.module.css';
 import { X, ArrowLeft, Search, UserPlus, Scan, Trash2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import { BASE } from '@/lib/api';
 
 type Gender = 'Male' | 'Female';
 type Status = 'Active' | 'Inactive';
@@ -76,7 +77,7 @@ function PatientManagementPage() {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const res   = await fetch('https://diagnovate-backend-production-f341.up.railway.app/api/patients', {
+            const res   = await fetch(`${BASE}/api/patients`, {
                 headers: { Authorization:`Bearer ${token}`, 'Content-Type':'application/json' },
             });
             const result = await res.json();
@@ -88,7 +89,7 @@ function PatientManagementPage() {
     const addPatientToAPI = async (data: any) => {
         try {
             const token = localStorage.getItem('token');
-            const res   = await fetch('https://diagnovate-backend-production-f341.up.railway.app/api/patients', {
+            const res   = await fetch(`${BASE}/api/patients`, {
                 method:'POST',
                 headers: { Authorization:`Bearer ${token}`, 'Content-Type':'application/json' },
                 body: JSON.stringify(data),
@@ -154,7 +155,7 @@ function PatientManagementPage() {
         setEditingStatus(false);
         try {
             const token = localStorage.getItem('token');
-            await fetch(`https://diagnovate-backend-production-f341.up.railway.app/api/patients/${patientId}`, {
+            await fetch(`${BASE}/api/patients/${patientId}`, {
                 method: 'PATCH',
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),

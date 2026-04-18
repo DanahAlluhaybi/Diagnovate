@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { User, Settings, Bell, Lock, ChevronRight, X, Sun, Moon, Monitor, Shield, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import { BASE } from '@/lib/api';
 
 interface Doctor {
     id: number;
@@ -55,7 +56,7 @@ export default function ProfilePage() {
     const fetchProfile = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('https://diagnovate-backend-production-f341.up.railway.app/api/profile', {
+            const response = await fetch(`${BASE}/api/profile`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -98,7 +99,7 @@ export default function ProfilePage() {
                 license_number: licenseNumber  || '',
             };
 
-            const res = await fetch('https://diagnovate-backend-production-f341.up.railway.app/api/profile', {
+            const res = await fetch(`${BASE}/api/profile`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -154,7 +155,7 @@ export default function ProfilePage() {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('https://diagnovate-backend-production-f341.up.railway.app/api/profile', {
+            const res = await fetch(`${BASE}/api/profile`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
