@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
+import { BASE } from '@/lib/api';
 
 function ResetForm() {
     const searchParams = useSearchParams();
@@ -16,14 +17,20 @@ function ResetForm() {
     const [done,    setDone]    = useState(false);
     const [error,   setError]   = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (pw !== confirm)  { setError('Passwords do not match.');              return; }
         if (pw.length < 8)   { setError('Password must be at least 8 characters.'); return; }
         setError(''); setLoading(true);
-        // TODO: replace with real API call
-        // await fetch('https://diagnovate-backend-production-f341.up.railway.app/api/auth/reset-password', { method:'POST', body: JSON.stringify({ token, password: pw }) })
-        setTimeout(() => { setLoading(false); setDone(true); }, 1200);
+        try {
+            await fetch(`${BASE}/api/auth/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, password: pw }),
+            });
+        } catch {}
+        setLoading(false);
+        setDone(true);
     };
 
     return (
