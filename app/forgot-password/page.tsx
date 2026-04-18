@@ -12,7 +12,7 @@ export default function ForgotPasswordPage() {
     const handleSend = () => {
         setLoading(true);
         // TODO: replace with real API call
-        // await fetch('https://diagnovate-backend-production.up.railway.app/api/auth/forgot-password', { method:'POST', body: JSON.stringify({ email }) })
+        // await fetch('https://diagnovate-backend-production-f341.up.railway.app/api/auth/forgot-password', { method:'POST', body: JSON.stringify({ email }) })
         setTimeout(() => { setLoading(false); setSent(true); }, 1200);
     };
 

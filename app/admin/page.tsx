@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import s from './styles.module.css';
 
-const API_BASE_URL = 'https://diagnovate-backend-production.up.railway.app/api';
+const API_BASE_URL = 'https://diagnovate-backend-production-f341.up.railway.app/api';
 
 // ─── TYPES ──────────────
 interface AdminStats {
