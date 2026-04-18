@@ -29,7 +29,7 @@ function LoginForm() {
         setError('');
         setLoading(true);
         try {
-            const result = await auth.login(email, password);
+            const result = isAdmin ? await auth.adminLogin(email, password) : await auth.login(email, password);
 
             // Backend responded with OTP required
             if ((result as any)?.otpRequired) {
