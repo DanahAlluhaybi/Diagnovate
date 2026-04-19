@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, Settings, Bell, Lock, ChevronRight, X, Sun, Moon, Shield, ArrowLeft } from 'lucide-react';
+import { User, Settings, Bell, Lock, ChevronRight, X, Sun, Moon, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { BASE } from '@/lib/api';
@@ -537,7 +537,7 @@ export default function ProfilePage() {
                         <div className="pf-modal" onClick={e => e.stopPropagation()}>
                             <div className="pf-modal-head">
                                 <div className="pf-modal-title-row">
-                                    <div className="pf-modal-title-ic"><Monitor size={15} /></div>
+                                    <div className="pf-modal-title-ic"><Sun size={15} /></div>
                                     <span className="pf-modal-title">System Preferences</span>
                                 </div>
                                 <button className="pf-modal-close" onClick={() => setShowPrefsModal(false)}><X size={14} /></button>
