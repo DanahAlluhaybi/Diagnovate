@@ -3,62 +3,6 @@
    Diagnovate · Unified Feature Theme
 ═══════════════════════════════════════════════════════ */
 
-:global([data-theme='dark']) {
-  --bg: #0F172A; --surface: #1E293B; --surface2: #263548;
-  --text: #F1F5F9; --text2: #CBD5E1; --muted: #94A3B8; --border: #334155;
-  --teal-light: #134E4A; --teal-ring: #0F766E; --teal-muted: #0F766E;
-}
-:global([data-theme='dark']) body::before { background-image: radial-gradient(circle, #1E293B 1px, transparent 1px) !important; opacity: 0.3 !important; }
-:global([data-theme='dark']) input,
-:global([data-theme='dark']) textarea,
-:global([data-theme='dark']) select { background: #263548 !important; color: #F1F5F9 !important; border-color: #334155 !important; }
-:global([data-theme='dark']) table thead tr { background: #1E293B !important; }
-:global([data-theme='dark']) th { color: #64748B !important; }
-:global([data-theme='dark']) td { color: #CBD5E1 !important; border-color: #263548 !important; }
-
-:global([data-theme='dark']) nav,
-:global([data-theme='dark']) .navbar {
-  background: #0F172A !important;
-  border-color: #334155 !important;
-}
-
-:global([data-theme='dark']) .card,
-:global([data-theme='dark']) [class*="card"],
-:global([data-theme='dark']) [class*="section"],
-:global([data-theme='dark']) [class*="panel"] {
-  background: #1E293B !important;
-  border-color: #334155 !important;
-  background-image: none !important;
-}
-
-:global([data-theme='dark']) [class*="header"],
-:global([data-theme='dark']) [class*="Header"] {
-  background: #1E293B !important;
-  background-image: none !important;
-  border-color: #334155 !important;
-}
-
-:global([data-theme='dark']) .loading-screen,
-:global([data-theme='dark']) .loadingContainer,
-:global([data-theme='dark']) [class*="loading"] { background: #0F172A !important; color: #F1F5F9 !important; }
-:global([data-theme='dark']) .loading-card,
-:global([data-theme='dark']) .loadingCard,
-:global([data-theme='dark']) [class*="loadingCard"] { background: #1E293B !important; border-color: #334155 !important; }
-:global([data-theme='dark']) .loading-title,
-:global([data-theme='dark']) .loading-sub,
-:global([data-theme='dark']) [class*="loadingTitle"],
-:global([data-theme='dark']) [class*="loadingSub"] { color: #F1F5F9 !important; }
-
-:global([data-theme='dark']) .page-hero,
-:global([data-theme='dark']) .hero,
-:global([data-theme='dark']) [class*="hero"],
-:global([data-theme='dark']) [class*="pageHero"],
-:global([data-theme='dark']) [class*="page-hero"] {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
 .wrap { min-height:100vh; background:var(--bg); font-family:var(--font-body); }
 
 .main {

@@ -50,11 +50,6 @@ export default function ProfilePage() {
         }
         fetchProfile();
         setTimeout(() => setVisible(true), 50);
-        const savedTheme = localStorage.getItem('theme') as 'Light' | 'Dark' | null;
-        if (savedTheme) {
-            setTheme(savedTheme);
-            document.documentElement.setAttribute('data-theme', savedTheme.toLowerCase());
-        }
     }, []);
 
     const fetchProfile = async () => {
@@ -206,33 +201,6 @@ export default function ProfilePage() {
           --body: 'Plus Jakarta Sans', sans-serif;
           --display: 'DM Serif Display', serif;
         }
-
-        [data-theme='dark'] {
-          --bg: #0F172A;
-          --surface: #1E293B;
-          --surface2: #263548;
-          --text: #F1F5F9;
-          --text2: #CBD5E1;
-          --muted: #94A3B8;
-          --border: #334155;
-          --teal-light: #134E4A;
-          --teal-ring: #0F766E;
-          --teal-muted: #0F766E;
-        }
-        [data-theme='dark'] body::before {
-          background-image: radial-gradient(circle, #1E293B 1px, transparent 1px) !important;
-          opacity: 0.3 !important;
-        }
-        [data-theme='dark'] input,
-        [data-theme='dark'] textarea,
-        [data-theme='dark'] select {
-          background: #263548 !important;
-          color: #F1F5F9 !important;
-          border-color: #334155 !important;
-        }
-        [data-theme='dark'] table thead tr { background: #1E293B !important; }
-        [data-theme='dark'] th { color: #64748B !important; }
-        [data-theme='dark'] td { color: #CBD5E1 !important; border-color: #263548 !important; }
 
         body { background: var(--bg); font-family: var(--body); -webkit-font-smoothing: antialiased; }
 

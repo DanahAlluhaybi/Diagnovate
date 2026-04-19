@@ -64,10 +64,6 @@ const fmtSize = (b: number) =>
 const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export default function AIDiagnosisPage() {
-    if (typeof window !== 'undefined') {
-        const t = localStorage.getItem('theme');
-        if (t) document.documentElement.setAttribute('data-theme', t.toLowerCase());
-    }
     const router = useRouter();
 
     const [inputMode,     setInputMode]     = useState<InputMode>('both');
@@ -90,10 +86,6 @@ export default function AIDiagnosisPage() {
     const timerIds = useRef<ReturnType<typeof setTimeout>[]>([]);
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            document.documentElement.setAttribute('data-theme', savedTheme.toLowerCase());
-        }
         if (!localStorage.getItem('token')) router.push('/log-in');
         try {
             const token = localStorage.getItem('token');
