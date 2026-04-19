@@ -136,6 +136,18 @@ export default function AdminProfilePage() {
 
             <div className="wrap">
                 <div className="blob"/>
+                <nav style={{position:'sticky',top:0,zIndex:200,height:66,background:'rgba(255,255,255,0.97)',backdropFilter:'blur(24px)',borderBottom:'1px solid #EBF0F5',display:'flex',alignItems:'center',padding:'0 32px',boxShadow:'0 4px 20px rgba(15,23,42,.04)'}}>
+                    <Link href="/admin" style={{display:'flex',alignItems:'center',gap:10,textDecoration:'none',fontWeight:800,fontSize:17,color:'#0F172A',marginRight:40}}>
+                        <div style={{width:34,height:34,background:'linear-gradient(140deg,#0D9488,#0891B2)',borderRadius:9,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                            <Shield size={16} color="white"/>
+                        </div>
+                        DIAGNO<span style={{color:'#0D9488'}}>VATE</span>
+                    </Link>
+                    <div style={{marginLeft:'auto',display:'flex',alignItems:'center',gap:8}}>
+                        <span style={{fontSize:13,fontWeight:600,color:'#0F172A'}}>{admin?.name ?? 'Admin'}</span>
+                        <span style={{fontSize:11,color:'#94A3B8'}}>System Administrator</span>
+                    </div>
+                </nav>
                 <main className="main">
                     <div className={`page-head${visible?' visible':''}`}>
                         <Link href="/admin" className="back"><ArrowLeft size={13}/> Admin Panel</Link>
