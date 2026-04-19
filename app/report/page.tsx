@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './styles.module.css';
 import Navbar from '@/components/Navbar';
@@ -33,6 +33,11 @@ const TABS = [
 export default function ThyroidCancerReport() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('tumor');
+
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme.toLowerCase());
+    }, []);
 
     return (
         <div className={styles.wrap}>
