@@ -16,6 +16,28 @@
 :global([data-theme='dark']) th { color: #64748B !important; }
 :global([data-theme='dark']) td { color: #CBD5E1 !important; border-color: #263548 !important; }
 
+:global([data-theme='dark']) nav,
+:global([data-theme='dark']) .navbar {
+  background: #0F172A !important;
+  border-color: #334155 !important;
+}
+
+:global([data-theme='dark']) .card,
+:global([data-theme='dark']) [class*="card"],
+:global([data-theme='dark']) [class*="section"],
+:global([data-theme='dark']) [class*="panel"] {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+  background-image: none !important;
+}
+
+:global([data-theme='dark']) [class*="header"],
+:global([data-theme='dark']) [class*="Header"] {
+  background: #1E293B !important;
+  background-image: none !important;
+  border-color: #334155 !important;
+}
+
 .wrap { min-height:100vh; background:var(--bg); font-family:var(--font-body); }
 
 .main {
