@@ -16,6 +16,17 @@
 :global([data-theme='dark']) th { color: #64748B !important; }
 :global([data-theme='dark']) td { color: #CBD5E1 !important; border-color: #263548 !important; }
 
+:global([data-theme='dark']) .loading-screen,
+:global([data-theme='dark']) .loadingContainer,
+:global([data-theme='dark']) [class*="loading"] { background: #0F172A !important; color: #F1F5F9 !important; }
+:global([data-theme='dark']) .loading-card,
+:global([data-theme='dark']) .loadingCard,
+:global([data-theme='dark']) [class*="loadingCard"] { background: #1E293B !important; border-color: #334155 !important; }
+:global([data-theme='dark']) .loading-title,
+:global([data-theme='dark']) .loading-sub,
+:global([data-theme='dark']) [class*="loadingTitle"],
+:global([data-theme='dark']) [class*="loadingSub"] { color: #F1F5F9 !important; }
+
 :global([data-theme='dark']) .page-hero,
 :global([data-theme='dark']) .hero,
 :global([data-theme='dark']) [class*="hero"],

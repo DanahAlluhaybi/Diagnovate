@@ -56,6 +56,10 @@ const formatDate  = (d: string)   => new Date(d).toLocaleDateString('en-GB', { d
 const getInitials = (f: string, l: string) => `${f[0]??''}${l[0]??''}`.toUpperCase();
 
 function PatientManagementPage() {
+    if (typeof window !== 'undefined') {
+        const t = localStorage.getItem('theme');
+        if (t) document.documentElement.setAttribute('data-theme', t.toLowerCase());
+    }
     const router       = useRouter();
     const searchParams = useSearchParams();
 

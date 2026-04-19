@@ -50,6 +50,10 @@ function saveImageToPatient(mrn: string, image: SavedImage) {
 }
 
 export default function ImageEnhancementPage() {
+    if (typeof window !== 'undefined') {
+        const t = localStorage.getItem('theme');
+        if (t) document.documentElement.setAttribute('data-theme', t.toLowerCase());
+    }
     const router = useRouter();
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);

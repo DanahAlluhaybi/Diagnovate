@@ -64,6 +64,10 @@ const fmtSize = (b: number) =>
 const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export default function AIDiagnosisPage() {
+    if (typeof window !== 'undefined') {
+        const t = localStorage.getItem('theme');
+        if (t) document.documentElement.setAttribute('data-theme', t.toLowerCase());
+    }
     const router = useRouter();
 
     const [inputMode,     setInputMode]     = useState<InputMode>('both');

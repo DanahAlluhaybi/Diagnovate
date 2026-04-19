@@ -31,6 +31,10 @@ const TABS = [
 ];
 
 export default function ThyroidCancerReport() {
+    if (typeof window !== 'undefined') {
+        const t = localStorage.getItem('theme');
+        if (t) document.documentElement.setAttribute('data-theme', t.toLowerCase());
+    }
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('tumor');
 
