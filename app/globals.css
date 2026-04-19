@@ -1256,3 +1256,35 @@ a           { color: inherit; }
 [data-theme='dark'] .pf-avatar-card {
     background: linear-gradient(160deg, #134E4A 0%, #1E293B 60%) !important;
 }
+
+/* ─── Dark Mode Polish ────────────────────────────────────────── */
+[data-theme='dark'] body::before {
+    background-image: radial-gradient(circle, #1E293B 1px, transparent 1px) !important;
+    opacity: 0.6 !important;
+}
+
+[data-theme='dark'] .navLogoMark,
+[data-theme='dark'] nav .logo,
+[data-theme='dark'] .nav {
+    background: #1E293B !important;
+    border-color: #334155 !important;
+}
+
+[data-theme='dark'] table thead tr,
+[data-theme='dark'] th {
+    background: #263548 !important;
+    color: #94A3B8 !important;
+}
+
+[data-theme='dark'] td {
+    color: #CBD5E1 !important;
+    border-color: #334155 !important;
+}
+
+[data-theme='dark'] input,
+[data-theme='dark'] textarea,
+[data-theme='dark'] select {
+    background: #263548 !important;
+    color: #F1F5F9 !important;
+    border-color: #334155 !important;
+}
