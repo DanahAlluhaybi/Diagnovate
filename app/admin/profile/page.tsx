@@ -62,6 +62,7 @@ export default function AdminProfilePage() {
                 body{background:var(--bg);font-family:var(--body);-webkit-font-smoothing:antialiased}
                 .wrap{min-height:100vh;background:var(--bg);position:relative}
                 .wrap::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#CBD5E1 1px,transparent 1px);background-size:28px 28px;opacity:.4;pointer-events:none;z-index:0}
+                .blob{position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(13,148,136,.08) 0%,transparent 65%);top:-200px;right:-150px;pointer-events:none;z-index:0}
                 .main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:48px 48px 80px}
                 .page-head{margin-bottom:40px;opacity:0;transform:translateY(20px);transition:all .6s cubic-bezier(.16,1,.3,1)}
                 .page-head.visible{opacity:1;transform:translateY(0)}
@@ -70,7 +71,7 @@ export default function AdminProfilePage() {
                 .badge{display:inline-flex;align-items:center;gap:7px;background:#F0FDFA;border:1px solid #99F6E4;color:#0D9488;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:100px;margin-bottom:14px}
                 .dot{width:5px;height:5px;border-radius:50%;background:#0D9488;animation:pulse 2s ease-in-out infinite}
                 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-                .h1{font-family:var(--display);font-size:36px;color:var(--text);letter-spacing:-.3px;margin-bottom:6px}
+                .h1{font-family:'DM Serif Display',serif;font-size:36px;color:var(--text);letter-spacing:-.5px;margin-bottom:6px}
                 .sub{font-size:14px;color:var(--muted)}
                 .grid{display:grid;grid-template-columns:300px 1fr;gap:24px;opacity:0;transform:translateY(20px);transition:all .6s .1s cubic-bezier(.16,1,.3,1)}
                 .grid.visible{opacity:1;transform:translateY(0)}
@@ -134,6 +135,7 @@ export default function AdminProfilePage() {
             `}</style>
 
             <div className="wrap">
+                <div className="blob"/>
                 <main className="main">
                     <div className={`page-head${visible?' visible':''}`}>
                         <Link href="/admin" className="back"><ArrowLeft size={13}/> Admin Panel</Link>
