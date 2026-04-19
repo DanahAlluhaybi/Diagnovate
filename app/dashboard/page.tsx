@@ -28,6 +28,10 @@ export default function DoctorDashboard() {
     const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
     useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme.toLowerCase());
+        }
         const fetchData = async () => {
             try {
                 const userData = localStorage.getItem('user');

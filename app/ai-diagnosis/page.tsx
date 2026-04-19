@@ -86,6 +86,10 @@ export default function AIDiagnosisPage() {
     const timerIds = useRef<ReturnType<typeof setTimeout>[]>([]);
 
     useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme.toLowerCase());
+        }
         if (!localStorage.getItem('token')) router.push('/log-in');
         try {
             const token = localStorage.getItem('token');

@@ -88,7 +88,13 @@ export default function AdminPage() {
     const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
     const profileRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => { fetchAll(); }, []);
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme.toLowerCase());
+        }
+        fetchAll();
+    }, []);
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
