@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
 import {
     Users, CheckCircle, XCircle, Clock, Shield,
     Search, ChevronDown, Building2, AlertCircle,
@@ -261,7 +260,85 @@ export default function AdminPage() {
 
     return (
         <div className={s.wrap}>
-            <Navbar />
+            {/* NAVBAR */}
+            <nav className={s.nav}>
+                <Link href="/admin" className={s.navLogo}>
+                    <div className={s.navLogoMark}>
+                        <Shield size={16} color="white" />
+                    </div>
+                    <span>DIAGNO<span className={s.navLogoAccent}>VATE</span></span>
+                </Link>
+
+                <div className={s.navLinks}>
+                    <Link href="/admin" className={`${s.navLink} ${s.navLinkActive}`}>Admin Panel</Link>
+                </div>
+
+                <div className={s.navRight}>
+                    <button className={s.navIconBtn} onClick={fetchAll} title="Refresh">
+                        <RefreshCw size={15} />
+                    </button>
+                    <div style={{ position: 'relative' }} ref={notifRef}>
+                        <button className={s.navIconBtn} onClick={() => setNotifOpen(p => !p)} title="Notifications">
+                            <Bell size={15} />
+                        </button>
+                        {notifOpen && (
+                            <div style={{
+                                position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                                background: 'white', border: '1px solid #EBF0F5',
+                                borderRadius: 18, boxShadow: '0 16px 48px rgba(15,23,42,0.12)',
+                                zIndex: 300, width: 280, overflow: 'hidden',
+                                animation: 'dropIn 0.18s cubic-bezier(0.16,1,0.3,1) both'
+                            }}>
+                                <div style={{ padding: '14px 18px', borderBottom: '1px solid #F1F5F9', fontSize: 11, fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#0D9488', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <Bell size={13} /> Notifications
+                                </div>
+                                <div style={{ padding: '48px 24px', textAlign: 'center' }}>
+                                    <Bell size={28} color="#CBD5E1" style={{ margin: '0 auto 12px' }} />
+                                    <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', margin: '0 0 4px' }}>All clear</p>
+                                    <p style={{ fontSize: 12, color: '#94A3B8', margin: 0 }}>No new notifications</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className={s.navDivider} />
+                    <div className={s.navDropWrap} ref={profileRef}>
+                        <div className={s.navProfile} onClick={() => setProfileOpen(p => !p)}>
+                            <div className={s.navAvatar}>
+                                <Shield size={13} />
+                            </div>
+                            <div>
+                                <div className={s.navPname}>{admin?.name ?? 'Admin'}</div>
+                                <div className={s.navProle}>System Administrator</div>
+                            </div>
+                            <ChevronDown size={12} color="#94A3B8" />
+                        </div>
+                        {profileOpen && (
+                            <div className={`${s.navDropdown} ${s.navProfDrop}`}>
+                                <div className={s.navProfHead}>
+                                    <div className={s.navProfAv}><Shield size={18} /></div>
+                                    <div>
+                                        <div className={s.navProfName}>{admin?.name ?? 'Admin'}</div>
+                                        <div className={s.navProfSpec}>{admin?.email ?? ''}</div>
+                                    </div>
+                                </div>
+                                <div style={{ padding: '6px 0' }}>
+                                    <Link href="/admin/profile" className={s.navMenuItem}>
+                                        <User size={14} /> My Profile
+                                    </Link>
+                                    <div className={s.navSep} />
+                                    <Link href="/admin/profile" className={s.navMenuItem}>
+                                        <User size={14}/> My Profile
+                                    </Link>
+                                    <div className={s.navSep}/>
+                                    <button className={`${s.navMenuItem} ${s.navMenuItemDanger}`} onClick={handleLogout}>
+                                        <LogOut size={14} /> Sign out
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </nav>
 
             {/* MAIN */}
             <main className={s.main}>
