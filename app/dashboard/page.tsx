@@ -111,16 +111,41 @@ export default function DoctorDashboard() {
                     --bg:#F0F4F8;--surface:#fff;--surface2:#F8FAFC;
                     --text:#0F172A;--text2:#334155;--muted:#64748B;--subtle:#94A3B8;--border:#E2E8F0;
                 }
-                [data-theme='dark']{
-                  --bg:#0F172A;--surface:#1E293B;--surface2:#263548;
-                  --text:#F1F5F9;--text2:#CBD5E1;--muted:#94A3B8;--border:#334155;
-                  --teal-light:#134E4A;--teal-ring:#0F766E;--teal-muted:#0F766E;
+                [data-theme='dark'] {
+                  --bg: #0F172A;
+                  --surface: #1E293B;
+                  --surface2: #263548;
+                  --text: #F1F5F9;
+                  --text2: #CBD5E1;
+                  --muted: #94A3B8;
+                  --border: #334155;
+                  --teal-light: #134E4A;
+                  --teal-ring: #0F766E;
+                  --teal-muted: #0F766E;
                 }
-                [data-theme='dark'] body::before{background-image:radial-gradient(circle,#1E293B 1px,transparent 1px)!important;opacity:.3!important}
-                [data-theme='dark'] input,[data-theme='dark'] textarea,[data-theme='dark'] select{background:#263548!important;color:#F1F5F9!important;border-color:#334155!important}
-                [data-theme='dark'] table thead tr{background:#1E293B!important}
-                [data-theme='dark'] th{color:#64748B!important}
-                [data-theme='dark'] td{color:#CBD5E1!important;border-color:#263548!important}
+                [data-theme='dark'] body { background: #0F172A !important; }
+                [data-theme='dark'] body::before { background-image: radial-gradient(circle, #1E293B 1px, transparent 1px) !important; opacity: 0.3 !important; }
+                [data-theme='dark'] .hero { background: #1E293B !important; border-color: #334155 !important; }
+                [data-theme='dark'] .hero::before { background: none !important; }
+                [data-theme='dark'] .hero-h1 { color: #F1F5F9 !important; }
+                [data-theme='dark'] .hero-sub { color: #94A3B8 !important; }
+                [data-theme='dark'] .greeting { color: #14B8A6 !important; }
+                [data-theme='dark'] .stat-pill { background: #263548 !important; border-color: #334155 !important; }
+                [data-theme='dark'] .stat-val { color: #F1F5F9 !important; }
+                [data-theme='dark'] .stat-lbl { color: #94A3B8 !important; }
+                [data-theme='dark'] .module-card { background: #1E293B !important; border-color: #334155 !important; }
+                [data-theme='dark'] .mc-label { color: #F1F5F9 !important; }
+                [data-theme='dark'] .mc-desc { color: #94A3B8 !important; }
+                [data-theme='dark'] .activity-wrap { background: #1E293B !important; border-color: #334155 !important; }
+                [data-theme='dark'] table thead tr { background: #263548 !important; }
+                [data-theme='dark'] th { color: #64748B !important; }
+                [data-theme='dark'] td { color: #CBD5E1 !important; border-color: #263548 !important; }
+                [data-theme='dark'] tr:hover { background: #1E293B !important; }
+                [data-theme='dark'] .sec-label { color: #14B8A6 !important; }
+                [data-theme='dark'] .p-name { color: #F1F5F9 !important; }
+                [data-theme='dark'] nav { background: rgba(15,23,42,0.97) !important; border-color: #334155 !important; }
+                [data-theme='dark'] .navLogo { color: #F1F5F9 !important; }
+                [data-theme='dark'] .empty-state p { color: #94A3B8 !important; }
                 body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased}
                 body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#CBD5E1 1px,transparent 1px);background-size:28px 28px;opacity:.45;pointer-events:none;z-index:0}
                 .page{position:relative;z-index:1;padding:36px 48px 80px;max-width:1360px;margin:0 auto}
