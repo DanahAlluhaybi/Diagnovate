@@ -320,9 +320,9 @@ export default function AdminPage() {
                                     </div>
                                 </div>
                                 <div style={{ padding: '6px 0' }}>
-                                    <button className={s.navMenuItem}>
+                                    <Link href="/admin/profile" className={s.navMenuItem}>
                                         <User size={14} /> My Profile
-                                    </button>
+                                    </Link>
                                     <div className={s.navSep} />
                                     <button className={`${s.navMenuItem} ${s.navMenuItemDanger}`} onClick={handleLogout}>
                                         <LogOut size={14} /> Sign out
