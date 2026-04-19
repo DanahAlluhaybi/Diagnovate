@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, Settings, Bell, Lock, ChevronRight, X, Sun, Moon, Monitor, Shield, ArrowLeft } from 'lucide-react';
+import { User, Settings, Bell, Lock, ChevronRight, X, Sun, Moon, Shield, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { BASE } from '@/lib/api';
@@ -38,8 +38,7 @@ export default function ProfilePage() {
     const [passwordError,   setPasswordError]   = useState('');
     const [passwordSuccess, setPasswordSuccess] = useState('');
 
-    const [theme, setTheme] = useState<'Light' | 'Dark' | 'System'>('Light');
-    const [appointmentReminders, setAppointmentReminders] = useState(true);
+    const [theme, setTheme] = useState<'Light' | 'Dark'>('Light');
     const [systemUpdates,        setSystemUpdates]        = useState(true);
     const [emailNotifications,   setEmailNotifications]   = useState(false);
 
@@ -51,6 +50,11 @@ export default function ProfilePage() {
         }
         fetchProfile();
         setTimeout(() => setVisible(true), 50);
+        const savedTheme = localStorage.getItem('theme') as 'Light' | 'Dark' | null;
+        if (savedTheme) {
+            setTheme(savedTheme);
+            document.documentElement.setAttribute('data-theme', savedTheme.toLowerCase());
+        }
     }, []);
 
     const fetchProfile = async () => {
@@ -186,7 +190,7 @@ export default function ProfilePage() {
     };
 
     const getInitials = (n: string) => n.split(' ').map(x => x[0]).join('').toUpperCase().slice(0, 2);
-    const activeNotifCount = [appointmentReminders, systemUpdates, emailNotifications].filter(Boolean).length;
+    const activeNotifCount = [systemUpdates, emailNotifications].filter(Boolean).length;
 
     return (
         <>
@@ -201,6 +205,16 @@ export default function ProfilePage() {
           --border: #E2E8F0;
           --body: 'Plus Jakarta Sans', sans-serif;
           --display: 'DM Serif Display', serif;
+        }
+
+        [data-theme='dark'] {
+          --bg: #0F172A;
+          --surface: #1E293B;
+          --surface2: #1E293B;
+          --text: #F8FAFC;
+          --text2: #CBD5E1;
+          --muted: #94A3B8;
+          --border: #334155;
         }
 
         body { background: var(--bg); font-family: var(--body); -webkit-font-smoothing: antialiased; }
@@ -461,7 +475,7 @@ export default function ProfilePage() {
                                         <Settings size={13} /> Settings
                                     </div>
                                     {[
-                                        { icon: <Monitor size={15} />, title: 'System Preferences', desc: `Theme: ${theme}`,            onClick: () => setShowPrefsModal(true)    },
+                                        { icon: <Sun size={15} />, title: 'Display Theme', desc: `Theme: ${theme}`, onClick: () => setShowPrefsModal(true) },
                                         { icon: <Bell size={15} />,    title: 'Notifications',       desc: `${activeNotifCount} active`, onClick: () => setShowNotifModal(true)    },
                                         { icon: <Lock size={15} />,    title: 'Security',             desc: 'Change your password',       onClick: () => setShowPasswordModal(true) },
                                     ].map((item, i) => (
@@ -531,15 +545,21 @@ export default function ProfilePage() {
                             <div className="pf-modal-body">
                                 <label className="pf-label" style={{ marginBottom:8, display:'block' }}>Display Theme</label>
                                 <div className="pf-theme-opts">
-                                    {(['Light','Dark','System'] as const).map(t => (
+                                    {(['Light','Dark'] as const).map(t => (
                                         <button key={t} className={`pf-theme-btn${theme === t ? ' active' : ''}`} onClick={() => setTheme(t)}>
-                                            {t === 'Light' ? <Sun size={18}/> : t === 'Dark' ? <Moon size={18}/> : <Monitor size={18}/>}
+                                            {t === 'Light' ? <Sun size={18}/> : <Moon size={18}/>}
                                             {t}
                                         </button>
                                     ))}
                                 </div>
                                 <button className="pf-save-btn" style={{ marginTop:24, width:'100%', justifyContent:'center' }}
-                                        onClick={() => { setShowPrefsModal(false); setSuccess('Preferences saved'); setTimeout(() => setSuccess(''), 3000); }}>
+                                        onClick={() => {
+                                            document.documentElement.setAttribute('data-theme', theme.toLowerCase());
+                                            localStorage.setItem('theme', theme);
+                                            setShowPrefsModal(false);
+                                            setSuccess('Preferences saved');
+                                            setTimeout(() => setSuccess(''), 3000);
+                                        }}>
                                     Save Preferences
                                 </button>
                             </div>
@@ -559,7 +579,6 @@ export default function ProfilePage() {
                             </div>
                             <div className="pf-modal-body">
                                 {[
-                                    { label:'Appointment Reminders', desc:'Get reminded before upcoming appointments', val:appointmentReminders, set:setAppointmentReminders },
                                     { label:'System Updates',        desc:'Receive notifications about system updates', val:systemUpdates,        set:setSystemUpdates        },
                                     { label:'Email Notifications',   desc:'Receive email summaries and alerts',        val:emailNotifications,   set:setEmailNotifications   },
                                 ].map(n => (
