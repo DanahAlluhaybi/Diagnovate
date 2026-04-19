@@ -16,6 +16,16 @@
 :global([data-theme='dark']) th { color: #64748B !important; }
 :global([data-theme='dark']) td { color: #CBD5E1 !important; border-color: #263548 !important; }
 
+:global([data-theme='dark']) .page-hero,
+:global([data-theme='dark']) .hero,
+:global([data-theme='dark']) [class*="hero"],
+:global([data-theme='dark']) [class*="pageHero"],
+:global([data-theme='dark']) [class*="page-hero"] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 .container {
     min-height: 100vh;
     background: var(--bg);
