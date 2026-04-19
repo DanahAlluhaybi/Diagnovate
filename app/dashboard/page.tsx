@@ -111,6 +111,16 @@ export default function DoctorDashboard() {
                     --bg:#F0F4F8;--surface:#fff;--surface2:#F8FAFC;
                     --text:#0F172A;--text2:#334155;--muted:#64748B;--subtle:#94A3B8;--border:#E2E8F0;
                 }
+                [data-theme='dark']{
+                  --bg:#0F172A;--surface:#1E293B;--surface2:#263548;
+                  --text:#F1F5F9;--text2:#CBD5E1;--muted:#94A3B8;--border:#334155;
+                  --teal-light:#134E4A;--teal-ring:#0F766E;--teal-muted:#0F766E;
+                }
+                [data-theme='dark'] body::before{background-image:radial-gradient(circle,#1E293B 1px,transparent 1px)!important;opacity:.3!important}
+                [data-theme='dark'] input,[data-theme='dark'] textarea,[data-theme='dark'] select{background:#263548!important;color:#F1F5F9!important;border-color:#334155!important}
+                [data-theme='dark'] table thead tr{background:#1E293B!important}
+                [data-theme='dark'] th{color:#64748B!important}
+                [data-theme='dark'] td{color:#CBD5E1!important;border-color:#263548!important}
                 body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased}
                 body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#CBD5E1 1px,transparent 1px);background-size:28px 28px;opacity:.45;pointer-events:none;z-index:0}
                 .page{position:relative;z-index:1;padding:36px 48px 80px;max-width:1360px;margin:0 auto}
