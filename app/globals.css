@@ -1208,3 +1208,51 @@ a           { color: inherit; }
   .verify-code-row  { gap: 7px; }
   .acard-path__line { max-width: 28px; }
 }
+/* ─── Dark Mode ───────────────────────────────────────────────── */
+[data-theme='dark'] {
+    --bg: #0F172A !important;
+    --surface: #1E293B !important;
+    --surface2: #263548 !important;
+    --text: #F1F5F9 !important;
+    --text2: #CBD5E1 !important;
+    --muted: #94A3B8 !important;
+    --border: #334155 !important;
+    --teal: #14B8A6 !important;
+    --teal-light: #134E4A !important;
+    --teal-ring: #0F766E !important;
+    --teal-muted: #0F766E !important;
+}
+
+[data-theme='dark'] body {
+    background: #0F172A !important;
+    color: #F1F5F9 !important;
+}
+
+[data-theme='dark'] .pf-wrap,
+[data-theme='dark'] .page,
+[data-theme='dark'] main {
+    background: #0F172A !important;
+}
+
+[data-theme='dark'] .pf-card,
+[data-theme='dark'] .card,
+[data-theme='dark'] nav,
+[data-theme='dark'] .hero,
+[data-theme='dark'] .module-card,
+[data-theme='dark'] .activity-wrap,
+[data-theme='dark'] .tableWrap {
+    background: #1E293B !important;
+    border-color: #334155 !important;
+    color: #F1F5F9 !important;
+}
+
+[data-theme='dark'] input,
+[data-theme='dark'] .pf-input {
+    background: #263548 !important;
+    border-color: #334155 !important;
+    color: #F1F5F9 !important;
+}
+
+[data-theme='dark'] .pf-avatar-card {
+    background: linear-gradient(160deg, #134E4A 0%, #1E293B 60%) !important;
+}
