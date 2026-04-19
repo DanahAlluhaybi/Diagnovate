@@ -79,6 +79,8 @@ export default function AdminPage() {
     const [tab, setTab] = useState<TabType>('pending');
     const [search, setSearch] = useState('');
     const [profileOpen, setProfileOpen] = useState(false);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const notifRef = useRef<HTMLDivElement>(null);
     const [actionModal, setActionModal] = useState<{ user: PendingUser; type: 'approve' | 'reject' } | null>(null);
     const [rejectReason, setRejectReason] = useState(REJECTION_REASONS[0]);
     const [customReason, setCustomReason] = useState('');
@@ -92,6 +94,15 @@ export default function AdminPage() {
         const handler = (e: MouseEvent) => {
             if (profileRef.current && !profileRef.current.contains(e.target as Node))
                 setProfileOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (notifRef.current && !notifRef.current.contains(e.target as Node))
+                setNotifOpen(false);
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
@@ -264,9 +275,29 @@ export default function AdminPage() {
                     <button className={s.navIconBtn} onClick={fetchAll} title="Refresh">
                         <RefreshCw size={15} />
                     </button>
-                    <button className={s.navIconBtn} title="Notifications">
-                        <Bell size={15} />
-                    </button>
+                    <div style={{ position: 'relative' }} ref={notifRef}>
+                        <button className={s.navIconBtn} onClick={() => setNotifOpen(p => !p)} title="Notifications">
+                            <Bell size={15} />
+                        </button>
+                        {notifOpen && (
+                            <div style={{
+                                position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                                background: 'white', border: '1px solid #EBF0F5',
+                                borderRadius: 18, boxShadow: '0 16px 48px rgba(15,23,42,0.12)',
+                                zIndex: 300, width: 280, overflow: 'hidden',
+                                animation: 'dropIn 0.18s cubic-bezier(0.16,1,0.3,1) both'
+                            }}>
+                                <div style={{ padding: '14px 18px', borderBottom: '1px solid #F1F5F9', fontSize: 11, fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#0D9488', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <Bell size={13} /> Notifications
+                                </div>
+                                <div style={{ padding: '48px 24px', textAlign: 'center' }}>
+                                    <Bell size={28} color="#CBD5E1" style={{ margin: '0 auto 12px' }} />
+                                    <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', margin: '0 0 4px' }}>All clear</p>
+                                    <p style={{ fontSize: 12, color: '#94A3B8', margin: 0 }}>No new notifications</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                     <div className={s.navDivider} />
                     <div className={s.navDropWrap} ref={profileRef}>
                         <div className={s.navProfile} onClick={() => setProfileOpen(p => !p)}>
@@ -394,7 +425,7 @@ export default function AdminPage() {
                                 <tr>
                                     <th>Clinician</th>
                                     <th>Institution</th>
-                                    <th>License</th>
+                                    <th>ID Number</th>
                                     <th>Verification</th>
                                     <th>Registered</th>
                                     <th>Actions</th>
@@ -422,7 +453,7 @@ export default function AdminPage() {
                                             </div>
                                         </td>
                                         <td>
-                                            <span className={s.licenseTag}>{u.license_number}</span>
+                                            <span className={s.licenseTag}>{u.mobile}</span>
                                         </td>
                                         <td>
                                             <div className={s.verifyBadges}>
