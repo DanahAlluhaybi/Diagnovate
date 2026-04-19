@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
     Users, CheckCircle, XCircle, Clock, Shield,
     Search, ChevronDown, Building2, AlertCircle,
-    UserCheck, UserX, LogOut, RefreshCw,
+    UserCheck, UserX, LogOut, RefreshCw, Bell, User,
 } from 'lucide-react';
 import s from './styles.module.css';
 import { BASE } from '@/lib/api';
@@ -264,6 +264,9 @@ export default function AdminPage() {
                     <button className={s.navIconBtn} onClick={fetchAll} title="Refresh">
                         <RefreshCw size={15} />
                     </button>
+                    <button className={s.navIconBtn} title="Notifications">
+                        <Bell size={15} />
+                    </button>
                     <div className={s.navDivider} />
                     <div className={s.navDropWrap} ref={profileRef}>
                         <div className={s.navProfile} onClick={() => setProfileOpen(p => !p)}>
@@ -286,6 +289,10 @@ export default function AdminPage() {
                                     </div>
                                 </div>
                                 <div style={{ padding: '6px 0' }}>
+                                    <button className={s.navMenuItem}>
+                                        <User size={14} /> My Profile
+                                    </button>
+                                    <div className={s.navSep} />
                                     <button className={`${s.navMenuItem} ${s.navMenuItemDanger}`} onClick={handleLogout}>
                                         <LogOut size={14} /> Sign out
                                     </button>
