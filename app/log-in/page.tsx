@@ -42,7 +42,8 @@ function LoginForm() {
             const { token, user } = result as { token: string; user: unknown };
             localStorage.setItem(isAdmin ? 'admin_token' : 'token', token);
             if (user) localStorage.setItem('user', JSON.stringify(user));
-            router.push(isAdmin ? '/admin' : '/dashboard');
+            console.log('isAdmin:', isAdmin, 'role:', role);
+            window.location.href = isAdmin ? '/admin' : '/dashboard';
 
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Invalid credentials. Please try again.');
