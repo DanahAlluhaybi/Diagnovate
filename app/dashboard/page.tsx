@@ -21,6 +21,10 @@ const ACTION_STYLES: Record<string, { bg: string; color: string; border: string 
 };
 
 export default function DoctorDashboard() {
+    if (typeof window !== 'undefined') {
+        const t = localStorage.getItem('theme');
+        if (t) document.documentElement.setAttribute('data-theme', t.toLowerCase());
+    }
     const router = useRouter();
     const [user,           setUser]           = useState<any>(null);
     const [loading,        setLoading]        = useState(true);
@@ -84,6 +88,10 @@ export default function DoctorDashboard() {
                     .loading-title{font-family:'DM Serif Display',serif;font-size:22px;color:#0F172A;margin:0 0 6px}
                     .loading-sub{font-size:13px;color:#64748B;margin:0}
                     @keyframes spin{to{transform:rotate(360deg)}}
+                    [data-theme='dark'] .loading-screen { background: #0F172A !important; }
+                    [data-theme='dark'] .loading-card { background: #1E293B !important; border-color: #334155 !important; }
+                    [data-theme='dark'] .loading-title { color: #F1F5F9 !important; }
+                    [data-theme='dark'] .loading-sub { color: #94A3B8 !important; }
                 `}</style>
                 <div className="loading-screen">
                     <div className="loading-card">
