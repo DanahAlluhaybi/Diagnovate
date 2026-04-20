@@ -26,8 +26,10 @@ export default function SignUpPage() {
             setForm(f => ({ ...f, [k]: e.target.value }));
 
     const goNext = () => {
-        if (!form.firstName || !form.lastName || !form.email || !form.phone || !form.idNumber) {
-            setError('Please fill in all required fields.'); return;
+        const nameValid = /^[a-zA-Z\u0600-\u06FF\s]+$/.test(form.firstName) &&
+            /^[a-zA-Z\u0600-\u06FF\s]+$/.test(form.lastName);
+        if (!nameValid) {
+            setError('First and last name must contain letters only, no numbers allowed.'); return;
         }
         const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
         if (!emailValid) {
@@ -239,7 +241,7 @@ export default function SignUpPage() {
                                             <span className="auth-iw__icon">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7A2 2 0 0 1 22 16.9z" /></svg>
                                             </span>
-                                            <input className="dv-input" placeholder="+966 5x xxx xxxx" value={form.phone} onChange={set('phone')} />
+                                            <input className="dv-input" placeholder="05xxxxxxxx" value={form.phone} onChange={set('phone')} />
                                         </div>
                                     </div>
                                     <div className="auth-field">
@@ -260,7 +262,7 @@ export default function SignUpPage() {
                                     </div>
                                 )}
 
-                                <button className="auth-btn-primary" onClick={goNext}>
+                                <button type="button" className="auth-btn-primary" onClick={goNext}>
                                     Continue <ArrowRight size={16} />
                                 </button>
                             </div>
