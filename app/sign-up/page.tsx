@@ -40,9 +40,14 @@ export default function SignUpPage() {
         if (!phoneValid) {
             setError('Phone number must start with 05 and be 10 digits.'); return;
         }
-        const idValid = /^\d{10}$/.test(form.idNumber);
+        const idValid = /^[12]\d{9}$/.test(form.idNumber);
         if (!idValid) {
-            setError('ID number must be 10 digits.'); return;
+            if (form.idNumber.length !== 10) {
+                setError('ID number must be 10 digits.'); return;
+            }
+            if (!form.idNumber.startsWith('1') && !form.idNumber.startsWith('2')) {
+                setError('ID number must start with 1 or 2.'); return;
+            }
         }
         setError(''); setStep(1);
     };
