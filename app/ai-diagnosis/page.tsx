@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import s from './styles.module.css';
 import Navbar from '@/components/Navbar';
+import { BASE } from '@/lib/api';
 
 type InputMode  = 'image' | 'lab' | 'both';
 type AIModel    = 'Auto' | 'CNN' | 'RandomForest' | 'DecisionTree';
@@ -51,20 +52,10 @@ const SEVERITY_META: Record<Severity, { color: string; bg: string; border: strin
     High:     { color: '#DC2626', bg: '#FFF1F2', border: '#FECDD3', icon: '▲' },
 };
 
-const MOCK_RESULT: DiagResult = {
-    malignancyScore : 62,
-    severity        : 'Moderate',
-    recommendation  :
-        'Suspicious nodule characteristics identified. Fine Needle Aspiration (FNA) biopsy is recommended for definitive histological confirmation. Correlate with elevated TSH and FTI values. Consider repeat ultrasound in 3 months if biopsy is deferred.',
-    modelUsed  : 'CNN + Random Forest Ensemble',
-    confidence : 87.4,
-    findings   : [
-        'Hypoechoic nodule detected — 14.2 mm (right lobe)',
-        'Irregular margin pattern observed',
-        'Microcalcification foci present',
-        'TSH level mildly elevated (5.1 mIU/L)',
-        'FTI value outside reference range',
-    ],
+const REC_MAP: Record<string, string> = {
+    'Hypothyroidism':  'Hypothyroidism detected. Thyroid hormone replacement therapy may be indicated. Consult an endocrinologist.',
+    'Hyperthyroidism': 'Hyperthyroidism detected. Anti-thyroid medication or radioiodine therapy may be required. Specialist referral recommended.',
+    'Normal':          'Thyroid function appears normal. Routine annual follow-up is recommended.',
 };
 
 const fmtSize = (b: number) =>
@@ -98,7 +89,7 @@ export default function AIDiagnosisPage() {
         if (!localStorage.getItem('token')) router.push('/log-in');
         try {
             const token = localStorage.getItem('token');
-            fetch('http://localhost:5002/api/patients', {
+            fetch(`${BASE}/api/patients`, {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             })
                 .then(r => r.json())
@@ -138,21 +129,109 @@ export default function AIDiagnosisPage() {
         (inputMode !== 'lab'   && !!imageFile) ||
         (inputMode !== 'image' && (!!lab.tsh || !!lab.t3 || !!lab.tt4));
 
+
+    //  الباك اند ي
+
     const runDiagnosis = async () => {
         if (!hasInput) return;
         setStage('uploading'); setResult(null); setError(''); setSavedOk(false);
         simulateProgress();
+
         try {
+            const token = localStorage.getItem('token');
+
             await delay(600);  setStage('enhancing');
             await delay(900);  setStage('analyzing');
-            await delay(1400);
+
+            // ──
+            const payload = {
+                age:                 lab.age  ? Number(lab.age)  : null,
+                sex:                 lab.sex === 'female' ? 'F' : 'M',
+
+                // قيم اللاب + measured flags
+                TSH_measured:        lab.tsh  ? 't' : 'f',
+                TSH:                 lab.tsh  ? Number(lab.tsh)  : null,
+                T3_measured:         lab.t3   ? 't' : 'f',
+                T3:                  lab.t3   ? Number(lab.t3)   : null,
+                TT4_measured:        lab.tt4  ? 't' : 'f',
+                TT4:                 lab.tt4  ? Number(lab.tt4)  : null,
+                T4U_measured:        lab.t4u  ? 't' : 'f',
+                T4U:                 lab.t4u  ? Number(lab.t4u)  : null,
+                FTI_measured:        lab.fti  ? 't' : 'f',
+                FTI:                 lab.fti  ? Number(lab.fti)  : null,
+                TBG_measured:        'f',
+                TBG:                 null,
+
+                //الأعمدة الطبيه
+                on_thyroxine:        'f',
+                query_on_thyroxine:  'f',
+                on_antithyroid_meds: 'f',
+                sick:                'f',
+                pregnant:            'f',
+                thyroid_surgery:     'f',
+                I131_treatment:      'f',
+                query_hypothyroid:   'f',
+                query_hyperthyroid:  'f',
+                lithium:             'f',
+                goitre:              'f',
+                tumor:               'f',
+                hypopituitary:       'f',
+                psych:               'f',
+            };
+
+            const res = await fetch(`${BASE}/api/diagnosis/predict`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization:  `Bearer ${token}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Prediction failed');
+            }
+
+            // ── تحويل severity من الباك اند  ──
+            const severityMap: Record<string, Severity> = {
+                high:   'High',
+                medium: 'Moderate',
+                low:    'Low',
+            };
+
+            // ─findings
+            const findings: string[] = [
+                `Primary Diagnosis: ${data.diagnosis}`,
+                ...(lab.tsh  ? [`TSH: ${lab.tsh} mIU/L`]  : []),
+                ...(lab.t3   ? [`T3: ${lab.t3} nmol/L`]   : []),
+                ...(lab.tt4  ? [`TT4: ${lab.tt4} nmol/L`] : []),
+                ...(lab.t4u  ? [`T4U: ${lab.t4u} ratio`]  : []),
+                ...(lab.fti  ? [`FTI: ${lab.fti} index`]  : []),
+                ...Object.entries(data.probabilities || {}).map(
+                    ([k, v]) => `${k}: ${v}% probability`
+                ),
+            ];
+
             clearTimers(); setProgress(100);
             await delay(300);
-            setResult(MOCK_RESULT);
+
+            setResult({
+                malignancyScore: Math.round(data.confidence),
+                severity:        severityMap[data.severity] ?? 'Moderate',
+                recommendation:  REC_MAP[data.diagnosis] ?? `Diagnosis: ${data.diagnosis}. Please consult a specialist.`,
+                modelUsed:       'XGBoost',
+                confidence:      data.confidence,
+                findings,
+            });
+
             setStage('done');
             if (patientId.trim()) setSavedOk(true);
-        } catch {
-            setError('Failed to connect to the diagnosis server. Make sure the backend is running.');
+
+        } catch (err: any) {
+            clearTimers();
+            setError(err.message || 'Failed to connect to the diagnosis server. Make sure the backend is running.');
             setStage('idle');
         }
     };

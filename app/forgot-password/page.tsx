@@ -3,17 +3,24 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Loader2 } from 'lucide-react';
+import { BASE } from '@/lib/api';
 
 export default function ForgotPasswordPage() {
     const [email,   setEmail]   = useState('');
     const [loading, setLoading] = useState(false);
     const [sent,    setSent]    = useState(false);
 
-    const handleSend = () => {
+    const handleSend = async () => {
         setLoading(true);
-        // TODO: replace with real API call
-        // await fetch('http://localhost:5002/api/auth/forgot-password', { method:'POST', body: JSON.stringify({ email }) })
-        setTimeout(() => { setLoading(false); setSent(true); }, 1200);
+        try {
+            await fetch(`${BASE}/api/auth/forgot-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+        } catch {}
+        setLoading(false);
+        setSent(true);
     };
 
     return (

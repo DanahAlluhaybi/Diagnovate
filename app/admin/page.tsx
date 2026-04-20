@@ -1,269 +1,664 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
+import Link from 'next/link';
+import {
+    Users, CheckCircle, XCircle, Clock, Shield,
+    Search, ChevronDown, Building2, AlertCircle,
+    UserCheck, UserX, LogOut, RefreshCw, Bell, User,
+} from 'lucide-react';
+import s from './styles.module.css';
+import { BASE } from '@/lib/api';
 
-interface Request { id: number; name: string; email: string; specialty: string; date: string; status: 'pending'|'approved'|'rejected'; hospital: string; }
+const API_BASE_URL = `${BASE}/api`;
 
-const MOCK: Request[] = [
-  { id:1, name:'Dr. Sarah Al-Rashid',   email:'sarah@hospital.sa',    specialty:'Pathology',      date:'Mar 08, 2026', status:'pending',  hospital:'King Faisal Hospital'   },
-  { id:2, name:'Dr. Omar Khalid',       email:'omar.k@clinic.sa',     specialty:'Radiology',      date:'Mar 07, 2026', status:'pending',  hospital:'National Guard Hospital' },
-  { id:3, name:'Dr. Layla Mansour',     email:'layla.m@medical.sa',   specialty:'Endocrinology',  date:'Mar 06, 2026', status:'approved', hospital:'King Fahad Specialist'   },
-  { id:4, name:'Dr. Ahmed Nasser',      email:'ahmed.n@research.sa',  specialty:'Oncology',       date:'Mar 05, 2026', status:'approved', hospital:'KFSH&RC'                 },
-  { id:5, name:'Dr. Noor Al-Hassan',    email:'noor.h@university.sa', specialty:'Surgery',        date:'Mar 04, 2026', status:'rejected', hospital:'King Khalid University'  },
-  { id:6, name:'Dr. Khalid Al-Ghamdi',  email:'khalid@clinic.sa',     specialty:'Pathology',      date:'Mar 03, 2026', status:'pending',  hospital:'Dallah Hospital'         },
-];
-
-const FILTERS = ['all','pending','approved','rejected'] as const;
-type Filter = typeof FILTERS[number];
-
-function getInitials(name: string) {
-  return name.replace(/^Dr\.?\s*/i,'').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+// ─── TYPES ──────────────
+interface AdminStats {
+    total_users: number;
+    pending_approvals: number;
+    active_users: number;
+    rejected_today: number;
 }
 
-export default function AdminDashboard() {
-  const router = useRouter();
-  const [requests, setRequests] = useState<Request[]>(MOCK);
-  const [filter,   setFilter]   = useState<Filter>('all');
-  const [loading,  setLoading]  = useState(true);
-  const [anim,     setAnim]     = useState<number|null>(null);
-  const [toast,    setToast]    = useState<{msg:string;type:'success'|'error'}|null>(null);
+interface PendingUser {
+    id: number;
+    full_name: string;
+    email: string;
+    mobile: string;
+    institution: string;
+    license_number: string;
+    specialty: string;
+    registered_at: string;
+    email_verified: boolean;
+    sms_verified: boolean;
+}
 
-  const pending  = requests.filter(r=>r.status==='pending').length;
-  const approved = requests.filter(r=>r.status==='approved').length;
-  const rejected = requests.filter(r=>r.status==='rejected').length;
+interface ActiveUser {
+    id: number;
+    full_name: string;
+    email: string;
+    institution: string;
+    specialty: string;
+    status: 'active' | 'inactive';
+    last_login: string;
+    created_at: string;
+}
 
-  useEffect(()=>{ setTimeout(()=>setLoading(false),900); },[]);
+interface AdminUser {
+    id: number;
+    name: string;
+    email: string;
+}
 
-  const showToast = (msg: string, type: 'success'|'error'='success') => {
-    setToast({msg,type});
-    setTimeout(()=>setToast(null),3200);
-  };
+type TabType = 'pending' | 'active' | 'all';
 
-  const act = (id: number, action: 'approved'|'rejected') => {
-    setAnim(id);
-    setTimeout(()=>{
-      setRequests(r=>r.map(req=>req.id===id?{...req,status:action}:req));
-      setAnim(null);
-      showToast(action==='approved'?'Doctor approved successfully.':'Request rejected.');
-    },600);
-  };
+const REJECTION_REASONS = [
+    'The provided information is incorrect or incomplete.',
+    'The license number is invalid or could not be verified.',
+    'The stated specialty is not accepted on this platform.',
+    'Other',
+];
 
-  const filtered = filter==='all' ? requests : requests.filter(r=>r.status===filter);
+/* ─── HELPERS ───────────────────────────────────────────────────── */
+const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+const formatTime = (d: string) =>
+    new Date(d).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+const getInitials = (name: string) =>
+    name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
 
-  const statusStyle = (s: string) => {
-    if (s==='pending')  return {bg:'#FFFBEB',color:'#D97706',border:'#FDE68A',dot:'#F59E0B'};
-    if (s==='approved') return {bg:'#F0FDFA',color:'#0D9488',border:'#99F6E4',dot:'#0D9488'};
-    return                     {bg:'#FFF1F2',color:'#EF4444',border:'#FECDD3',dot:'#EF4444'};
-  };
+export default function AdminPage() {
+    const router = useRouter();
 
-  if (loading) return (
-      <>
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{background:#F0F4F8;font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased}body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#CBD5E1 1px,transparent 1px);background-size:28px 28px;opacity:.45;pointer-events:none;z-index:0}.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;z-index:1}.card{background:white;border:1px solid #E2E8F0;border-radius:28px;padding:52px 64px;text-align:center;box-shadow:0 32px 80px rgba(15,23,42,.12);display:flex;flex-direction:column;align-items:center}.logo{width:52px;height:52px;background:linear-gradient(145deg,#1E40AF,#3B82F6);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(30,64,175,.3);margin-bottom:24px}.spinner{width:36px;height:36px;border:3px solid #EFF6FF;border-top-color:#3B82F6;border-radius:50%;animation:spin .75s linear infinite;margin-bottom:20px}.t{font-family:'DM Serif Display',serif;font-size:22px;color:#0F172A;margin:0 0 6px}.s{font-size:13px;color:#64748B;margin:0}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-        <div className="screen"><div className="card">
-          <div className="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white"/></svg></div>
-          <div className="spinner"/>
-          <p className="t">Loading Console</p>
-          <p className="s">Preparing admin workspace...</p>
-        </div></div>
-      </>
-  );
+    const [admin, setAdmin] = useState<AdminUser | null>(null);
+    const [stats, setStats] = useState<AdminStats | null>(null);
+    const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
+    const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [tab, setTab] = useState<TabType>('pending');
+    const [search, setSearch] = useState('');
+    const [profileOpen, setProfileOpen] = useState(false);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const notifRef = useRef<HTMLDivElement>(null);
+    const [actionModal, setActionModal] = useState<{ user: PendingUser; type: 'approve' | 'reject' } | null>(null);
+    const [rejectReason, setRejectReason] = useState(REJECTION_REASONS[0]);
+    const [customReason, setCustomReason] = useState('');
+    const [actionLoading, setActionLoading] = useState(false);
+    const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+    const profileRef = useRef<HTMLDivElement>(null);
 
-  return (
-      <>
-        <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        :root{--blue:#1E40AF;--blue-mid:#3B82F6;--blue-light:#EFF6FF;--blue-ring:#BFDBFE;--teal:#0D9488;--bg:#F0F4F8;--surface:#fff;--surface2:#F8FAFC;--text:#0F172A;--text2:#334155;--muted:#64748B;--subtle:#94A3B8;--border:#E2E8F0;--grad:linear-gradient(135deg,#1E40AF,#3B82F6);--display:'DM Serif Display',serif;--body:'Plus Jakarta Sans',sans-serif;}
-        body{background:var(--bg);color:var(--text);font-family:var(--body);-webkit-font-smoothing:antialiased}
-        body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#CBD5E1 1px,transparent 1px);background-size:28px 28px;opacity:.45;pointer-events:none;z-index:0}
+    useEffect(() => {
+        fetchAll();
+    }, []);
 
-        .page{position:relative;z-index:1;padding:36px 48px 80px;max-width:1360px;margin:0 auto}
-        @media(max-width:1024px){.page{padding:28px 24px 64px}}
-        @media(max-width:600px){.page{padding:20px 16px 56px}}
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (profileRef.current && !profileRef.current.contains(e.target as Node))
+                setProfileOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
 
-        /* PAGE HEADER */
-        .ph{margin-bottom:32px}
-        .ph-sec{font-size:10.5px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--blue-mid);margin-bottom:8px;display:flex;align-items:center;gap:8px}
-        .ph-sec::after{content:'';flex:1;height:1px;background:linear-gradient(to right,#BFDBFE,transparent)}
-        .ph-h1{font-family:var(--display);font-size:clamp(28px,3.5vw,40px);color:var(--text);letter-spacing:-.5px;margin-bottom:6px}
-        .ph-sub{font-size:14px;color:var(--muted)}
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (notifRef.current && !notifRef.current.contains(e.target as Node))
+                setNotifOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
 
-        /* STATS */
-        .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px}
-        @media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
-        @media(max-width:480px){.stats{grid-template-columns:1fr}}
-        .stat{background:white;border:1.5px solid var(--border);border-radius:18px;padding:22px 22px 18px;box-shadow:0 2px 8px rgba(15,23,42,.05);transition:all .25s;position:relative;overflow:hidden}
-        .stat:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(15,23,42,.1)}
-        .stat-bar{position:absolute;top:0;left:0;right:0;height:3px}
-        .stat-ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
-        .stat-val{font-family:var(--display);font-size:34px;letter-spacing:-2px;color:var(--text);line-height:1;margin-bottom:4px}
-        .stat-lbl{font-size:12.5px;font-weight:600;color:var(--muted)}
+    const fetchWithToken = async (endpoint: string, options: RequestInit = {}) => {
+        const token = localStorage.getItem('admin_token');
+        if (!token) {
+            router.push('/log-in?role=admin');
+            throw new Error('No token');
+        }
 
-        /* FILTER BAR */
-        .filter-bar{background:white;border:1px solid var(--border);border-radius:18px;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;box-shadow:0 2px 8px rgba(15,23,42,.05)}
-        .filter-tabs{display:flex;gap:6px;flex-wrap:wrap}
-        .ftab{padding:7px 18px;border-radius:10px;font-family:var(--body);font-size:13px;font-weight:600;border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;transition:all .18s;text-transform:capitalize}
-        .ftab:hover{border-color:#CBD5E1;color:var(--text2)}
-        .ftab.active{background:var(--blue-light);border-color:var(--blue-ring);color:var(--blue)}
-        .count-pill{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--muted)}
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            ...options,
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
 
-        /* TABLE */
-        .table-wrap{background:white;border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 2px 8px rgba(15,23,42,.05)}
-        table{width:100%;border-collapse:collapse}
-        thead tr{background:var(--surface2)}
-        th{padding:13px 20px;text-align:left;font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
-        td{padding:15px 20px;border-bottom:1px solid #F1F5F9;vertical-align:middle;font-size:14px}
-        tr:last-child td{border-bottom:none}
-        tbody tr{transition:background .15s}
-        tbody tr:hover{background:#FAFBFC}
-        tbody tr.animating{opacity:.5;transform:scale(.99);transition:all .35s}
+        if (response.status === 401) {
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_user');
+            router.push('/log-in?role=admin');
+            throw new Error('Unauthorized');
+        }
 
-        .doc-info{display:flex;align-items:center;gap:12px}
-        .doc-av{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:white;flex-shrink:0;background:linear-gradient(135deg,#1E40AF,#3B82F6)}
-        .doc-name{font-weight:700;color:var(--text);font-size:14px;margin-bottom:2px}
-        .doc-email{font-size:12px;color:var(--muted)}
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status} — ${errorText}`);
+        }
 
-        .spec-chip{display:inline-flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--text2)}
-        .status-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px}
-        .status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+        return response.json();
+    };
 
-        .acts{display:flex;gap:8px;white-space:nowrap}
-        .btn-ap{height:34px;padding:0 16px;border:none;border-radius:9px;background:linear-gradient(135deg,#0D9488,#0891B2);color:white;font-family:var(--body);font-size:12.5px;font-weight:700;cursor:pointer;transition:all .18s;box-shadow:0 3px 10px rgba(13,148,136,.28)}
-        .btn-ap:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(13,148,136,.38)}
-        .btn-rj{height:34px;padding:0 16px;border:1.5px solid #FECDD3;border-radius:9px;background:#FFF1F2;color:#EF4444;font-family:var(--body);font-size:12.5px;font-weight:700;cursor:pointer;transition:all .18s}
-        .btn-rj:hover{background:#EF4444;color:white;border-color:#EF4444}
+    const fetchAll = async () => {
+        try {
+            setLoading(true);
 
-        .empty{padding:60px 20px;text-align:center}
-        .empty-ico{width:56px;height:56px;border-radius:16px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--subtle)}
-        .empty-t{font-family:var(--display);font-size:20px;color:var(--text);margin-bottom:6px}
-        .empty-s{font-size:13px;color:var(--muted)}
+            const token     = localStorage.getItem('admin_token');
+            const userStr   = localStorage.getItem('admin_user');
 
-        /* TOAST */
-        .toast{position:fixed;top:24px;right:24px;z-index:9999;display:flex;align-items:center;gap:10px;padding:13px 20px;border-radius:14px;font-family:var(--body);font-size:13.5px;font-weight:600;color:white;box-shadow:0 8px 32px rgba(0,0,0,.15);animation:tIn .3s cubic-bezier(.16,1,.3,1) both}
-        .toast-s{background:var(--teal)}
-        .toast-e{background:#EF4444}
+            if (!token || !userStr) {
+                router.push('/log-in?role=admin');
+                return;
+            }
 
-        @keyframes tIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-        @media(max-width:900px){.table-wrap{overflow-x:auto}}
-      `}</style>
+            const userData = JSON.parse(userStr) as AdminUser;
+            setAdmin(userData);
 
-        <Navbar variant="admin" pendingCount={pending}/>
+            const [statsData, pendingData, activeData] = await Promise.all([
+                fetchWithToken('/admin/stats'),
+                fetchWithToken('/admin/pending-users'),
+                fetchWithToken('/admin/active-users'),
+            ]);
 
-        {toast && (
-            <div className={`toast toast-${toast.type==='success'?'s':'e'}`}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                {toast.type==='success'?<polyline points="20 6 9 17 4 12"/>:<><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>}
-              </svg>
-              {toast.msg}
+            setStats(statsData);
+            setPendingUsers(pendingData);
+            setActiveUsers(activeData);
+
+        } catch (error) {
+            console.error('FetchAll error:', error);
+            showToast('Failed to load data', false);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const showToast = (msg: string, ok: boolean) => {
+        setToast({ msg, ok });
+        setTimeout(() => setToast(null), 3200);
+    };
+
+    const handleApprove = async () => {
+        if (!actionModal) return;
+        setActionLoading(true);
+        try {
+            await fetchWithToken(`/admin/approve/${actionModal.user.id}`, { method: 'POST' });
+            setPendingUsers(p => p.filter(u => u.id !== actionModal.user.id));
+            setStats(s => s ? { ...s, pending_approvals: s.pending_approvals - 1, active_users: s.active_users + 1 } : s);
+            showToast(`${actionModal.user.full_name} approved successfully`, true);
+        } catch {
+            showToast('Failed to approve', false);
+        } finally {
+            setActionLoading(false);
+            setActionModal(null);
+        }
+    };
+
+    const handleReject = async () => {
+        if (!actionModal) return;
+        setActionLoading(true);
+
+        const finalReason = rejectReason === 'Other'
+            ? (customReason.trim() || 'No reason provided')
+            : rejectReason;
+
+        try {
+            await fetchWithToken(`/admin/reject/${actionModal.user.id}`, {
+                method: 'POST',
+                body: JSON.stringify({ reason: finalReason }),
+            });
+            setPendingUsers(p => p.filter(u => u.id !== actionModal.user.id));
+            setStats(s => s ? { ...s, pending_approvals: s.pending_approvals - 1, rejected_today: s.rejected_today + 1 } : s);
+            showToast(`${actionModal.user.full_name} rejected`, false);
+        } catch {
+            showToast('Failed to reject', false);
+        } finally {
+            setActionLoading(false);
+            setActionModal(null);
+            setCustomReason('');
+        }
+    };
+
+    const handleToggleStatus = async (user: ActiveUser) => {
+        try {
+            const action = user.status === 'active' ? 'deactivate' : 'activate';
+            await fetchWithToken(`/admin/${action}/${user.id}`, { method: 'POST' });
+            setActiveUsers(u => u.map(x => x.id === user.id ? { ...x, status: action === 'activate' ? 'active' : 'inactive' } : x));
+            showToast(`${user.full_name} ${action}d`, action === 'activate');
+        } catch {
+            showToast('Network error.', false);
+        }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('admin_user');
+        router.push('/log-in?role=admin');
+    };
+
+    const filteredPending = pendingUsers.filter(u =>
+        u.full_name.toLowerCase().includes(search.toLowerCase()) ||
+        u.email.toLowerCase().includes(search.toLowerCase()) ||
+        u.institution.toLowerCase().includes(search.toLowerCase())
+    );
+    const filteredActive = activeUsers.filter(u =>
+        u.full_name.toLowerCase().includes(search.toLowerCase()) ||
+        u.email.toLowerCase().includes(search.toLowerCase()) ||
+        u.institution.toLowerCase().includes(search.toLowerCase())
+    );
+
+    if (loading) return (
+        <div className={s.screen}>
+            <div className={s.screenCard}>
+                <div className={s.spinner} />
+                <p className={s.screenTitle}>Loading Admin Panel…</p>
+                <p className={s.screenSub}>Preparing your workspace…</p>
             </div>
-        )}
+        </div>
+    );
 
-        <main className="page">
-          {/* Header */}
-          <div className="ph">
-            <div className="ph-sec">Admin Console</div>
-            <h1 className="ph-h1">Doctor Requests</h1>
-            <p className="ph-sub">Review and manage incoming doctor registration requests.</p>
-          </div>
+    return (
+        <div className={s.wrap}>
+            {/* NAVBAR */}
+            <nav className={s.nav}>
+                <Link href="/admin" className={s.navLogo}>
+                    <div className={s.navLogoMark}>
+                        <Shield size={16} color="white" />
+                    </div>
+                    <span>DIAGNO<span className={s.navLogoAccent}>VATE</span></span>
+                </Link>
 
-          {/* Stats */}
-          <div className="stats">
-            {[
-              {val:requests.length, lbl:'Total Requests', bar:'linear-gradient(90deg,#1E40AF,#3B82F6)', ic:'#EFF6FF', bcol:'#BFDBFE', icol:'#3B82F6'},
-              {val:pending,  lbl:'Pending Review', bar:'linear-gradient(90deg,#D97706,#F59E0B)', ic:'#FFFBEB', bcol:'#FDE68A', icol:'#F59E0B'},
-              {val:approved, lbl:'Approved',        bar:'linear-gradient(90deg,#0D9488,#0891B2)', ic:'#F0FDFA', bcol:'#99F6E4', icol:'#0D9488'},
-              {val:rejected, lbl:'Rejected',         bar:'linear-gradient(90deg,#DC2626,#EF4444)', ic:'#FFF1F2', bcol:'#FECDD3', icol:'#EF4444'},
-            ].map(s=>(
-                <div key={s.lbl} className="stat">
-                  <div className="stat-bar" style={{background:s.bar}}/>
-                  <div className="stat-ic" style={{background:s.ic,border:`1px solid ${s.bcol}`,color:s.icol}}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                    </svg>
-                  </div>
-                  <div className="stat-val">{s.val}</div>
-                  <div className="stat-lbl">{s.lbl}</div>
+                <div className={s.navLinks}>
+                    <Link href="/admin" className={`${s.navLink} ${s.navLinkActive}`}>Admin Panel</Link>
                 </div>
-            ))}
-          </div>
 
-          {/* Filter bar */}
-          <div className="filter-bar">
-            <div className="filter-tabs">
-              {FILTERS.map(f=>(
-                  <button key={f} className={`ftab${filter===f?' active':''}`} onClick={()=>setFilter(f)}>
-                    {f==='all'?'All Requests':f}
-                  </button>
-              ))}
-            </div>
-            <div className="count-pill">{filtered.length} result{filtered.length!==1?'s':''}</div>
-          </div>
-
-          {/* Table */}
-          <div className="table-wrap">
-            {filtered.length > 0 ? (
-                <table>
-                  <thead>
-                  <tr>
-                    <th>Doctor</th>
-                    <th>Specialty</th>
-                    <th>Hospital</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  {filtered.map(req=>{
-                    const s = statusStyle(req.status);
-                    return (
-                        <tr key={req.id} className={anim===req.id?'animating':''}>
-                          <td>
-                            <div className="doc-info">
-                              <div className="doc-av">{getInitials(req.name)}</div>
-                              <div>
-                                <div className="doc-name">{req.name}</div>
-                                <div className="doc-email">{req.email}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td><span className="spec-chip">{req.specialty}</span></td>
-                          <td style={{fontSize:13.5,color:'var(--text2)'}}>{req.hospital}</td>
-                          <td style={{fontSize:13,color:'var(--muted)'}}>{req.date}</td>
-                          <td>
-                        <span className="status-chip" style={{background:s.bg,color:s.color,border:`1px solid ${s.border}`}}>
-                          <span className="status-dot" style={{background:s.dot}}/>
-                          {req.status.charAt(0).toUpperCase()+req.status.slice(1)}
-                        </span>
-                          </td>
-                          <td>
-                            {req.status==='pending' ? (
-                                <div className="acts">
-                                  <button className="btn-ap" onClick={()=>act(req.id,'approved')}>Approve</button>
-                                  <button className="btn-rj" onClick={()=>act(req.id,'rejected')}>Reject</button>
+                <div className={s.navRight}>
+                    <button className={s.navIconBtn} onClick={fetchAll} title="Refresh">
+                        <RefreshCw size={15} />
+                    </button>
+                    <div style={{ position: 'relative' }} ref={notifRef}>
+                        <button className={s.navIconBtn} onClick={() => setNotifOpen(p => !p)} title="Notifications">
+                            <Bell size={15} />
+                        </button>
+                        {notifOpen && (
+                            <div style={{
+                                position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                                background: 'white', border: '1px solid #EBF0F5',
+                                borderRadius: 18, boxShadow: '0 16px 48px rgba(15,23,42,0.12)',
+                                zIndex: 300, width: 280, overflow: 'hidden',
+                                animation: 'dropIn 0.18s cubic-bezier(0.16,1,0.3,1) both'
+                            }}>
+                                <div style={{ padding: '14px 18px', borderBottom: '1px solid #F1F5F9', fontSize: 11, fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#0D9488', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <Bell size={13} /> Notifications
                                 </div>
+                                <div style={{ padding: '48px 24px', textAlign: 'center' }}>
+                                    <Bell size={28} color="#CBD5E1" style={{ margin: '0 auto 12px' }} />
+                                    <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', margin: '0 0 4px' }}>All clear</p>
+                                    <p style={{ fontSize: 12, color: '#94A3B8', margin: 0 }}>No new notifications</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className={s.navDivider} />
+                    <div className={s.navDropWrap} ref={profileRef}>
+                        <div className={s.navProfile} onClick={() => setProfileOpen(p => !p)}>
+                            <div className={s.navAvatar}>
+                                <Shield size={13} />
+                            </div>
+                            <div>
+                                <div className={s.navPname}>{admin?.name ?? 'Admin'}</div>
+                                <div className={s.navProle}>System Administrator</div>
+                            </div>
+                            <ChevronDown size={12} color="#94A3B8" />
+                        </div>
+                        {profileOpen && (
+                            <div className={`${s.navDropdown} ${s.navProfDrop}`}>
+                                <div className={s.navProfHead}>
+                                    <div className={s.navProfAv}><Shield size={18} /></div>
+                                    <div>
+                                        <div className={s.navProfName}>{admin?.name ?? 'Admin'}</div>
+                                        <div className={s.navProfSpec}>{admin?.email ?? ''}</div>
+                                    </div>
+                                </div>
+                                <div style={{ padding: '6px 0' }}>
+                                    <Link href="/admin/profile" className={s.navMenuItem}>
+                                        <User size={14} /> My Profile
+                                    </Link>
+                                    <div className={s.navSep} />
+                                    <Link href="/admin/profile" className={s.navMenuItem}>
+                                        <User size={14}/> My Profile
+                                    </Link>
+                                    <div className={s.navSep}/>
+                                    <button className={`${s.navMenuItem} ${s.navMenuItemDanger}`} onClick={handleLogout}>
+                                        <LogOut size={14} /> Sign out
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </nav>
+
+            {/* MAIN */}
+            <main className={s.main}>
+                {/* HERO */}
+                <div className={s.hero}>
+                    <div className={s.heroBlob1} />
+                    <div className={s.heroBlob2} />
+                    <div className={s.heroBlob3} />
+                    <div className={s.heroLeft}>
+                        <div className={s.heroBadge}>
+                            <span className={s.liveDot} />
+                            Admin Control Panel
+                        </div>
+                        <h1 className={s.heroH1}>
+                            User<br />
+                            <em>Management</em>
+                        </h1>
+                        <p className={s.heroDate}>
+                            {new Date().toLocaleDateString('en-US', {
+                                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                            })}
+                        </p>
+                    </div>
+                    <div className={s.heroStats}>
+                        {[
+                            { icon: <Clock size={17}/>, label: 'Pending Approval', val: stats?.pending_approvals ?? 0, hc: '#F59E0B', hbg: '#FFFBEB', hb: '#FDE68A' },
+                            { icon: <UserCheck size={17}/>, label: 'Active Users', val: stats?.active_users ?? 0, hc: '#0D9488', hbg: '#F0FDFA', hb: '#CCFBF1' },
+                            { icon: <Users size={17}/>, label: 'Total Users', val: stats?.total_users ?? 0, hc: '#7C3AED', hbg: '#F5F3FF', hb: '#EDE9FE' },
+                            { icon: <UserX size={17}/>, label: 'Rejected Today', val: stats?.rejected_today ?? 0, hc: '#E11D48', hbg: '#FFF1F2', hb: '#FECDD3' },
+                        ].map((st, i) => (
+                            <div key={i} className={s.heroStat}
+                                 style={{ '--hc': st.hc, '--hbg': st.hbg, '--hb': st.hb } as React.CSSProperties}>
+                                <div className={s.hstatIc}>{st.icon}</div>
+                                <div className={s.hstatVal}>{st.val}</div>
+                                <div className={s.hstatLbl}>{st.label}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* SECTION HEADER + TABS + SEARCH */}
+                <div className={s.secHead}>
+                    <span className={s.secLabel}>User Accounts</span>
+                    <div className={s.secLine} />
+                </div>
+
+                <div className={s.toolbar}>
+                    <div className={s.tabs}>
+                        {([
+                            { key: 'pending', label: 'Pending', count: pendingUsers.length },
+                            { key: 'active', label: 'Active', count: activeUsers.filter(u => u.status === 'active').length },
+                            { key: 'all', label: 'All Users', count: activeUsers.length },
+                        ] as { key: TabType; label: string; count: number }[]).map(t => (
+                            <button
+                                key={t.key}
+                                className={`${s.tab} ${tab === t.key ? s.tabActive : ''}`}
+                                onClick={() => setTab(t.key)}
+                            >
+                                {t.label}
+                                <span className={`${s.tabBadge} ${tab === t.key ? s.tabBadgeActive : ''}`}>
+                      {t.count}
+                    </span>
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className={s.searchWrap}>
+                        <Search size={14} className={s.searchIc} />
+                        <input
+                            className={s.searchInput}
+                            placeholder="Search by name, email, institution…"
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                {/* PENDING TAB */}
+                {tab === 'pending' && (
+                    <div className={s.tableWrap}>
+                        {filteredPending.length === 0 ? (
+                            <div className={s.empty}>
+                                <div className={s.emptyIc}><CheckCircle size={26} color="#0D9488" /></div>
+                                <p className={s.emptyTitle}>All caught up!</p>
+                                <p className={s.emptySub}>No pending registration requests at this time.</p>
+                            </div>
+                        ) : (
+                            <table className={s.table}>
+                                <thead>
+                                <tr>
+                                    <th>Clinician</th>
+                                    <th>Institution</th>
+                                    <th>ID Number</th>
+                                    <th>Verification</th>
+                                    <th>Registered</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {filteredPending.map(u => (
+                                    <tr key={u.id} className={s.tableRow}>
+                                        <td>
+                                            <div className={s.userCell}>
+                                                <div className={s.userAvatar} style={{ background: 'linear-gradient(135deg,#0D9488,#0891B2)' }}>
+                                                    {getInitials(u.full_name)}
+                                                </div>
+                                                <div>
+                                                    <div className={s.userName}>{u.full_name}</div>
+                                                    <div className={s.userEmail}>{u.email}</div>
+                                                    {u.specialty && <div className={s.userSpec}>{u.specialty}</div>}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className={s.cellWithIc}>
+                                                <Building2 size={13} color="#94A3B8" />
+                                                <span>{u.institution}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className={s.licenseTag}>{u.mobile}</span>
+                                        </td>
+                                        <td>
+                                            <div className={s.verifyBadges}>
+                                <span className={`${s.verifyBadge} ${u.email_verified ? s.verifyOk : s.verifyNo}`}>
+                                  {u.email_verified ? <CheckCircle size={10}/> : <XCircle size={10}/>} Email
+                                </span>
+                                                <span className={`${s.verifyBadge} ${u.sms_verified ? s.verifyOk : s.verifyNo}`}>
+                                  {u.sms_verified ? <CheckCircle size={10}/> : <XCircle size={10}/>} SMS
+                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className={s.dateCell}>
+                                                <span>{formatDate(u.registered_at)}</span>
+                                                <span className={s.timeLabel}>{formatTime(u.registered_at)}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className={s.actionBtns}>
+                                                <button className={s.approveBtn} onClick={() => setActionModal({ user: u, type: 'approve' })}>
+                                                    <CheckCircle size={13} /> Approve
+                                                </button>
+                                                <button className={s.rejectBtn} onClick={() => { setRejectReason(REJECTION_REASONS[0]); setCustomReason(''); setActionModal({ user: u, type: 'reject' }); }}>
+                                                    <XCircle size={13} /> Reject
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                )}
+
+                {/* ACTIVE / ALL TABS */}
+                {(tab === 'active' || tab === 'all') && (
+                    <div className={s.tableWrap}>
+                        {filteredActive.length === 0 ? (
+                            <div className={s.empty}>
+                                <div className={s.emptyIc}><Users size={26} color="#94A3B8" /></div>
+                                <p className={s.emptyTitle}>No users found</p>
+                                <p className={s.emptySub}>Try adjusting your search.</p>
+                            </div>
+                        ) : (
+                            <table className={s.table}>
+                                <thead>
+                                <tr>
+                                    <th>Clinician</th>
+                                    <th>Institution</th>
+                                    <th>Status</th>
+                                    <th>Last Login</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {(tab === 'active' ? filteredActive.filter(u => u.status === 'active') : filteredActive).map(u => (
+                                    <tr key={u.id} className={s.tableRow}>
+                                        <td>
+                                            <div className={s.userCell}>
+                                                <div className={s.userAvatar} style={{
+                                                    background: u.status === 'active'
+                                                        ? 'linear-gradient(135deg,#10B981,#059669)'
+                                                        : 'linear-gradient(135deg,#94A3B8,#CBD5E1)'
+                                                }}>
+                                                    {getInitials(u.full_name)}
+                                                </div>
+                                                <div>
+                                                    <div className={s.userName}>{u.full_name}</div>
+                                                    <div className={s.userEmail}>{u.email}</div>
+                                                    {u.specialty && <div className={s.userSpec}>{u.specialty}</div>}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className={s.cellWithIc}>
+                                                <Building2 size={13} color="#94A3B8" />
+                                                <span>{u.institution}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                              <span className={`${s.statusTag} ${u.status === 'active' ? s.statusActive : s.statusInactive}`}>
+                                <span className={s.statusDot} />
+                                  {u.status === 'active' ? 'Active' : 'Inactive'}
+                              </span>
+                                        </td>
+                                        <td>
+                                            <div className={s.dateCell}>
+                                                <span>{formatDate(u.last_login)}</span>
+                                                <span className={s.timeLabel}>{formatTime(u.last_login)}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span>{formatDate(u.created_at)}</span>
+                                        </td>
+                                        <td>
+                                            <button
+                                                className={u.status === 'active' ? s.deactivateBtn : s.activateBtn}
+                                                onClick={() => handleToggleStatus(u)}
+                                            >
+                                                {u.status === 'active' ? <><UserX size={13}/> Deactivate</> : <><UserCheck size={13}/> Activate</>}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                )}
+            </main>
+
+            {/* ACTION MODAL */}
+            {actionModal && (
+                <div className={s.modalOverlay} onClick={() => !actionLoading && setActionModal(null)}>
+                    <div className={s.modal} onClick={e => e.stopPropagation()}>
+                        <div className={`${s.modalHeader} ${actionModal.type === 'approve' ? s.modalHeaderApprove : s.modalHeaderReject}`}>
+                            {actionModal.type === 'approve'
+                                ? <><CheckCircle size={20}/> Approve Registration</>
+                                : <><XCircle size={20}/> Reject Registration</>
+                            }
+                        </div>
+                        <div className={s.modalBody}>
+                            <div className={s.modalUserCard}>
+                                <div className={s.userAvatar} style={{ width: 44, height: 44, fontSize: 16, background: 'linear-gradient(135deg,#0D9488,#0891B2)', flexShrink: 0 }}>
+                                    {getInitials(actionModal.user.full_name)}
+                                </div>
+                                <div>
+                                    <div className={s.userName} style={{ fontSize: 14 }}>{actionModal.user.full_name}</div>
+                                    <div className={s.userEmail}>{actionModal.user.email}</div>
+                                    <div className={s.userSpec}>{actionModal.user.institution}</div>
+                                </div>
+                            </div>
+
+                            {actionModal.type === 'approve' ? (
+                                <p className={s.modalText}>
+                                    Approving this account will grant <strong>{actionModal.user.full_name}</strong> full access to the Diagnovate platform.
+                                </p>
                             ) : (
-                                <span style={{fontSize:12.5,color:'var(--subtle)',fontStyle:'italic'}}>No action needed</span>
+                                <>
+                                    <p className={s.modalText}>Select a reason for rejecting this registration request.</p>
+                                    <div className={s.reasonGroup}>
+                                        {REJECTION_REASONS.map(r => (
+                                            <label key={r} className={`${s.reasonOption} ${rejectReason === r ? s.reasonSelected : ''}`}>
+                                                <input
+                                                    type="radio" name="reason" value={r}
+                                                    checked={rejectReason === r}
+                                                    onChange={() => setRejectReason(r)}
+                                                    className={s.reasonRadio}
+                                                />
+                                                {r}
+                                            </label>
+                                        ))}
+                                    </div>
+                                    {rejectReason === 'Other' && (
+                                        <textarea
+                                            placeholder="Write the reason here…"
+                                            value={customReason}
+                                            onChange={e => setCustomReason(e.target.value)}
+                                            rows={3}
+                                            style={{
+                                                width: '100%', marginTop: 8, padding: '10px 12px',
+                                                borderRadius: 10, border: '1.5px solid #E2E8F0',
+                                                fontSize: 13, fontFamily: 'inherit', resize: 'vertical',
+                                                outline: 'none', color: '#334155',
+                                            }}
+                                        />
+                                    )}
+                                </>
                             )}
-                          </td>
-                        </tr>
-                    );
-                  })}
-                  </tbody>
-                </table>
-            ) : (
-                <div className="empty">
-                  <div className="empty-ico">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  </div>
-                  <div className="empty-t">No {filter === 'all' ? '' : filter} requests</div>
-                  <div className="empty-s">Nothing to show for this filter right now.</div>
+                        </div>
+                        <div className={s.modalFooter}>
+                            <button className={s.modalCancel} onClick={() => setActionModal(null)} disabled={actionLoading}>
+                                Cancel
+                            </button>
+                            {actionModal.type === 'approve' ? (
+                                <button className={s.modalApprove} onClick={handleApprove} disabled={actionLoading}>
+                                    {actionLoading ? <span className={s.spinnerSm}/> : <CheckCircle size={14}/>}
+                                    {actionLoading ? 'Approving…' : 'Confirm Approval'}
+                                </button>
+                            ) : (
+                                <button className={s.modalReject} onClick={handleReject} disabled={actionLoading}>
+                                    {actionLoading ? <span className={s.spinnerSm}/> : <XCircle size={14}/>}
+                                    {actionLoading ? 'Rejecting…' : 'Confirm Rejection'}
+                                </button>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
-          </div>
-        </main>
-      </>
-  );
+
+            {/* TOAST */}
+            {toast && (
+                <div className={`${s.toast} ${toast.ok ? s.toastOk : s.toastErr}`}>
+                    {toast.ok ? <CheckCircle size={15}/> : <AlertCircle size={15}/>}
+                    {toast.msg}
+                </div>
+            )}
+        </div>
+    );
 }
