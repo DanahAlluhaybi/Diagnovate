@@ -22,9 +22,10 @@ export default function SignUpPage() {
     });
 
     const set = (k: string) =>
-        (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+        (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+            setError('');  //
             setForm(f => ({ ...f, [k]: e.target.value }));
-
+        };
     const goNext = () => {
         const nameValid = /^[a-zA-Z\u0600-\u06FF\s]+$/.test(form.firstName) &&
             /^[a-zA-Z\u0600-\u06FF\s]+$/.test(form.lastName);
