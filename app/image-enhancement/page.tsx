@@ -121,6 +121,7 @@ export default function ImageEnhancementPage() {
 
         const fd = new FormData();
         fd.append('image', selectedFile);
+        fd.append('image_type', scanType === 'Ultrasound' ? 'ultrasound' : 'ct');
         if (patientId.trim()) {
             fd.append('case_id', selectedPatientRef?.id || mrn);
         }
