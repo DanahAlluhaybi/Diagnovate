@@ -16,8 +16,8 @@ function LoginForm() {
     const [password,   setPassword]   = useState('');
     const [show,       setShow]       = useState(false);
     const [loading,    setLoading]    = useState(false);
-    const [error,      setError]      = useState('');
-
+    const [error,    setError]    = useState('');
+    const [pwError,  setPwError]  = useState('');
     // OTP step state
     const [otpStep,    setOtpStep]    = useState(false);
     const [otp,        setOtp]        = useState('');
@@ -43,8 +43,7 @@ function LoginForm() {
             localStorage.setItem(isAdmin ? 'admin_token' : 'token', token);
             if (user) localStorage.setItem(isAdmin ? 'admin_user' : 'user', JSON.stringify(user));
             console.log('isAdmin:', isAdmin, 'role:', role);
-            window.location.href = isAdmin ? '/admin' : '/dashboard';
-
+            router.push(isAdmin ? '/admin' : '/dashboard');
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Invalid credentials. Please try again.');
         } finally {
@@ -247,8 +246,16 @@ function LoginForm() {
                                                     type={show ? 'text' : 'password'}
                                                     placeholder="••••••••"
                                                     value={password}
-                                                    onChange={e => setPassword(e.target.value)}
+                                                    onChange={e => {
+                                                        setPassword(e.target.value);
+                                                        if (e.target.value.length > 0 && e.target.value.length < 8) {
+                                                            setPwError('Password must be at least 8 characters.');
+                                                        } else {
+                                                            setPwError('');
+                                                        }
+                                                    }}
                                                     required
+                                                    minLength={8}
                                                 />
                                                 <button type="button" className="auth-eye" onClick={() => setShow(v => !v)}>
                                                     {show ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -257,6 +264,12 @@ function LoginForm() {
                                         </div>
 
                                     </div>
+
+                                    {pwError && (
+                                        <p style={{ color: '#dc2626', fontSize: 12, marginTop: 4 }}>
+                                            {pwError}
+                                        </p>
+                                    )}
 
                                     <div className="auth-forgot-row">
                                         <Link href="/forgot-password" className="auth-forgot">Forgot password?</Link>
