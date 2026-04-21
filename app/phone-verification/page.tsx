@@ -44,7 +44,7 @@ export default function PhoneVerificationPage() {
         setError(''); setLoading(true);
         try {
             const identifier = new URLSearchParams(window.location.search).get('identifier') ?? '';
-            const data = await auth.verifyOTP(identifier, code.join(''));
+            const data = await auth.verifyOtp(identifier, code.join(''));
             localStorage.setItem('token', data.token);
             if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
             setDone(true);
