@@ -145,8 +145,8 @@ export default function AdminPage() {
         try {
             setLoading(true);
 
-            const token     = localStorage.getItem('admin_token');
-            const userStr   = localStorage.getItem('admin_user');
+            const token   = localStorage.getItem('admin_token');
+            const userStr = localStorage.getItem('admin_user');
 
             if (!token || !userStr) {
                 router.push('/log-in?role=admin');
@@ -322,14 +322,11 @@ export default function AdminPage() {
                                     </div>
                                 </div>
                                 <div style={{ padding: '6px 0' }}>
+                                    {/* ✅ My Profile مرة وحدة بس */}
                                     <Link href="/admin/profile" className={s.navMenuItem}>
                                         <User size={14} /> My Profile
                                     </Link>
                                     <div className={s.navSep} />
-                                    <Link href="/admin/profile" className={s.navMenuItem}>
-                                        <User size={14}/> My Profile
-                                    </Link>
-                                    <div className={s.navSep}/>
                                     <button className={`${s.navMenuItem} ${s.navMenuItemDanger}`} onClick={handleLogout}>
                                         <LogOut size={14} /> Sign out
                                     </button>
@@ -399,8 +396,8 @@ export default function AdminPage() {
                             >
                                 {t.label}
                                 <span className={`${s.tabBadge} ${tab === t.key ? s.tabBadgeActive : ''}`}>
-                      {t.count}
-                    </span>
+                                    {t.count}
+                                </span>
                             </button>
                         ))}
                     </div>
@@ -463,12 +460,12 @@ export default function AdminPage() {
                                         </td>
                                         <td>
                                             <div className={s.verifyBadges}>
-                                <span className={`${s.verifyBadge} ${u.email_verified ? s.verifyOk : s.verifyNo}`}>
-                                  {u.email_verified ? <CheckCircle size={10}/> : <XCircle size={10}/>} Email
-                                </span>
+                                                <span className={`${s.verifyBadge} ${u.email_verified ? s.verifyOk : s.verifyNo}`}>
+                                                    {u.email_verified ? <CheckCircle size={10}/> : <XCircle size={10}/>} Email
+                                                </span>
                                                 <span className={`${s.verifyBadge} ${u.sms_verified ? s.verifyOk : s.verifyNo}`}>
-                                  {u.sms_verified ? <CheckCircle size={10}/> : <XCircle size={10}/>} SMS
-                                </span>
+                                                    {u.sms_verified ? <CheckCircle size={10}/> : <XCircle size={10}/>} SMS
+                                                </span>
                                             </div>
                                         </td>
                                         <td>
@@ -542,10 +539,10 @@ export default function AdminPage() {
                                             </div>
                                         </td>
                                         <td>
-                              <span className={`${s.statusTag} ${u.status === 'active' ? s.statusActive : s.statusInactive}`}>
-                                <span className={s.statusDot} />
-                                  {u.status === 'active' ? 'Active' : 'Inactive'}
-                              </span>
+                                            <span className={`${s.statusTag} ${u.status === 'active' ? s.statusActive : s.statusInactive}`}>
+                                                <span className={s.statusDot} />
+                                                {u.status === 'active' ? 'Active' : 'Inactive'}
+                                            </span>
                                         </td>
                                         <td>
                                             <div className={s.dateCell}>

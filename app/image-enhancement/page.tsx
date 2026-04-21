@@ -115,21 +115,32 @@ export default function ImageEnhancementPage() {
     const handleEnhance = async () => {
         if (!selectedFile) return;
         setLoading(true); setError(''); setSavedOk(false); simulateProgress();
+
+        const token = localStorage.getItem('token');
+        const mrn   = selectedPatientRef?.mrn || patientId.trim();
+
         const fd = new FormData();
         fd.append('image', selectedFile);
+        if (patientId.trim()) {
+            fd.append('case_id', selectedPatientRef?.id || mrn);
+        }
+
         try {
-            const res  = await fetch(`${BASE}/api/enhance`, { method: 'POST', body: fd });
+            const res  = await fetch(`${BASE}/api/enhance`, {
+                method: 'POST',
+                body: fd,
+                headers: { Authorization: `Bearer ${token}` },
+            });
             const data: EnhanceResponse = await res.json();
             if (res.status === 503 && data.loading) { setError('Model is loading, please try again in 30 seconds.'); return; }
             if (!res.ok) { setError(data.error || `Error ${res.status}`); return; }
             if (data.success) {
                 clearTimers(); setProgress(100);
-                setTimeout(() => {
+                setTimeout(async () => {
                     setOriginalSrc(data.original);
                     setEnhancedSrc(data.enhanced);
                     if (patientId.trim()) {
                         // Always use MRN as the key — fall back to whatever was typed if no patient was selected from dropdown
-                        const mrn = selectedPatientRef?.mrn || patientId.trim();
                         const img: SavedImage = {
                             id: `IMG-${Date.now()}`,
                             patientId: mrn,          // key is always MRN
@@ -142,6 +153,30 @@ export default function ImageEnhancementPage() {
                         };
                         saveImageToPatient(mrn, img);
                         setSavedOk(true);
+
+                        // Save enhanced image to backend case record
+                        try {
+                            const patientDbId = selectedPatientRef?.id || mrn;
+                            const casesRes = await fetch(
+                                `${BASE}/api/cases?patient_id=${encodeURIComponent(patientDbId)}`,
+                                { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } },
+                            );
+                            if (casesRes.ok) {
+                                const casesData = await casesRes.json();
+                                const caseId = Array.isArray(casesData)
+                                    ? casesData[0]?.id
+                                    : (casesData?.id ?? casesData?.case_id);
+                                if (caseId) {
+                                    await fetch(`${BASE}/api/cases/${caseId}`, {
+                                        method: 'PATCH',
+                                        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ enhanced_image_path: data.enhanced }),
+                                    });
+                                }
+                            }
+                        } catch {
+                            // backend case update is non-fatal — localStorage save already succeeded
+                        }
                     }
                 }, 400);
             } else { setError(data.error || 'Enhancement failed.'); }

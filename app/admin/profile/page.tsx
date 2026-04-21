@@ -1,11 +1,12 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { Shield, Lock, Bell, Sun, Moon, X, ChevronRight, ArrowLeft, Settings } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Shield, Lock, Bell, Sun, Moon, X, ChevronRight, ArrowLeft, Settings, ChevronDown, LogOut, User, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { BASE } from '@/lib/api';
-import Navbar from '@/components/Navbar';
 
 export default function AdminProfilePage() {
+    const router = useRouter();
     const [admin, setAdmin] = useState<{name:string;email:string}|null>(null);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [showPrefsModal, setShowPrefsModal] = useState(false);
@@ -20,6 +21,10 @@ export default function AdminProfilePage() {
     const [passwordSuccess, setPasswordSuccess] = useState('');
     const [success, setSuccess] = useState('');
     const [visible, setVisible] = useState(false);
+    const [profileOpen, setProfileOpen] = useState(false);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const profileRef = useRef<HTMLDivElement>(null);
+    const notifRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const userStr = localStorage.getItem('admin_user');
@@ -28,6 +33,30 @@ export default function AdminProfilePage() {
         if (savedTheme) setTheme(savedTheme);
         setTimeout(() => setVisible(true), 50);
     }, []);
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (profileRef.current && !profileRef.current.contains(e.target as Node))
+                setProfileOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (notifRef.current && !notifRef.current.contains(e.target as Node))
+                setNotifOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('admin_user');
+        router.push('/log-in?role=admin');
+    };
 
     const handlePasswordChange = async () => {
         setPasswordError('');
@@ -61,6 +90,39 @@ export default function AdminProfilePage() {
                 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
                 :root{--bg:#F0F4F8;--surface:#fff;--teal:#0D9488;--text:#0F172A;--text2:#334155;--muted:#64748B;--border:#E2E8F0;--body:'Plus Jakarta Sans',sans-serif;--display:'DM Serif Display',serif;}
                 body{background:var(--bg);font-family:var(--body);-webkit-font-smoothing:antialiased}
+
+                /* ── NAVBAR (same as dashboard) ── */
+                .pf-nav{height:56px;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-bottom:1px solid #EBF0F5;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:200;box-shadow:0 1px 12px rgba(15,23,42,0.06)}
+                .pf-nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:13px;font-weight:800;letter-spacing:1.5px;color:#0F172A}
+                .pf-nav-logomark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#0D9488,#0891B2);display:flex;align-items:center;justify-content:center}
+                .pf-nav-accent{color:#0D9488}
+                .pf-nav-links{display:flex;align-items:center;gap:4px;margin-left:16px}
+                .pf-nav-link{font-size:13px;font-weight:600;color:#64748B;text-decoration:none;padding:6px 12px;border-radius:8px;transition:all .15s}
+                .pf-nav-link:hover{background:#F1F5F9;color:#0F172A}
+                .pf-nav-link-active{background:#F0FDFA;color:#0D9488}
+                .pf-nav-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+                .pf-nav-iconbtn{width:32px;height:32px;border-radius:9px;border:1px solid #E2E8F0;background:#F8FAFC;color:#64748B;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+                .pf-nav-iconbtn:hover{background:#F0FDFA;color:#0D9488;border-color:#CCFBF1}
+                .pf-nav-divider{width:1px;height:20px;background:#E2E8F0;margin:0 4px}
+                .pf-nav-dropwrap{position:relative}
+                .pf-nav-profile{display:flex;align-items:center;gap:8px;cursor:pointer;padding:5px 10px;border-radius:10px;border:1px solid #E2E8F0;background:#F8FAFC;transition:all .15s}
+                .pf-nav-profile:hover{background:#F0FDFA;border-color:#CCFBF1}
+                .pf-nav-avatar{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#0D9488,#0891B2);display:flex;align-items:center;justify-content:center;color:white}
+                .pf-nav-pname{font-size:12px;font-weight:700;color:#0F172A}
+                .pf-nav-prole{font-size:10px;color:#94A3B8}
+                .pf-nav-dropdown{position:absolute;top:calc(100% + 10px);right:0;background:white;border:1px solid #EBF0F5;border-radius:18px;box-shadow:0 16px 48px rgba(15,23,42,0.12);z-index:300;width:220px;overflow:hidden;animation:dropIn 0.18s cubic-bezier(0.16,1,0.3,1) both}
+                @keyframes dropIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+                .pf-nav-profhead{padding:16px;border-bottom:1px solid #F1F5F9;display:flex;align-items:center;gap:10px}
+                .pf-nav-profav{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#0D9488,#0891B2);display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0}
+                .pf-nav-profname{font-size:13px;font-weight:700;color:#0F172A}
+                .pf-nav-profspec{font-size:11px;color:#94A3B8}
+                .pf-nav-menuitem{display:flex;align-items:center;gap:9px;padding:9px 14px;font-size:13px;font-weight:600;color:#334155;text-decoration:none;cursor:pointer;border:none;background:none;width:100%;font-family:var(--body);transition:background .12s}
+                .pf-nav-menuitem:hover{background:#F8FAFC;color:#0F172A}
+                .pf-nav-menuitem-danger{color:#E11D48}
+                .pf-nav-menuitem-danger:hover{background:#FFF1F2;color:#E11D48}
+                .pf-nav-sep{height:1px;background:#F1F5F9;margin:2px 0}
+
+                /* ── PAGE ── */
                 .wrap{min-height:100vh;background:var(--bg);position:relative}
                 .wrap::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#CBD5E1 1px,transparent 1px);background-size:28px 28px;opacity:.4;pointer-events:none;z-index:0}
                 .blob{position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(13,148,136,.08) 0%,transparent 65%);top:-200px;right:-150px;pointer-events:none;z-index:0}
@@ -137,7 +199,81 @@ export default function AdminProfilePage() {
 
             <div className="wrap">
                 <div className="blob"/>
-                <Navbar />
+
+                {/* ── NAVBAR (نفس الداشبورد) ── */}
+                <nav className="pf-nav">
+                    <Link href="/admin" className="pf-nav-logo">
+                        <div className="pf-nav-logomark">
+                            <Shield size={16} color="white" />
+                        </div>
+                        <span>DIAGNO<span className="pf-nav-accent">VATE</span></span>
+                    </Link>
+
+                    <div className="pf-nav-links">
+                        <Link href="/admin" className="pf-nav-link">Admin Panel</Link>
+                    </div>
+
+                    <div className="pf-nav-right">
+                        <div style={{ position: 'relative' }} ref={notifRef}>
+                            <button className="pf-nav-iconbtn" onClick={() => setNotifOpen(p => !p)} title="Notifications">
+                                <Bell size={15} />
+                            </button>
+                            {notifOpen && (
+                                <div style={{
+                                    position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                                    background: 'white', border: '1px solid #EBF0F5',
+                                    borderRadius: 18, boxShadow: '0 16px 48px rgba(15,23,42,0.12)',
+                                    zIndex: 300, width: 280, overflow: 'hidden',
+                                    animation: 'dropIn 0.18s cubic-bezier(0.16,1,0.3,1) both'
+                                }}>
+                                    <div style={{ padding: '14px 18px', borderBottom: '1px solid #F1F5F9', fontSize: 11, fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#0D9488', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <Bell size={13} /> Notifications
+                                    </div>
+                                    <div style={{ padding: '48px 24px', textAlign: 'center' }}>
+                                        <Bell size={28} color="#CBD5E1" style={{ margin: '0 auto 12px' }} />
+                                        <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', margin: '0 0 4px' }}>All clear</p>
+                                        <p style={{ fontSize: 12, color: '#94A3B8', margin: 0 }}>No new notifications</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <div className="pf-nav-divider" />
+                        <div className="pf-nav-dropwrap" ref={profileRef}>
+                            <div className="pf-nav-profile" onClick={() => setProfileOpen(p => !p)}>
+                                <div className="pf-nav-avatar">
+                                    <Shield size={13} />
+                                </div>
+                                <div>
+                                    <div className="pf-nav-pname">{admin?.name ?? 'Admin'}</div>
+                                    <div className="pf-nav-prole">System Administrator</div>
+                                </div>
+                                <ChevronDown size={12} color="#94A3B8" />
+                            </div>
+                            {profileOpen && (
+                                <div className="pf-nav-dropdown">
+                                    <div className="pf-nav-profhead">
+                                        <div className="pf-nav-profav"><Shield size={18} /></div>
+                                        <div>
+                                            <div className="pf-nav-profname">{admin?.name ?? 'Admin'}</div>
+                                            <div className="pf-nav-profspec">{admin?.email ?? ''}</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ padding: '6px 0' }}>
+                                        {/* ✅ My Profile مرة وحدة */}
+                                        <Link href="/admin/profile" className="pf-nav-menuitem">
+                                            <User size={14} /> My Profile
+                                        </Link>
+                                        <div className="pf-nav-sep" />
+                                        <button className="pf-nav-menuitem pf-nav-menuitem-danger" onClick={handleLogout}>
+                                            <LogOut size={14} /> Sign out
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </nav>
+
                 <main className="main">
                     <div className={`page-head${visible?' visible':''}`}>
                         <Link href="/admin" className="back"><ArrowLeft size={13}/> Admin Panel</Link>
@@ -201,6 +337,7 @@ export default function AdminProfilePage() {
                 </main>
             </div>
 
+            {/* MODALS */}
             {showPrefsModal&&(
                 <div className="modal-overlay" onClick={()=>setShowPrefsModal(false)}>
                     <div className="modal" onClick={e=>e.stopPropagation()}>
