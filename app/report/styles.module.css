@@ -1,512 +1,589 @@
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px;
-    background: #f9fafb;
+/* ════════════════════════════════
+   Report Page — styles.module.css
+   Builds on globals.css tokens
+   ════════════════════════════════ */
+
+/* ── Layout ── */
+.wrap {
     min-height: 100vh;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    position: relative;
+    z-index: 1;
 }
 
-.header {
-    margin-bottom: 24px;
+.main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: calc(var(--nav-h) + 36px) 48px 80px;
 }
 
-.headerTop {
-    display: flex;
-    justify-content: space-between;
+/* ── Feature Header ── */
+.featureHeader { margin-bottom: 28px; }
+
+.backBtn {
+    display: inline-flex;
     align-items: center;
-    margin-bottom: 12px;
+    gap: 6px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: all 0.18s;
+    text-decoration: none;
+}
+.backBtn:hover {
+    color: var(--teal);
+    border-color: var(--teal-muted);
+    background: var(--teal-light);
+    transform: translateX(-2px);
 }
 
-.title {
-    font-size: 28px;
-    font-weight: 600;
-    color: #111827;
+.eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 10px;
+}
+.eyebrowDot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--teal);
+    animation: dvBlink 2s ease-in-out infinite;
+}
+
+.headerRow {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.titleGroup { display: flex; flex-direction: column; gap: 4px; }
+
+.pageTitle {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 3vw, 38px);
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    color: var(--text);
     margin: 0;
+    line-height: 1.15;
+}
+.pageTitle em {
+    font-style: italic;
+    background: var(--grad-brand);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .breadcrumb {
     display: flex;
     align-items: center;
-    gap: 8px;
-    color: #6b7280;
-    font-size: 14px;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--subtle);
 }
-
 .breadcrumbActive {
-    color: #2563eb;
-    font-weight: 500;
+    color: var(--teal);
+    font-weight: 600;
 }
 
 .headerActions {
     display: flex;
-    gap: 12px;
-    align-items: center;
-}
-
-.actionButton {
-    display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    background: white;
-    color: #374151;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
+    flex-wrap: wrap;
 }
 
-.actionButton:hover {
-    background: #f3f4f6;
-    border-color: #d1d5db;
-}
-
-.primaryButton {
-    background: #2563eb;
-    border-color: #2563eb;
-    color: white;
-}
-
-.primaryButton:hover {
-    background: #1d4ed8;
-    border-color: #1d4ed8;
-}
-
-.iconButton {
-    padding: 8px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    background: white;
-    color: #6b7280;
-    cursor: pointer;
-    display: flex;
+.actionBtn {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-
-.iconButton:hover {
-    background: #f3f4f6;
-    color: #374151;
-}
-
-.patientInfo {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.patientHeader {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 20px;
-    color: #374151;
-}
-
-.patientHeader h2 {
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0;
-    color: #111827;
-}
-
-.patientGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-}
-
-.inputGroup {
-    display: flex;
-    flex-direction: column;
     gap: 6px;
-}
-
-.inputGroup label {
+    height: 38px;
+    padding: 0 16px;
+    font-family: var(--font-body);
     font-size: 13px;
-    font-weight: 500;
-    color: #4b5563;
-}
-
-.inputGroup input,
-.inputGroup select,
-.inputGroup textarea {
-    padding: 10px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #111827;
-    transition: all 0.2s;
-    background: #f9fafb;
-}
-
-.inputGroup input:focus,
-.inputGroup select:focus,
-.inputGroup textarea:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    background: white;
-}
-
-.inputGroup input:hover,
-.inputGroup select:hover,
-.inputGroup textarea:hover {
-    background: white;
-    border-color: #9ca3af;
-}
-
-.tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
-    background: white;
-    padding: 8px;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.tab {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border: none;
-    background: transparent;
-    color: #6b7280;
-    font-size: 14px;
-    font-weight: 500;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    flex: 1;
-}
-
-.tab:hover {
-    background: #f3f4f6;
-    color: #374151;
-}
-
-.activeTab {
-    background: #2563eb;
-    color: white;
-}
-
-.activeTab:hover {
-    background: #1d4ed8;
-    color: white;
-}
-
-.content {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    margin-bottom: 24px;
-}
-
-.section {
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-}
-
-.subsection {
-    border-bottom: 1px solid #f0f0f0;
-    padding-bottom: 24px;
-}
-
-.subsection:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
-.subsectionHeader {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 20px;
-    color: #374151;
-}
-
-.subsectionHeader h3 {
-    font-size: 16px;
     font-weight: 600;
-    margin: 0;
-    color: #111827;
-}
-
-.tumorGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-.ultrasoundGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    background: #f9fafb;
-    padding: 20px;
-    border-radius: 8px;
-}
-
-.pathologyGrid {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.radioGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    background: #f9fafb;
-    padding: 20px;
-    border-radius: 8px;
-}
-
-.radioLabel {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
-    color: #374151;
+    color: var(--text2);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
     cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 6px;
-    transition: all 0.2s;
+    transition: all 0.18s;
+    box-shadow: var(--shadow-sm);
 }
-
-.radioLabel:hover {
-    background: #e5e7eb;
-}
-
-.radioLabel input[type="radio"] {
-    width: 16px;
-    height: 16px;
-    accent-color: #2563eb;
-}
-
-.fullWidth {
-    width: 100%;
-}
-
-.featuresGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-}
-
-.checkboxGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    background: #f9fafb;
-    padding: 20px;
-    border-radius: 8px;
-}
-
-.checkbox {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
-    color: #374151;
-    cursor: pointer;
-}
-
-.checkbox input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    accent-color: #2563eb;
-}
-
-
-.tnmGrid {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.tnmCategory {
-    background: #f9fafb;
-    padding: 20px;
-    border-radius: 8px;
-}
-
-.tnmCategory h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #2563eb;
-    margin: 0 0 16px 0;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.molecularGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-}
-
-.mutationCard {
-    background: #f9fafb;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    transition: all 0.2s;
-}
-
-.mutationCard:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-}
-
-.mutationCard h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #2563eb;
-    margin: 0 0 12px 0;
-}
-
-.mutationCard select {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    background: white;
-}
-
-.serumGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-}
-
-.surgeryGrid {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.raiGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-}
-
-.tshGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-.followupGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-}
-
-.finalActions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 24px;
-}
-
-.cancelBtn {
-    padding: 10px 24px;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #6b7280;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.cancelBtn:hover {
-    background: #f3f4f6;
-    border-color: #9ca3af;
-    color: #374151;
-}
-
-.saveBtn {
-    padding: 10px 24px;
-    background: #6b7280;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.saveBtn:hover {
-    background: #4b5563;
+.actionBtn:hover {
+    border-color: var(--faint);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
 .submitBtn {
-    padding: 10px 28px;
-    background: #2563eb;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 18px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--grad-brand);
     border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    color: white;
+    border-radius: var(--r-sm);
     cursor: pointer;
-    transition: all 0.2s;
+    box-shadow: var(--shadow-brand);
+    transition: all 0.18s;
 }
-
 .submitBtn:hover {
-    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(13,148,136,.38);
 }
 
+.iconBtn {
+    width: 38px; height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.15s;
+}
+.iconBtn:hover {
+    color: var(--text);
+    border-color: var(--faint);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ── Cards ── */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-sm);
+    padding: 22px 24px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    position: relative;
+}
+.card::before {
+    content: '';
+    display: block;
+    height: 3px;
+    background: var(--grad-brand);
+    margin: -22px -24px 18px;
+}
+
+.cardHead {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border3);
+}
+
+.cardIcon {
+    width: 32px; height: 32px;
+    background: var(--teal-light);
+    border: 1px solid var(--teal-ring);
+    border-radius: var(--r-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--teal);
+    flex-shrink: 0;
+}
+
+.cardIconSm {
+    width: 26px; height: 26px;
+    background: var(--teal-light);
+    border: 1px solid var(--teal-ring);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--teal);
+    flex-shrink: 0;
+}
+
+.cardTitle {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.1px;
+}
+
+/* ── Section ── */
+.section { display: flex; flex-direction: column; }
+
+/* ── Patient grid ── */
+.patientGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+/* ── Form primitives ── */
+.fGroup { display: flex; flex-direction: column; gap: 6px; }
+
+.fLabel {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text2);
+}
+
+.fInput,
+.fSelect {
+    height: 42px;
+    padding: 0 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface2);
+    outline: none;
+    transition: all 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+.fInput::placeholder { color: var(--subtle); }
+.fInput:hover, .fSelect:hover {
+    border-color: var(--faint);
+    background: var(--surface);
+}
+.fInput:focus, .fSelect:focus {
+    border-color: var(--teal);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+}
+
+/* ── Grids ── */
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.grid1 { display: flex; flex-direction: column; gap: 12px; }
+.grid5 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+.gridTNM { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; }
+.gridMolecular { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+
+/* ── Tab bar ── */
+.tabBar {
+    display: flex;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow-sm);
+}
+
+.tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: all 0.18s;
+    flex: 1;
+}
+.tab:hover {
+    background: var(--surface2);
+    color: var(--text2);
+}
+
+.tabActive {
+    background: var(--grad-brand) !important;
+    color: #fff !important;
+    box-shadow: var(--shadow-brand);
+}
+
+/* ── Radio & Check groups ── */
+.radioGroup,
+.checkGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.radioOpt,
+.checkOpt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text2);
+    cursor: pointer;
+    padding: 10px 14px;
+    border-radius: var(--r-sm);
+    border: 1px solid transparent;
+    transition: all 0.15s;
+}
+.radioOpt:hover, .checkOpt:hover {
+    background: var(--teal-light);
+    border-color: var(--teal-muted);
+    color: var(--teal-dark);
+}
+.radioOpt input, .checkOpt input { accent-color: var(--teal); }
+
+/* ── TNM ── */
+.tnmCat { display: flex; flex-direction: column; gap: 8px; }
+.tnmLabel {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--teal);
+}
+
+/* ── Mutation cards ── */
+.mutCard {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.18s;
+}
+.mutCard:hover {
+    border-color: var(--teal-ring);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+.mutCardLabel {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--teal);
+    margin: 0;
+}
+
+/* ── Final actions ── */
+.finalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+}
+
+.cancelFinal {
+    height: 42px;
+    padding: 0 22px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.cancelFinal:hover { background: var(--surface2); color: var(--text2); }
+
+.saveFinal {
+    height: 42px;
+    padding: 0 22px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text2);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.15s;
+}
+.saveFinal:hover { border-color: var(--faint); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+.finalizeFinal {
+    height: 42px;
+    padding: 0 26px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--grad-brand);
+    border: none;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    box-shadow: var(--shadow-brand);
+    transition: all 0.18s;
+}
+.finalizeFinal:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(13,148,136,.38);
+}
+
+/* ── AI PDF Button ── */
+.pdfAiBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 18px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--purple), var(--teal));
+    border: none;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(124,58,237,0.28);
+    transition: all 0.18s;
+}
+.pdfAiBtn:hover { opacity: 0.88; transform: translateY(-1px); }
+.pdfAiBtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ── PDF Modal ── */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.5);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.modal {
+    background: var(--surface);
+    border-radius: var(--r-2xl);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-xl);
+    padding: 32px;
+    max-width: 580px;
+    width: 100%;
+    animation: modalIn 0.25s cubic-bezier(0.16,1,0.3,1) both;
+    overflow: hidden;
+    position: relative;
+}
+.modal::before {
+    content: '';
+    display: block;
+    height: 3px;
+    background: linear-gradient(135deg, var(--purple), var(--teal));
+    margin: -32px -32px 24px;
+}
+
+.modalTitle {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--text);
+    margin: 0 0 6px;
+    letter-spacing: -0.3px;
+}
+.modalSub {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 20px;
+}
+
+.modalContent {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 16px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.75;
+    max-height: 280px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+.modalActions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.modalClose {
+    height: 40px;
+    padding: 0 20px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.modalClose:hover { background: var(--surface2); color: var(--text2); }
+
+.modalDownload {
+    height: 40px;
+    padding: 0 20px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--purple), var(--teal));
+    border: none;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(124,58,237,0.28);
+    transition: all 0.18s;
+}
+.modalDownload:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+    .main { padding: calc(var(--nav-h) + 28px) 32px 64px; }
+}
 @media (max-width: 768px) {
-    .container {
-        padding: 16px;
-    }
-
-    .headerTop {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-    }
-
-    .headerActions {
-        width: 100%;
-        flex-wrap: wrap;
-    }
-
-    .tabs {
-        flex-wrap: wrap;
-    }
-
-    .tab {
-        flex: none;
-        width: 100%;
-    }
-
-    .patientGrid {
-        grid-template-columns: 1fr;
-    }
-
-    .finalActions {
-        flex-direction: column;
-    }
-
-    .cancelBtn,
-    .saveBtn,
-    .submitBtn {
-        width: 100%;
-    }
+    .main { padding: calc(var(--nav-h) + 20px) 20px 56px; }
+    .headerRow { flex-direction: column; align-items: flex-start; }
+    .headerActions { flex-wrap: wrap; }
+    .tabBar { gap: 4px; }
+    .tab { flex: none; width: 100%; }
+    .finalActions { flex-direction: column; }
+    .cancelFinal, .saveFinal, .finalizeFinal { width: 100%; justify-content: center; }
+}
+@media (max-width: 480px) {
+    .main { padding: calc(var(--nav-h) + 12px) 16px 48px; }
 }
