@@ -13,8 +13,8 @@ import { dashboard } from '@/lib/api';
 const MODULES = [
     { href: '/patient-management', icon: <Users size={26} />, label: 'Patient Management', desc: 'View, add, and manage patient records', color: '#0D9488', bg: '#F0FDFA', border: '#99F6E4' },
     { href: '/image-enhancement',  icon: <Scan size={26} />,  label: 'Image Enhancement',  desc: 'AI-powered ultrasound image clarity boost', color: '#0891B2', bg: '#F0F9FF', border: '#BAE6FD' },
-    { href: '/ai-diagnosis',        icon: <Brain size={26} />, label: 'AI Diagnosis',        desc: 'Context-aware diagnostic recommendations',  color: '#7C3AED', bg: '#F5F3FF', border: '#DDD6FE' },
-    { href: '/report',              icon: <FileText size={26} />, label: 'Reports',          desc: 'Generate and export clinical diagnostic reports', color: '#F59E0B', bg: '#FFFBEB', border: '#FDE68A' },
+    { href: '/ai-diagnosis',        icon: <Brain size={26} />, label: 'AI Diagnosis',        desc: 'Context-aware diagnostic recommendations',  color: '#0D9488', bg: '#F0FDFA', border: '#99F6E4' },
+    { href: '/report',              icon: <FileText size={26} />, label: 'Reports',          desc: 'Generate and export clinical diagnostic reports', color: '#0D9488', bg: '#F0FDFA', border: '#99F6E4' },
 ];
 
 export default function DoctorDashboard() {

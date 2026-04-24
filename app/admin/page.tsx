@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
     Users, CheckCircle, XCircle, Clock, Shield,
     Search, ChevronDown, Building2, AlertCircle,
-    UserCheck, UserX, LogOut, RefreshCw, Bell, User,
+    UserCheck, UserX, LogOut, Bell, User,
 } from 'lucide-react';
 import s from './styles.module.css';
 import { BASE } from '@/lib/api';
@@ -290,9 +290,18 @@ export default function AdminPage() {
             <nav className={s.nav}>
                 <Link href="/admin" className={s.navLogo}>
                     <div className={s.navLogoMark}>
-                        <Shield size={16} color="white" />
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white" />
+                        </svg>
                     </div>
-                    <span>DIAGNO<span className={s.navLogoAccent}>VATE</span></span>
+                    <div>
+                        <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 19, fontWeight: 400, letterSpacing: '-0.3px', lineHeight: 1.1 }}>
+                            Diagno<span className={s.navLogoAccent}>vate</span>
+                        </div>
+                        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase', marginTop: 1 }}>
+                            Admin Console
+                        </div>
+                    </div>
                 </Link>
 
                 <div className={s.navLinks}>
@@ -300,9 +309,6 @@ export default function AdminPage() {
                 </div>
 
                 <div className={s.navRight}>
-                    <button className={s.navIconBtn} onClick={fetchAll} title="Refresh">
-                        <RefreshCw size={15} />
-                    </button>
                     <div style={{ position: 'relative' }} ref={notifRef}>
                         <button className={s.navIconBtn} onClick={() => setNotifOpen(p => !p)} title="Notifications">
                             <Bell size={15} />
