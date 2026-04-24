@@ -324,6 +324,45 @@
 .imgDate   { font-size: 12px; color: var(--muted); }
 .imgId     { font-size: 11px; color: var(--subtle); font-variant-numeric: tabular-nums; }
 
+.imgActions {
+    display: flex; align-items: center; gap: 6px; margin-top: 10px;
+}
+.deleteImgBtn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 11px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 12px; font-weight: 700; font-family: inherit;
+    background: #FFF1F2; color: #E11D48;
+    transition: background .15s, color .15s;
+}
+.deleteImgBtn:hover { background: #E11D48; color: #fff; }
+
+.downloadImgBtn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 11px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 12px; font-weight: 700; font-family: inherit;
+    background: #F0FDFA; color: #0D9488;
+    transition: background .15s, color .15s;
+    text-decoration: none;
+}
+.downloadImgBtn:hover { background: #0D9488; color: #fff; }
+
+.deleteConfirm { margin-top: 10px; }
+.deleteConfirmBtns { display: flex; gap: 6px; }
+.deleteConfirmYes {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 12px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 12px; font-weight: 700; font-family: inherit;
+    background: #E11D48; color: #fff; transition: opacity .15s;
+}
+.deleteConfirmYes:hover { opacity: .85; }
+.deleteConfirmNo {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 12px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 12px; font-weight: 700; font-family: inherit;
+    background: #F1F5F9; color: #64748B; transition: background .15s;
+}
+.deleteConfirmNo:hover { background: #E2E8F0; }
+
 /* ══════════════════════════════════════════
    EMPTY TAB STATE
 ══════════════════════════════════════════ */

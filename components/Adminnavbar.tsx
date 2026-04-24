@@ -45,12 +45,31 @@ export default function AdminNavbar({ pendingCount = 0 }: { pendingCount?: numbe
             {loggingOut && (
                 <div style={{
                     position:'fixed', inset:0, zIndex:9999,
-                    background:'rgba(255,255,255,0.9)', backdropFilter:'blur(8px)',
-                    display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:16
+                    background:'#F0F4F8',
+                    backgroundImage:'radial-gradient(circle,#CBD5E1 1px,transparent 1px)',
+                    backgroundSize:'28px 28px',
+                    display:'flex', alignItems:'center', justifyContent:'center'
                 }}>
-                    <div style={{ width:40, height:40, border:'3px solid #F0FDFA', borderTop:'3px solid #0D9488', borderRadius:'50%', animation:'spin 0.8s linear infinite' }}/>
-                    <p style={{ fontFamily:"'DM Serif Display',serif", fontSize:20, color:'#0F172A' }}>Signing out...</p>
-                    <p style={{ fontSize:13, color:'#64748B' }}>See you next time, Admin</p>
+                    <div style={{
+                        background:'white', border:'1px solid #E2E8F0', borderRadius:28,
+                        padding:'52px 64px', textAlign:'center',
+                        boxShadow:'0 32px 80px rgba(15,23,42,.12)',
+                        display:'flex', flexDirection:'column', alignItems:'center'
+                    }}>
+                        <div style={{
+                            width:52, height:52,
+                            background:'linear-gradient(145deg,#0D9488,#0891B2)',
+                            borderRadius:16, display:'flex', alignItems:'center', justifyContent:'center',
+                            boxShadow:'0 8px 24px rgba(13,148,136,.3)', marginBottom:24
+                        }}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white"/>
+                            </svg>
+                        </div>
+                        <div style={{ width:36, height:36, border:'3px solid #F0FDFA', borderTop:'3px solid #0D9488', borderRadius:'50%', animation:'spin 0.75s linear infinite', marginBottom:20 }}/>
+                        <p style={{ fontFamily:"'DM Serif Display',serif", fontSize:22, color:'#0F172A', margin:'0 0 6px' }}>Signing out...</p>
+                        <p style={{ fontSize:13, color:'#64748B', margin:0 }}>See you next time, Admin</p>
+                    </div>
                 </div>
             )}
 

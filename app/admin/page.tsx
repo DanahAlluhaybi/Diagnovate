@@ -248,14 +248,40 @@ export default function AdminPage() {
         u.institution.toLowerCase().includes(search.toLowerCase())
     );
 
+    const hour = new Date().getHours();
+    const loadingGreeting = hour >= 5 && hour < 12 ? 'Good morning, Admin'
+        : hour >= 12 && hour < 17 ? 'Good afternoon, Admin'
+        : hour >= 17 && hour < 21 ? 'Good evening, Admin'
+        : 'Good night, Admin';
+
     if (loading) return (
-        <div className={s.screen}>
-            <div className={s.screenCard}>
-                <div className={s.spinner} />
-                <p className={s.screenTitle}>Loading Admin Panel…</p>
-                <p className={s.screenSub}>Preparing your workspace…</p>
+        <>
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+                *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+                body{background:#F0F4F8;font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased}
+                body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#CBD5E1 1px,transparent 1px);background-size:28px 28px;opacity:.45;pointer-events:none;z-index:0}
+                .loading-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+                .loading-card{background:white;border:1px solid #E2E8F0;border-radius:28px;padding:52px 64px;text-align:center;box-shadow:0 32px 80px rgba(15,23,42,.12);display:flex;flex-direction:column;align-items:center}
+                .loading-logo{width:52px;height:52px;background:linear-gradient(145deg,#0D9488,#0891B2);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(13,148,136,.3);margin-bottom:24px}
+                .loading-spinner{width:36px;height:36px;border:3px solid #F0FDFA;border-top-color:#0D9488;border-radius:50%;animation:spin .75s linear infinite;margin-bottom:20px}
+                .loading-title{font-family:'DM Serif Display',serif;font-size:22px;color:#0F172A;margin:0 0 6px}
+                .loading-sub{font-size:13px;color:#64748B;margin:0}
+                @keyframes spin{to{transform:rotate(360deg)}}
+            `}</style>
+            <div className="loading-screen">
+                <div className="loading-card">
+                    <div className="loading-logo">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white" />
+                        </svg>
+                    </div>
+                    <div className="loading-spinner" />
+                    <p className="loading-title">{loadingGreeting}</p>
+                    <p className="loading-sub">Preparing your workspace…</p>
+                </div>
             </div>
-        </div>
+        </>
     );
 
     return (

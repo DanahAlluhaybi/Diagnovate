@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './styles.module.css';
-import { X, ArrowLeft, Search, UserPlus, Scan, Trash2 } from 'lucide-react';
+import { X, ArrowLeft, Search, UserPlus, Scan, Trash2, Download } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { BASE } from '@/lib/api';
 
@@ -318,9 +318,18 @@ function PatientManagementPage() {
                                                                                 </div>
                                                                             </div>
                                                                         ) : (
-                                                                            <button className={styles.deleteImgBtn} onClick={() => setConfirmDeleteId(img.id)}>
-                                                                                <Trash2 size={13} /> Delete
-                                                                            </button>
+                                                                            <div className={styles.imgActions}>
+                                                                                <a
+                                                                                    className={styles.downloadImgBtn}
+                                                                                    href={img.enhancedSrc || img.originalSrc}
+                                                                                    download={`${img.label || img.type}.png`}
+                                                                                >
+                                                                                    <Download size={13} /> Save
+                                                                                </a>
+                                                                                <button className={styles.deleteImgBtn} onClick={() => setConfirmDeleteId(img.id)}>
+                                                                                    <Trash2 size={13} /> Delete
+                                                                                </button>
+                                                                            </div>
                                                                         )}
                                                                     </div>
                                                                 </div>
