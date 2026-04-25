@@ -399,11 +399,6 @@ export default function ThyroidCancerReport() {
                     <div className={styles.headerRow}>
                         <div className={styles.titleGroup}>
                             <h1 className={styles.pageTitle}>Thyroid Cancer <em>Report</em></h1>
-                            <div className={styles.breadcrumb}>
-                                <span>Oncology</span>
-                                <ChevronDown size={12} />
-                                <span className={styles.breadcrumbActive}>Thyroid Carcinoma</span>
-                            </div>
                         </div>
                     </div>
                 </div>
