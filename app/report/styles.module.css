@@ -181,7 +181,7 @@
     box-shadow: var(--shadow-sm);
     padding: 22px 24px;
     margin-bottom: 16px;
-    overflow: hidden;
+    overflow: visible;     /* ← تغيير من hidden إلى visible لإظهار الكاليندر */
     position: relative;
 }
 .card::before {
@@ -190,6 +190,7 @@
     height: 3px;
     background: var(--grad-brand);
     margin: -22px -24px 18px;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;  /* ← لتعويض إزالة overflow:hidden */
 }
 
 .cardHead {
@@ -244,7 +245,12 @@
 }
 
 /* ── Form primitives ── */
-.fGroup { display: flex; flex-direction: column; gap: 6px; }
+.fGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;   /* ← مهم لتحديد سياق الـ dropdown */
+}
 
 .fLabel {
     font-size: 11px;

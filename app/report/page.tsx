@@ -1,14 +1,226 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './styles.module.css';
 import Navbar from '@/components/Navbar';
 import {
-    Activity, ArrowLeft, Calendar, ChevronDown, Download,
+    Activity, ArrowLeft, Calendar, ChevronDown, ChevronLeft, ChevronRight, Download,
     FlaskConical, Microscope, Pill, Printer, Save, Scan, Send, Stethoscope, Target,
 } from 'lucide-react';
 
+/* ═══════════════════════════════════════════════════════
+   INLINE CALENDAR DATE PICKER
+═══════════════════════════════════════════════════════ */
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+function parseDate(val: string) {
+    if (!val) return null;
+    const d = new Date(val + 'T00:00:00');
+    return isNaN(d.getTime()) ? null : d;
+}
+
+function formatDisplay(val: string) {
+    const d = parseDate(val);
+    if (!d) return '';
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+interface DatePickerProps {
+    value: string;
+    onChange: (v: string) => void;
+    placeholder?: string;
+}
+
+function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePickerProps) {
+    const today    = new Date();
+    const selected = parseDate(value);
+    const [open,  setOpen]  = useState(false);
+    const [month, setMonth] = useState(selected ? selected.getMonth()    : today.getMonth());
+    const [year,  setYear]  = useState(selected ? selected.getFullYear() : today.getFullYear());
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const h = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        };
+        document.addEventListener('mousedown', h);
+        return () => document.removeEventListener('mousedown', h);
+    }, []);
+
+    useEffect(() => {
+        if (selected) { setMonth(selected.getMonth()); setYear(selected.getFullYear()); }
+    }, [value]);
+
+    const firstDay    = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const prevDays    = new Date(year, month, 0).getDate();
+
+    const cells: { day: number; cur: boolean }[] = [];
+    for (let i = firstDay - 1; i >= 0; i--) cells.push({ day: prevDays - i, cur: false });
+    for (let i = 1; i <= daysInMonth; i++)  cells.push({ day: i,            cur: true  });
+    while (cells.length % 7 !== 0)          cells.push({ day: cells.length - firstDay - daysInMonth + 1, cur: false });
+
+    const prevMonth = () => { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); };
+    const nextMonth = () => { if (month === 11){ setMonth(0);  setYear(y => y + 1); } else setMonth(m => m + 1); };
+
+    const select = (day: number) => {
+        const mm = String(month + 1).padStart(2, '0');
+        const dd = String(day).padStart(2, '0');
+        onChange(`${year}-${mm}-${dd}`);
+        setOpen(false);
+    };
+
+    const isSelected = (day: number) =>
+        !!selected && selected.getFullYear() === year && selected.getMonth() === month && selected.getDate() === day;
+    const isToday = (day: number) =>
+        today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
+
+    return (
+        <div style={{ position: 'relative', width: '100%' }} ref={ref}>
+            {/* ── Trigger ── */}
+            <button
+                type="button"
+                onClick={() => setOpen(o => !o)}
+                style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    width: '100%', height: 42, padding: '0 12px',
+                    border: `1.5px solid ${open ? 'var(--teal)' : 'var(--border)'}`,
+                    borderRadius: 'var(--r-md)',
+                    background: open ? 'var(--surface)' : 'var(--surface2)',
+                    boxShadow: open ? '0 0 0 3px rgba(13,148,136,0.12)' : 'none',
+                    cursor: 'pointer', transition: 'all .2s',
+                    fontFamily: 'var(--font-body)', fontSize: 14,
+                    color: value ? 'var(--text)' : 'var(--subtle)',
+                    textAlign: 'left', boxSizing: 'border-box',
+                }}
+            >
+                <Calendar size={14} style={{ color: 'var(--teal)', flexShrink: 0 }} />
+                <span style={{ flex: 1 }}>{value ? formatDisplay(value) : placeholder}</span>
+                <ChevronDown size={13} style={{ color: 'var(--muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+            </button>
+
+            {/* ── Dropdown ── */}
+            {open && (
+                <div style={{
+                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 9999,
+                    background: 'var(--surface)', border: '1.5px solid var(--border)',
+                    borderRadius: 'var(--r-lg)', boxShadow: 'var(--shadow-lg)',
+                    padding: 16, width: 280,
+                    animation: 'fadeUp .18s cubic-bezier(.16,1,.3,1) both',
+                }}>
+                    {/* Month nav */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <button type="button" onClick={prevMonth} style={{
+                            width: 28, height: 28, border: '1.5px solid var(--border)', borderRadius: 8,
+                            background: 'var(--surface2)', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: 'var(--muted)', transition: 'all .15s',
+                        }}
+                                onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = 'var(--teal-light)'; b.style.color = 'var(--teal)'; }}
+                                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = 'var(--surface2)'; b.style.color = 'var(--muted)'; }}
+                        ><ChevronLeft size={14} /></button>
+
+                        <span style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>
+                            {MONTHS[month]} {year}
+                        </span>
+
+                        <button type="button" onClick={nextMonth} style={{
+                            width: 28, height: 28, border: '1.5px solid var(--border)', borderRadius: 8,
+                            background: 'var(--surface2)', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: 'var(--muted)', transition: 'all .15s',
+                        }}
+                                onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = 'var(--teal-light)'; b.style.color = 'var(--teal)'; }}
+                                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = 'var(--surface2)'; b.style.color = 'var(--muted)'; }}
+                        ><ChevronRight size={14} /></button>
+                    </div>
+
+                    {/* Day headers */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2, marginBottom: 4 }}>
+                        {DAYS.map(d => (
+                            <div key={d} style={{
+                                textAlign: 'center', fontSize: 11, fontWeight: 700,
+                                color: 'var(--muted)', padding: '4px 0',
+                                fontFamily: 'var(--font-body)',
+                            }}>{d}</div>
+                        ))}
+                    </div>
+
+                    {/* Day cells */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2 }}>
+                        {cells.map((cell, i) => {
+                            const sel = cell.cur && isSelected(cell.day);
+                            const tod = cell.cur && isToday(cell.day);
+                            return (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    onClick={() => cell.cur && select(cell.day)}
+                                    style={{
+                                        height: 32, borderRadius: 8, border: 'none',
+                                        background: sel ? 'var(--teal)' : tod ? 'var(--teal-light)' : 'transparent',
+                                        color: sel ? '#fff' : tod ? 'var(--teal)' : cell.cur ? 'var(--text)' : 'var(--faint)',
+                                        fontFamily: 'var(--font-body)', fontSize: 13,
+                                        fontWeight: sel || tod ? 700 : 500,
+                                        cursor: cell.cur ? 'pointer' : 'default',
+                                        transition: 'all .12s',
+                                        outline: tod && !sel ? '1.5px solid var(--teal-ring)' : 'none',
+                                        outlineOffset: '-1px',
+                                    }}
+                                    onMouseEnter={e => {
+                                        if (cell.cur && !sel) {
+                                            const b = e.currentTarget as HTMLButtonElement;
+                                            b.style.background = 'var(--teal-light)';
+                                            b.style.color = 'var(--teal)';
+                                        }
+                                    }}
+                                    onMouseLeave={e => {
+                                        if (cell.cur && !sel) {
+                                            const b = e.currentTarget as HTMLButtonElement;
+                                            b.style.background = tod ? 'var(--teal-light)' : 'transparent';
+                                            b.style.color = tod ? 'var(--teal)' : 'var(--text)';
+                                        }
+                                    }}
+                                >
+                                    {cell.day}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Today shortcut */}
+                    <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border3)' }}>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                                const dd = String(today.getDate()).padStart(2, '0');
+                                onChange(`${today.getFullYear()}-${mm}-${dd}`);
+                                setOpen(false);
+                            }}
+                            style={{
+                                width: '100%', height: 30, border: '1.5px solid var(--border)',
+                                borderRadius: 8, background: 'var(--surface2)',
+                                fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600,
+                                color: 'var(--muted)', cursor: 'pointer', transition: 'all .15s',
+                            }}
+                            onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = 'var(--teal-light)'; b.style.color = 'var(--teal)'; b.style.borderColor = 'var(--teal-ring)'; }}
+                            onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = 'var(--surface2)'; b.style.color = 'var(--muted)'; b.style.borderColor = 'var(--border)'; }}
+                        >
+                            Today
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════════════════════
+   SVG ICONS
+═══════════════════════════════════════════════════════ */
 const ThyroidIcon = () => (
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M12 4c-2.5 0-5 1.5-7 4-2 2.5-3 5.5-3 8 0 2.5 1 5 3 7 2 2 4.5 3 7 3s5-1 7-3c2-2 3-4.5 3-7 0-2.5-1-5.5-3-8-2-2.5-4.5-4-7-4z"/>
@@ -30,9 +242,18 @@ const TABS = [
     { id: 'treatment', label: 'Treatment',      Icon: () => <Pill        size={15} /> },
 ];
 
+/* ═══════════════════════════════════════════════════════
+   MAIN PAGE
+═══════════════════════════════════════════════════════ */
 export default function ThyroidCancerReport() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('tumor');
+
+    // Date states
+    const [diagnosisDate, setDiagnosisDate] = useState('');
+    const [raiDate,       setRaiDate]       = useState('');
+    const [nextVisit,     setNextVisit]     = useState('');
+    const [nextTg,        setNextTg]        = useState('');
 
     return (
         <div className={styles.wrap}>
@@ -40,7 +261,7 @@ export default function ThyroidCancerReport() {
 
             <main className={styles.main}>
 
-                {/* ════ UNIFIED FEATURE HEADER — same as Enhancement ════ */}
+                {/* ════ FEATURE HEADER ════ */}
                 <div className={styles.featureHeader}>
                     <button className={styles.backBtn} onClick={() => router.back()}>
                         <ArrowLeft size={13} /> Back
@@ -96,7 +317,7 @@ export default function ThyroidCancerReport() {
                         </div>
                         <div className={styles.fGroup}>
                             <label className={styles.fLabel}>Date of Diagnosis</label>
-                            <input className={styles.fInput} type="date" />
+                            <DatePicker value={diagnosisDate} onChange={setDiagnosisDate} placeholder="Select date" />
                         </div>
                     </div>
                 </div>
@@ -269,21 +490,36 @@ export default function ThyroidCancerReport() {
                         <div className={styles.card}>
                             <div className={styles.cardHead}><div className={styles.cardIconSm}><Activity size={16} /></div><span className={styles.cardTitle}>RAI Therapy</span></div>
                             <div className={styles.grid2}>
-                                <div className={styles.fGroup}><label className={styles.fLabel}>RAI Dose (mCi)</label><input className={styles.fInput} type="number" placeholder="e.g., 30, 100" /></div>
-                                <div className={styles.fGroup}><label className={styles.fLabel}>Date of RAI</label><input className={styles.fInput} type="date" /></div>
+                                <div className={styles.fGroup}>
+                                    <label className={styles.fLabel}>RAI Dose (mCi)</label>
+                                    <input className={styles.fInput} type="number" placeholder="e.g., 30, 100" />
+                                </div>
+                                <div className={styles.fGroup}>
+                                    <label className={styles.fLabel}>Date of RAI</label>
+                                    <DatePicker value={raiDate} onChange={setRaiDate} placeholder="Select date" />
+                                </div>
                             </div>
                         </div>
                         <div className={styles.card}>
                             <div className={styles.cardHead}><div className={styles.cardIconSm}><Pill size={16} /></div><span className={styles.cardTitle}>TSH Suppression</span></div>
                             <div className={styles.grid1}>
-                                <div className={styles.fGroup} style={{ maxWidth: 260 }}><label className={styles.fLabel}>Levothyroxine Dose</label><input className={styles.fInput} type="number" placeholder="mcg/day" /></div>
+                                <div className={styles.fGroup} style={{ maxWidth: 260 }}>
+                                    <label className={styles.fLabel}>Levothyroxine Dose</label>
+                                    <input className={styles.fInput} type="number" placeholder="mcg/day" />
+                                </div>
                             </div>
                         </div>
                         <div className={styles.card}>
                             <div className={styles.cardHead}><div className={styles.cardIconSm}><Calendar size={16} /></div><span className={styles.cardTitle}>Follow-up Plan</span></div>
                             <div className={styles.grid2}>
-                                <div className={styles.fGroup}><label className={styles.fLabel}>Next visit</label><input className={styles.fInput} type="date" /></div>
-                                <div className={styles.fGroup}><label className={styles.fLabel}>Next Tg check</label><input className={styles.fInput} type="date" /></div>
+                                <div className={styles.fGroup}>
+                                    <label className={styles.fLabel}>Next visit</label>
+                                    <DatePicker value={nextVisit} onChange={setNextVisit} placeholder="Select date" />
+                                </div>
+                                <div className={styles.fGroup}>
+                                    <label className={styles.fLabel}>Next Tg check</label>
+                                    <DatePicker value={nextTg} onChange={setNextTg} placeholder="Select date" />
+                                </div>
                             </div>
                         </div>
                     </div>
