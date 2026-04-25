@@ -19,8 +19,7 @@ const DOCTOR_LINKS = [
     { href: '/patient-management', label: 'Patients'    },
     { href: '/image-enhancement',  label: 'Enhancement' },
     { href: '/ai-diagnosis',       label: 'AI Diagnosis'},
-    { href: '/reports',            label: 'Reports'     },
-];
+    { href: '/report', label: 'Reports' },];
 const ADMIN_LINKS = [{ href: '/admin', label: 'Dashboard' }];
 
 function getInitials(name: string) {
