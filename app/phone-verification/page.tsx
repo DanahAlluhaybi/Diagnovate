@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Loader2, RotateCcw } from 'lucide-react';
@@ -13,6 +13,11 @@ export default function PhoneVerificationPage() {
     const [done,    setDone]    = useState(false);
     const [error,   setError]   = useState('');
     const [resent,  setResent]  = useState(false);
+    const [identifier, setIdentifier] = useState('');
+
+    useEffect(() => {
+        setIdentifier(new URLSearchParams(window.location.search).get('identifier') ?? '');
+    }, []);
 
     const r0 = useRef<HTMLInputElement>(null);
     const r1 = useRef<HTMLInputElement>(null);
@@ -182,7 +187,7 @@ export default function PhoneVerificationPage() {
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6" /></svg>
                                 Back to sign up
                             </Link>
-                            <Link href="/email-verification" className="verify-back" style={{ marginTop: 8 }}>
+                            <Link href={`/email-verification?identifier=${encodeURIComponent(identifier)}`} className="verify-back" style={{ marginTop: 8 }}>
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="3"/><polyline points="2,4 12,13 22,4"/></svg>
                                 Verify with email instead
                             </Link>
