@@ -1,14 +1,226 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-    ArrowLeft, Calendar, ChevronDown, FileText, Filter,
-    Search, X, Eye, Download, Printer,
+    ArrowLeft, Calendar, ChevronDown, ChevronLeft, ChevronRight,
+    FileText, Filter, Search, X, Eye, Download, Printer,
     TrendingUp, Clock, CheckCircle, AlertCircle,
 } from 'lucide-react';
 import styles from './styles.module.css';
 
+/* ═══════════════════════════════════════════════════════
+   INLINE CALENDAR DATE PICKER
+═══════════════════════════════════════════════════════ */
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+function parseDate(val: string) {
+    if (!val) return null;
+    const d = new Date(val + 'T00:00:00');
+    return isNaN(d.getTime()) ? null : d;
+}
+
+function formatDisplay(val: string) {
+    const d = parseDate(val);
+    if (!d) return '';
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+interface DatePickerProps {
+    value: string;
+    onChange: (v: string) => void;
+    placeholder?: string;
+}
+
+function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePickerProps) {
+    const today    = new Date();
+    const selected = parseDate(value);
+    const [open,  setOpen]  = useState(false);
+    const [month, setMonth] = useState(selected ? selected.getMonth()    : today.getMonth());
+    const [year,  setYear]  = useState(selected ? selected.getFullYear() : today.getFullYear());
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const h = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        };
+        document.addEventListener('mousedown', h);
+        return () => document.removeEventListener('mousedown', h);
+    }, []);
+
+    useEffect(() => {
+        if (selected) { setMonth(selected.getMonth()); setYear(selected.getFullYear()); }
+    }, [value]);
+
+    const firstDay    = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const prevDays    = new Date(year, month, 0).getDate();
+
+    const cells: { day: number; cur: boolean }[] = [];
+    for (let i = firstDay - 1; i >= 0; i--) cells.push({ day: prevDays - i, cur: false });
+    for (let i = 1; i <= daysInMonth; i++)  cells.push({ day: i,            cur: true  });
+    while (cells.length % 7 !== 0)          cells.push({ day: cells.length - firstDay - daysInMonth + 1, cur: false });
+
+    const prevMonth = () => { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); };
+    const nextMonth = () => { if (month === 11){ setMonth(0);  setYear(y => y + 1); } else setMonth(m => m + 1); };
+
+    const select = (day: number) => {
+        const mm = String(month + 1).padStart(2, '0');
+        const dd = String(day).padStart(2, '0');
+        onChange(`${year}-${mm}-${dd}`);
+        setOpen(false);
+    };
+
+    const isSelected = (day: number) =>
+        !!selected && selected.getFullYear() === year && selected.getMonth() === month && selected.getDate() === day;
+    const isToday = (day: number) =>
+        today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
+
+    return (
+        <div style={{ position: 'relative', width: '100%' }} ref={ref}>
+            {/* ── Trigger ── */}
+            <button
+                type="button"
+                onClick={() => setOpen(o => !o)}
+                style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    width: '100%', height: 42, padding: '0 12px',
+                    border: `1.5px solid ${open ? 'var(--teal)' : 'var(--border)'}`,
+                    borderRadius: 9,
+                    background: open ? 'white' : 'var(--surface2)',
+                    boxShadow: open ? '0 0 0 3px rgba(13,148,136,0.08)' : 'none',
+                    cursor: 'pointer', transition: 'all .2s',
+                    fontFamily: 'var(--font-body)', fontSize: 13,
+                    color: value ? 'var(--text)' : 'var(--subtle)',
+                    textAlign: 'left', boxSizing: 'border-box',
+                }}
+            >
+                <Calendar size={14} style={{ color: 'var(--teal)', flexShrink: 0 }} />
+                <span style={{ flex: 1 }}>{value ? formatDisplay(value) : placeholder}</span>
+                <ChevronDown size={13} style={{ color: 'var(--muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+            </button>
+
+            {/* ── Dropdown ── */}
+            {open && (
+                <div style={{
+                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 9999,
+                    background: 'var(--surface)', border: '1.5px solid var(--border)',
+                    borderRadius: 'var(--r-lg)', boxShadow: 'var(--shadow-lg)',
+                    padding: 16, width: 280,
+                    animation: 'fadeUp .18s cubic-bezier(.16,1,.3,1) both',
+                }}>
+                    {/* Month nav */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <button type="button" onClick={prevMonth} style={{
+                            width: 28, height: 28, border: '1.5px solid var(--border)', borderRadius: 8,
+                            background: 'var(--surface2)', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: 'var(--muted)', transition: 'all .15s',
+                        }}
+                                onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = 'var(--teal-light)'; b.style.color = 'var(--teal)'; }}
+                                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = 'var(--surface2)'; b.style.color = 'var(--muted)'; }}
+                        ><ChevronLeft size={14} /></button>
+
+                        <span style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>
+                            {MONTHS[month]} {year}
+                        </span>
+
+                        <button type="button" onClick={nextMonth} style={{
+                            width: 28, height: 28, border: '1.5px solid var(--border)', borderRadius: 8,
+                            background: 'var(--surface2)', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: 'var(--muted)', transition: 'all .15s',
+                        }}
+                                onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = 'var(--teal-light)'; b.style.color = 'var(--teal)'; }}
+                                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = 'var(--surface2)'; b.style.color = 'var(--muted)'; }}
+                        ><ChevronRight size={14} /></button>
+                    </div>
+
+                    {/* Day headers */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2, marginBottom: 4 }}>
+                        {DAYS.map(d => (
+                            <div key={d} style={{
+                                textAlign: 'center', fontSize: 11, fontWeight: 700,
+                                color: 'var(--muted)', padding: '4px 0',
+                                fontFamily: 'var(--font-body)',
+                            }}>{d}</div>
+                        ))}
+                    </div>
+
+                    {/* Day cells */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2 }}>
+                        {cells.map((cell, i) => {
+                            const sel = cell.cur && isSelected(cell.day);
+                            const tod = cell.cur && isToday(cell.day);
+                            return (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    onClick={() => cell.cur && select(cell.day)}
+                                    style={{
+                                        height: 32, borderRadius: 8, border: 'none',
+                                        background: sel ? 'var(--teal)' : tod ? 'var(--teal-light)' : 'transparent',
+                                        color: sel ? '#fff' : tod ? 'var(--teal)' : cell.cur ? 'var(--text)' : 'var(--faint)',
+                                        fontFamily: 'var(--font-body)', fontSize: 13,
+                                        fontWeight: sel || tod ? 700 : 500,
+                                        cursor: cell.cur ? 'pointer' : 'default',
+                                        transition: 'all .12s',
+                                        outline: tod && !sel ? '1.5px solid var(--teal-ring)' : 'none',
+                                        outlineOffset: '-1px',
+                                    }}
+                                    onMouseEnter={e => {
+                                        if (cell.cur && !sel) {
+                                            const b = e.currentTarget as HTMLButtonElement;
+                                            b.style.background = 'var(--teal-light)';
+                                            b.style.color = 'var(--teal)';
+                                        }
+                                    }}
+                                    onMouseLeave={e => {
+                                        if (cell.cur && !sel) {
+                                            const b = e.currentTarget as HTMLButtonElement;
+                                            b.style.background = tod ? 'var(--teal-light)' : 'transparent';
+                                            b.style.color = tod ? 'var(--teal)' : 'var(--text)';
+                                        }
+                                    }}
+                                >
+                                    {cell.day}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Today shortcut */}
+                    <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border3)' }}>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                                const dd = String(today.getDate()).padStart(2, '0');
+                                onChange(`${today.getFullYear()}-${mm}-${dd}`);
+                                setOpen(false);
+                            }}
+                            style={{
+                                width: '100%', height: 30, border: '1.5px solid var(--border)',
+                                borderRadius: 8, background: 'var(--surface2)',
+                                fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600,
+                                color: 'var(--muted)', cursor: 'pointer', transition: 'all .15s',
+                            }}
+                            onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = 'var(--teal-light)'; b.style.color = 'var(--teal)'; b.style.borderColor = 'var(--teal-ring)'; }}
+                            onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = 'var(--surface2)'; b.style.color = 'var(--muted)'; b.style.borderColor = 'var(--border)'; }}
+                        >
+                            Today
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════════════════════
+   TYPES & DATA
+═══════════════════════════════════════════════════════ */
 type ReportStatus = 'Finalized' | 'Draft' | 'Pending';
 
 interface Report {
@@ -20,9 +232,9 @@ interface Report {
 }
 
 const MOCK_REPORTS: Report[] = [
-    { id: 'RPT-001', patientName: 'Ahmed Al-Rashid',    patientId: 'P-10023', age: 45, gender: 'Male',   diagnosisDate: '2025-11-10', histType: 'PTC', stage: 'Stage II', ataRisk: 'Intermediate Risk', status: 'Finalized', doctor: 'Dr. Sara Khalid' },
-    { id: 'RPT-002', patientName: 'Fatima Al-Zahrani',  patientId: 'P-10045', age: 38, gender: 'Female', diagnosisDate: '2025-12-01', histType: 'FTC', stage: 'Stage I',  ataRisk: 'Low Risk',          status: 'Draft',     doctor: 'Dr. Omar Nasser' },
-    { id: 'RPT-004', patientName: 'Noura Al-Shamrani',  patientId: 'P-10089', age: 29, gender: 'Female', diagnosisDate: '2025-01-28', histType: 'PTC', stage: 'Stage I',  ataRisk: 'Low Risk',          status: 'Pending',   doctor: 'Dr. Omar Nasser' },
+    { id: 'RPT-001', patientName: 'Ahmed Al-Rashid',   patientId: 'P-10023', age: 45, gender: 'Male',   diagnosisDate: '2025-11-10', histType: 'PTC', stage: 'Stage II', ataRisk: 'Intermediate Risk', status: 'Finalized', doctor: 'Dr. Sara Khalid' },
+    { id: 'RPT-002', patientName: 'Fatima Al-Zahrani', patientId: 'P-10045', age: 38, gender: 'Female', diagnosisDate: '2025-12-01', histType: 'FTC', stage: 'Stage I',  ataRisk: 'Low Risk',          status: 'Draft',     doctor: 'Dr. Omar Nasser' },
+    { id: 'RPT-004', patientName: 'Noura Al-Shamrani', patientId: 'P-10089', age: 29, gender: 'Female', diagnosisDate: '2025-01-28', histType: 'PTC', stage: 'Stage I',  ataRisk: 'Low Risk',          status: 'Pending',   doctor: 'Dr. Omar Nasser' },
 ];
 
 const statusColors: Record<ReportStatus, string> = {
@@ -37,6 +249,9 @@ const riskColors: Record<string, string> = {
     'High Risk':         styles.riskHigh,
 };
 
+/* ═══════════════════════════════════════════════════════
+   MAIN PAGE
+═══════════════════════════════════════════════════════ */
 export default function SearchReportPage() {
     const router = useRouter();
 
@@ -58,12 +273,12 @@ export default function SearchReportPage() {
                 r.patientId.toLowerCase().includes(q) ||
                 r.id.toLowerCase().includes(q) ||
                 r.doctor.toLowerCase().includes(q);
-            const matchesStatus   = filterStatus   === 'All' || r.status   === filterStatus;
-            const matchesHist     = filterHistType === 'All' || r.histType === filterHistType;
-            const matchesRisk     = filterRisk     === 'All' || r.ataRisk  === filterRisk;
-            const reportDate      = new Date(r.diagnosisDate);
-            const matchesFrom     = !dateFrom || reportDate >= new Date(dateFrom);
-            const matchesTo       = !dateTo   || reportDate <= new Date(dateTo);
+            const matchesStatus = filterStatus   === 'All' || r.status   === filterStatus;
+            const matchesHist   = filterHistType === 'All' || r.histType === filterHistType;
+            const matchesRisk   = filterRisk     === 'All' || r.ataRisk  === filterRisk;
+            const reportDate    = new Date(r.diagnosisDate);
+            const matchesFrom   = !dateFrom || reportDate >= new Date(dateFrom);
+            const matchesTo     = !dateTo   || reportDate <= new Date(dateTo);
             return matchesQuery && matchesStatus && matchesHist && matchesRisk && matchesFrom && matchesTo;
         });
     }, [searchQuery, filterStatus, filterHistType, filterRisk, dateFrom, dateTo]);
@@ -199,11 +414,11 @@ export default function SearchReportPage() {
                         </div>
                         <div className={styles.inputGroup}>
                             <label>Date From</label>
-                            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+                            <DatePicker value={dateFrom} onChange={setDateFrom} placeholder="Select date" />
                         </div>
                         <div className={styles.inputGroup}>
                             <label>Date To</label>
-                            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+                            <DatePicker value={dateTo} onChange={setDateTo} placeholder="Select date" />
                         </div>
                     </div>
                 </div>
@@ -211,10 +426,10 @@ export default function SearchReportPage() {
 
             {/* ── Results bar ── */}
             <div className={styles.resultsBar}>
-        <span className={styles.resultsCount}>
-          <TrendingUp size={13} />
-          Showing <strong>{filtered.length}</strong> of {MOCK_REPORTS.length} reports
-        </span>
+                <span className={styles.resultsCount}>
+                    <TrendingUp size={13} />
+                    Showing <strong>{filtered.length}</strong> of {MOCK_REPORTS.length} reports
+                </span>
             </div>
 
             {/* ── Table ── */}
