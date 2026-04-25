@@ -45,6 +45,10 @@ export default function PhoneVerificationPage() {
         try {
             const identifier = new URLSearchParams(window.location.search).get('identifier') ?? '';
             const data = await auth.verifyOtp(identifier, code.join(''));
+            if (data.next_step === 'verify_email') {
+                router.push(`/email-verification?identifier=${encodeURIComponent(data.email ?? '')}`);
+                return;
+            }
             localStorage.setItem('token', data.token);
             if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
             setDone(true);

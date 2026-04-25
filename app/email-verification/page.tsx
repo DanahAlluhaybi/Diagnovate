@@ -42,39 +42,26 @@ export default function EmailVerificationPage() {
     };
 
     const handleVerify = async () => {
-        setError('');
-        setLoading(true);
+        setError(''); setLoading(true);
         try {
-            const identifier = localStorage.getItem('otp_identifier') || '';
-            const otp_code   = code.join('');
-
-            if (!identifier) {
-                setError('Session expired. Please sign up again.');
-                return;
-            }
-
-            await auth.verifyOtp(identifier, otp_code);
-
+            const email = new URLSearchParams(window.location.search).get('identifier') ?? '';
+            await auth.verifyEmailOtp(email, code.join(''));
             setDone(true);
-            setTimeout(() => router.push('/pending-approval'), 1500);
-
-        } catch (err) {
+        } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Invalid code. Please try again.');
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
     const handleResend = async () => {
         setCode(['', '', '', '', '', '']);
         setError('');
         try {
-            const identifier = localStorage.getItem('otp_identifier') || '';
-            await auth.resendOtp(identifier);
+            const email = new URLSearchParams(window.location.search).get('identifier') ?? '';
+            await auth.resendEmailOtp(email);
             setResent(true);
             r0.current?.focus();
             setTimeout(() => setResent(false), 4000);
-        } catch (err) {
+        } catch {
             setError('Failed to resend code. Please try again.');
         }
     };
@@ -83,7 +70,6 @@ export default function EmailVerificationPage() {
 
     return (
         <div className="acard-page">
-
             <span className="acard-page__glow acard-page__glow--teal" />
             <span className="acard-page__glow acard-page__glow--purple" />
 
@@ -107,7 +93,6 @@ export default function EmailVerificationPage() {
 
             <div className="acard-wrap">
                 <div className="acard">
-
                     <Link href="/" className="acard-logo">
                         <div className="acard-logo__mark">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -121,20 +106,19 @@ export default function EmailVerificationPage() {
                         <>
                             <div className="acard-icon acard-icon--teal">
                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="1.8" strokeLinecap="round">
-                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-                                    <line x1="12" y1="18" x2="12.01" y2="18"/>
+                                    <rect x="2" y="4" width="20" height="16" rx="3" />
+                                    <polyline points="2,4 12,13 22,4" />
                                 </svg>
                             </div>
 
                             <div className="acard-status acard-status--teal">
                                 <span className="acard-status__dot" />
-                                Phone Verification
+                                Email Verification
                             </div>
 
-                            <h2 className="acard-h2">Check your phone.</h2>
+                            <h2 className="acard-h2">Check your email.</h2>
                             <p className="acard-p" style={{ marginBottom: 20 }}>
-                                We sent a 6-digit code to your phone number.<br />
-                                Enter it below to continue.
+                                We sent a 6-digit code to your email address.<br />Enter it below to continue.
                             </p>
 
                             <div className="verify-code-row" onPaste={handlePaste}>
@@ -143,10 +127,8 @@ export default function EmailVerificationPage() {
                                         key={i}
                                         ref={refs[i]}
                                         className={`verify-box${d ? ' verify-box--filled' : ''}`}
-                                        type="text"
-                                        inputMode="numeric"
-                                        maxLength={1}
-                                        value={d}
+                                        type="text" inputMode="numeric"
+                                        maxLength={1} value={d}
                                         onChange={e => handleChange(i, e.target.value)}
                                         onKeyDown={e => handleKeyDown(i, e)}
                                         autoFocus={i === 0}
@@ -155,28 +137,20 @@ export default function EmailVerificationPage() {
                             </div>
 
                             <p className="verify-hint">
-                                {filled === 6
-                                    ? '✓ Ready to verify'
-                                    : `${6 - filled} digit${6 - filled !== 1 ? 's' : ''} remaining`}
+                                {filled === 6 ? '✓ Ready to verify' : `${6 - filled} digit${6 - filled !== 1 ? 's' : ''} remaining`}
                             </p>
 
                             {error && (
                                 <div className="dv-alert dv-alert-error">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                                        <circle cx="12" cy="12" r="10" />
-                                        <line x1="12" y1="8" x2="12" y2="12" />
-                                        <line x1="12" y1="16" x2="12.01" y2="16" />
-                                    </svg>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                                     {error}
                                 </div>
                             )}
 
                             {resent && (
                                 <div className="dv-alert dv-alert-success" style={{ marginBottom: 16 }}>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="20 6 9 17 4 12" />
-                                    </svg>
-                                    New code sent to your phone.
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                    New code sent to your email.
                                 </div>
                             )}
 
@@ -204,9 +178,7 @@ export default function EmailVerificationPage() {
                             </button>
 
                             <Link href="/sign-up" className="verify-back">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                                    <polyline points="15 18 9 12 15 6" />
-                                </svg>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6" /></svg>
                                 Back to sign up
                             </Link>
                         </>
@@ -217,9 +189,9 @@ export default function EmailVerificationPage() {
                                     <polyline className="verify-check" points="20 6 9 17 4 12" />
                                 </svg>
                             </div>
-                            <h2 className="acard-h2">Phone verified!</h2>
+                            <h2 className="acard-h2">Email verified!</h2>
                             <p className="acard-p">
-                                Your phone number has been confirmed.<br />
+                                Your email address has been confirmed.<br />
                                 Your account is now pending admin approval.
                             </p>
                             <Link href="/pending-approval" className="acard-btn" style={{ marginTop: 8 }}>
