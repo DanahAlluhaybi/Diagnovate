@@ -5,13 +5,10 @@ import { useRouter } from 'next/navigation';
 import styles from './styles.module.css';
 import Navbar from '@/components/Navbar';
 import {
-    Activity, ArrowLeft, Calendar, ChevronDown, ChevronLeft, ChevronRight, Download,
-    FlaskConical, Microscope, Pill, Printer, Save, Scan, Send, Stethoscope, Target,
+    Activity, ArrowLeft, Calendar, ChevronDown, ChevronLeft, ChevronRight,
+    FlaskConical, Microscope, Pill, Scan, Stethoscope, Target,
 } from 'lucide-react';
 
-/* ═══════════════════════════════════════════════════════
-   INLINE CALENDAR DATE PICKER
-═══════════════════════════════════════════════════════ */
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
@@ -79,7 +76,6 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
 
     return (
         <div style={{ position: 'relative', width: '100%' }} ref={ref}>
-            {/* ── Trigger ── */}
             <button
                 type="button"
                 onClick={() => setOpen(o => !o)}
@@ -101,7 +97,6 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
                 <ChevronDown size={13} style={{ color: 'var(--muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
             </button>
 
-            {/* ── Dropdown ── */}
             {open && (
                 <div style={{
                     position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 9999,
@@ -110,7 +105,6 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
                     padding: 16, width: 280,
                     animation: 'fadeUp .18s cubic-bezier(.16,1,.3,1) both',
                 }}>
-                    {/* Month nav */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                         <button type="button" onClick={prevMonth} style={{
                             width: 28, height: 28, border: '1.5px solid var(--border)', borderRadius: 8,
@@ -137,7 +131,6 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
                         ><ChevronRight size={14} /></button>
                     </div>
 
-                    {/* Day headers */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2, marginBottom: 4 }}>
                         {DAYS.map(d => (
                             <div key={d} style={{
@@ -148,7 +141,6 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
                         ))}
                     </div>
 
-                    {/* Day cells */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2 }}>
                         {cells.map((cell, i) => {
                             const sel = cell.cur && isSelected(cell.day);
@@ -190,7 +182,6 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
                         })}
                     </div>
 
-                    {/* Today shortcut */}
                     <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border3)' }}>
                         <button
                             type="button"
@@ -218,9 +209,6 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
     );
 }
 
-/* ═══════════════════════════════════════════════════════
-   SVG ICONS
-═══════════════════════════════════════════════════════ */
 const ThyroidIcon = () => (
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M12 4c-2.5 0-5 1.5-7 4-2 2.5-3 5.5-3 8 0 2.5 1 5 3 7 2 2 4.5 3 7 3s5-1 7-3c2-2 3-4.5 3-7 0-2.5-1-5.5-3-8-2-2.5-4.5-4-7-4z"/>
@@ -242,26 +230,163 @@ const TABS = [
     { id: 'treatment', label: 'Treatment',      Icon: () => <Pill        size={15} /> },
 ];
 
-/* ═══════════════════════════════════════════════════════
-   MAIN PAGE
-═══════════════════════════════════════════════════════ */
+type ToastType = 'success' | 'error' | 'info';
+interface ToastState { msg: string; type: ToastType; }
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
 export default function ThyroidCancerReport() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('tumor');
+    const [loading,   setLoading]   = useState(false);
+    const [toast,     setToast]     = useState<ToastState | null>(null);
+    const [reportId,  setReportId]  = useState<string | null>(null);
 
-    // Date states
+    const [patientName,   setPatientName]   = useState('');
+    const [patientId,     setPatientId]     = useState('');
+    const [age,           setAge]           = useState('');
+    const [gender,        setGender]        = useState('');
     const [diagnosisDate, setDiagnosisDate] = useState('');
-    const [raiDate,       setRaiDate]       = useState('');
-    const [nextVisit,     setNextVisit]     = useState('');
-    const [nextTg,        setNextTg]        = useState('');
+
+    const [lobeInvolvement, setLobeInvolvement] = useState('');
+    const [tumorSize,        setTumorSize]       = useState('');
+    const [noduleCount,      setNoduleCount]     = useState('');
+    const [usComposition,    setUsComposition]   = useState('Cystic');
+    const [usEchogenicity,   setUsEchogenicity]  = useState('Anechoic');
+    const [usShape,          setUsShape]         = useState('Wider-than-tall');
+    const [usMargin,         setUsMargin]        = useState('Smooth');
+    const [tiradsScore,      setTiradsScore]     = useState('');
+
+    const [histologicalType,  setHistologicalType]  = useState('');
+    const [capsularInvasion,  setCapsularInvasion]  = useState(false);
+    const [vascularInvasion,  setVascularInvasion]  = useState(false);
+    const [lymphaticInvasion, setLymphaticInvasion] = useState(false);
+    const [extrathyroidalExt, setExtrathyroidalExt] = useState(false);
+    const [multifocality,     setMultifocality]     = useState(false);
+
+    const [tCategory,       setTCategory]       = useState('');
+    const [nCategory,       setNCategory]       = useState('');
+    const [mCategory,       setMCategory]       = useState('');
+    const [metastasisSites, setMetastasisSites] = useState<string[]>([]);
+    const [stageGroup,      setStageGroup]      = useState('');
+    const [ataRisk,         setAtaRisk]         = useState('');
+
+    const [brafV600e,    setBrafV600e]    = useState('Not tested');
+    const [rasMutation,  setRasMutation]  = useState('Not tested');
+    const [retPtc,       setRetPtc]       = useState('Not tested');
+    const [tertPromoter, setTertPromoter] = useState('Not tested');
+    const [tgLevel,      setTgLevel]      = useState('');
+    const [antiTg,       setAntiTg]       = useState('');
+    const [calcitonin,   setCalcitonin]   = useState('');
+
+    const [surgeryProcedure,  setSurgeryProcedure]  = useState('');
+    const [raiDose,           setRaiDose]           = useState('');
+    const [raiDate,           setRaiDate]           = useState('');
+    const [levothyroxineDose, setLevothyroxineDose] = useState('');
+    const [nextVisit,         setNextVisit]         = useState('');
+    const [nextTg,            setNextTg]            = useState('');
+
+    const showToast = (msg: string, type: ToastType = 'success') => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3500);
+    };
+
+    const buildPayload = (status: 'draft' | 'submitted') => ({
+        patient_id:         patientId,
+        status,
+        diagnosis_date:     diagnosisDate,
+        lobe_involvement:   lobeInvolvement,
+        tumor_size:         tumorSize    ? parseFloat(tumorSize)         : null,
+        nodule_count:       noduleCount  ? parseInt(noduleCount)         : null,
+        us_composition:     usComposition,
+        us_echogenicity:    usEchogenicity,
+        us_shape:           usShape,
+        us_margin:          usMargin,
+        tirads_score:       tiradsScore,
+        histological_type:  histologicalType,
+        capsular_invasion:  capsularInvasion,
+        vascular_invasion:  vascularInvasion,
+        lymphatic_invasion: lymphaticInvasion,
+        extrathyroidal_ext: extrathyroidalExt,
+        multifocality:      multifocality,
+        t_category:         tCategory,
+        n_category:         nCategory,
+        m_category:         mCategory,
+        metastasis_sites:   JSON.stringify(metastasisSites),
+        stage_group:        stageGroup,
+        ata_risk:           ataRisk,
+        braf_v600e:         brafV600e,
+        ras_mutation:       rasMutation,
+        ret_ptc:            retPtc,
+        tert_promoter:      tertPromoter,
+        tg_level:           tgLevel    ? parseFloat(tgLevel)             : null,
+        anti_tg:            antiTg     ? parseFloat(antiTg)              : null,
+        calcitonin:         calcitonin ? parseFloat(calcitonin)          : null,
+        surgery_procedure:  surgeryProcedure,
+        rai_dose:           raiDose    ? parseFloat(raiDose)             : null,
+        rai_date:           raiDate,
+        levothyroxine_dose: levothyroxineDose ? parseFloat(levothyroxineDose) : null,
+        next_visit:         nextVisit,
+        next_tg_check:      nextTg,
+    });
+
+    const getToken = () =>
+        localStorage.getItem('access_token') || sessionStorage.getItem('access_token') || '';
+
+    const handleSaveDraft = async () => {
+        if (!patientId) { showToast('Please enter Patient ID first', 'error'); return; }
+        try {
+            setLoading(true);
+            const method = reportId ? 'PUT' : 'POST';
+            const url    = reportId ? `${BASE_URL}/api/reports/${reportId}` : `${BASE_URL}/api/reports`;
+            const res    = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                body: JSON.stringify(buildPayload('draft')),
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (!reportId && data.data?.report_id) setReportId(data.data.report_id);
+                showToast('Draft saved successfully ✓', 'success');
+            } else {
+                showToast(data.error || 'Failed to save draft', 'error');
+            }
+        } catch { showToast('Network error. Please try again.', 'error'); }
+        finally  { setLoading(false); }
+    };
+
+    const handleSubmit = async () => {
+        if (!patientId)     { showToast('Patient ID is required', 'error');        return; }
+        if (!diagnosisDate) { showToast('Date of Diagnosis is required', 'error'); return; }
+        try {
+            setLoading(true);
+            const method = reportId ? 'PUT' : 'POST';
+            const url    = reportId ? `${BASE_URL}/api/reports/${reportId}` : `${BASE_URL}/api/reports`;
+            const res    = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                body: JSON.stringify(buildPayload('submitted')),
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Report submitted successfully ✓', 'success');
+                setTimeout(() => router.back(), 1500);
+            } else {
+                showToast(data.error || 'Failed to submit report', 'error');
+            }
+        } catch { showToast('Network error. Please try again.', 'error'); }
+        finally  { setLoading(false); }
+    };
+
+    const toggleSite = (site: string) =>
+        setMetastasisSites(prev => prev.includes(site) ? prev.filter(s => s !== site) : [...prev, site]);
 
     return (
         <div className={styles.wrap}>
             <Navbar />
-
             <main className={styles.main}>
 
-                {/* ════ FEATURE HEADER ════ */}
+                {/* ════ HEADER ════ */}
                 <div className={styles.featureHeader}>
                     <button className={styles.backBtn} onClick={() => router.back()}>
                         <ArrowLeft size={13} /> Back
@@ -279,16 +404,10 @@ export default function ThyroidCancerReport() {
                                 <span className={styles.breadcrumbActive}>Thyroid Carcinoma</span>
                             </div>
                         </div>
-                        <div className={styles.headerActions}>
-                            <button className={styles.actionBtn}><Save size={15} /> Save Draft</button>
-                            <button className={styles.submitBtn}><Send size={15} /> Submit</button>
-                            <button className={styles.iconBtn}><Printer size={15} /></button>
-                            <button className={styles.iconBtn}><Download size={15} /></button>
-                        </div>
                     </div>
                 </div>
 
-                {/* ════ PATIENT INFO CARD ════ */}
+                {/* ════ PATIENT INFO ════ */}
                 <div className={styles.card} style={{ marginBottom: 20 }}>
                     <div className={styles.cardHead}>
                         <div className={styles.cardIcon}><ThyroidIcon /></div>
@@ -297,20 +416,20 @@ export default function ThyroidCancerReport() {
                     <div className={styles.patientGrid}>
                         <div className={styles.fGroup}>
                             <label className={styles.fLabel}>Patient Name *</label>
-                            <input className={styles.fInput} type="text" placeholder="Enter patient name" />
+                            <input className={styles.fInput} type="text" placeholder="Enter patient name" value={patientName} onChange={e => setPatientName(e.target.value)} />
                         </div>
                         <div className={styles.fGroup}>
                             <label className={styles.fLabel}>Patient ID *</label>
-                            <input className={styles.fInput} type="text" placeholder="Enter patient ID" />
+                            <input className={styles.fInput} type="text" placeholder="Enter patient ID" value={patientId} onChange={e => setPatientId(e.target.value)} />
                         </div>
                         <div className={styles.fGroup}>
                             <label className={styles.fLabel}>Age</label>
-                            <input className={styles.fInput} type="number" placeholder="Age" />
+                            <input className={styles.fInput} type="number" placeholder="Age" value={age} onChange={e => setAge(e.target.value)} />
                         </div>
                         <div className={styles.fGroup}>
                             <label className={styles.fLabel}>Gender</label>
-                            <select className={styles.fSelect}>
-                                <option>Select gender</option>
+                            <select className={styles.fSelect} value={gender} onChange={e => setGender(e.target.value)}>
+                                <option value="">Select gender</option>
                                 <option>Male</option>
                                 <option>Female</option>
                             </select>
@@ -322,7 +441,7 @@ export default function ThyroidCancerReport() {
                     </div>
                 </div>
 
-                {/* ════ TAB BAR ════ */}
+                {/* ════ TABS ════ */}
                 <div className={styles.tabBar}>
                     {TABS.map(({ id, label, Icon }) => (
                         <button
@@ -335,7 +454,7 @@ export default function ThyroidCancerReport() {
                     ))}
                 </div>
 
-                {/* ════ TUMOR DETAILS ════ */}
+                {/* ════ TUMOR ════ */}
                 {activeTab === 'tumor' && (
                     <div className={styles.section}>
                         <div className={styles.card}>
@@ -346,8 +465,8 @@ export default function ThyroidCancerReport() {
                             <div className={styles.grid3}>
                                 <div className={styles.fGroup}>
                                     <label className={styles.fLabel}>Lobe Involvement *</label>
-                                    <select className={styles.fSelect}>
-                                        <option>Select lobe</option>
+                                    <select className={styles.fSelect} value={lobeInvolvement} onChange={e => setLobeInvolvement(e.target.value)}>
+                                        <option value="">Select lobe</option>
                                         <option>Right lobe only</option>
                                         <option>Left lobe only</option>
                                         <option>Isthmus only</option>
@@ -357,26 +476,25 @@ export default function ThyroidCancerReport() {
                                 </div>
                                 <div className={styles.fGroup}>
                                     <label className={styles.fLabel}>Tumor Size (cm) *</label>
-                                    <input className={styles.fInput} type="number" step="0.1" placeholder="e.g., 2.5" />
+                                    <input className={styles.fInput} type="number" step="0.1" placeholder="e.g., 2.5" value={tumorSize} onChange={e => setTumorSize(e.target.value)} />
                                 </div>
                                 <div className={styles.fGroup}>
                                     <label className={styles.fLabel}>Number of Nodules</label>
-                                    <input className={styles.fInput} type="number" placeholder="e.g., 1, 2, 3" />
+                                    <input className={styles.fInput} type="number" placeholder="e.g., 1, 2, 3" value={noduleCount} onChange={e => setNoduleCount(e.target.value)} />
                                 </div>
                             </div>
                         </div>
-
                         <div className={styles.card}>
                             <div className={styles.cardHead}>
                                 <div className={styles.cardIconSm}><Scan size={16} /></div>
                                 <span className={styles.cardTitle}>Ultrasound Features</span>
                             </div>
                             <div className={styles.grid5}>
-                                <div className={styles.fGroup}><label className={styles.fLabel}>Composition</label><select className={styles.fSelect}><option>Cystic</option><option>Spongiform</option><option>Mixed</option><option>Solid</option></select></div>
-                                <div className={styles.fGroup}><label className={styles.fLabel}>Echogenicity</label><select className={styles.fSelect}><option>Anechoic</option><option>Hyperechoic</option><option>Isoechoic</option><option>Hypoechoic</option></select></div>
-                                <div className={styles.fGroup}><label className={styles.fLabel}>Shape</label><select className={styles.fSelect}><option>Wider-than-tall</option><option>Taller-than-wide</option></select></div>
-                                <div className={styles.fGroup}><label className={styles.fLabel}>Margin</label><select className={styles.fSelect}><option>Smooth</option><option>Ill-defined</option><option>Lobulated</option><option>Irregular</option></select></div>
-                                <div className={styles.fGroup}><label className={styles.fLabel}>TI-RADS Score</label><input className={styles.fInput} type="text" placeholder="e.g., TR3, TR4, TR5" /></div>
+                                <div className={styles.fGroup}><label className={styles.fLabel}>Composition</label><select className={styles.fSelect} value={usComposition} onChange={e => setUsComposition(e.target.value)}><option>Cystic</option><option>Spongiform</option><option>Mixed</option><option>Solid</option></select></div>
+                                <div className={styles.fGroup}><label className={styles.fLabel}>Echogenicity</label><select className={styles.fSelect} value={usEchogenicity} onChange={e => setUsEchogenicity(e.target.value)}><option>Anechoic</option><option>Hyperechoic</option><option>Isoechoic</option><option>Hypoechoic</option></select></div>
+                                <div className={styles.fGroup}><label className={styles.fLabel}>Shape</label><select className={styles.fSelect} value={usShape} onChange={e => setUsShape(e.target.value)}><option>Wider-than-tall</option><option>Taller-than-wide</option></select></div>
+                                <div className={styles.fGroup}><label className={styles.fLabel}>Margin</label><select className={styles.fSelect} value={usMargin} onChange={e => setUsMargin(e.target.value)}><option>Smooth</option><option>Ill-defined</option><option>Lobulated</option><option>Irregular</option></select></div>
+                                <div className={styles.fGroup}><label className={styles.fLabel}>TI-RADS Score</label><input className={styles.fInput} type="text" placeholder="e.g., TR3, TR4, TR5" value={tiradsScore} onChange={e => setTiradsScore(e.target.value)} /></div>
                             </div>
                         </div>
                     </div>
@@ -392,8 +510,10 @@ export default function ThyroidCancerReport() {
                             </div>
                             <div className={styles.grid1}>
                                 <div className={styles.radioGroup}>
-                                    {['Papillary Thyroid Carcinoma (PTC)', 'Follicular Thyroid Carcinoma (FTC)', 'Medullary Thyroid Carcinoma (MTC)', 'Anaplastic Thyroid Carcinoma (ATC)'].map(opt => (
-                                        <label key={opt} className={styles.radioOpt}><input type="radio" name="histType" /> {opt}</label>
+                                    {['Papillary Thyroid Carcinoma (PTC)','Follicular Thyroid Carcinoma (FTC)','Medullary Thyroid Carcinoma (MTC)','Anaplastic Thyroid Carcinoma (ATC)'].map(opt => (
+                                        <label key={opt} className={styles.radioOpt}>
+                                            <input type="radio" name="histType" checked={histologicalType === opt} onChange={() => setHistologicalType(opt)} /> {opt}
+                                        </label>
                                     ))}
                                 </div>
                             </div>
@@ -405,8 +525,16 @@ export default function ThyroidCancerReport() {
                             </div>
                             <div className={styles.grid1}>
                                 <div className={styles.checkGroup}>
-                                    {['Capsular invasion', 'Vascular invasion', 'Lymphatic invasion', 'Extrathyroidal extension', 'Multifocality'].map(opt => (
-                                        <label key={opt} className={styles.checkOpt}><input type="checkbox" /> {opt}</label>
+                                    {[
+                                        { label: 'Capsular invasion',        state: capsularInvasion,  set: setCapsularInvasion  },
+                                        { label: 'Vascular invasion',        state: vascularInvasion,  set: setVascularInvasion  },
+                                        { label: 'Lymphatic invasion',       state: lymphaticInvasion, set: setLymphaticInvasion },
+                                        { label: 'Extrathyroidal extension', state: extrathyroidalExt, set: setExtrathyroidalExt },
+                                        { label: 'Multifocality',            state: multifocality,     set: setMultifocality     },
+                                    ].map(({ label, state, set }) => (
+                                        <label key={label} className={styles.checkOpt}>
+                                            <input type="checkbox" checked={state} onChange={e => set(e.target.checked)} /> {label}
+                                        </label>
                                     ))}
                                 </div>
                             </div>
@@ -423,19 +551,59 @@ export default function ThyroidCancerReport() {
                                 <span className={styles.cardTitle}>TNM Staging (AJCC 8th Edition)</span>
                             </div>
                             <div className={styles.gridTNM}>
-                                <div className={styles.tnmCat}><p className={styles.tnmLabel}>T — Primary Tumor</p><select className={styles.fSelect}><option>Select T category</option><option>T1a — ≤1 cm</option><option>T1b — &gt;1–2 cm</option><option>T2 — &gt;2–4 cm</option><option>T3a — &gt;4 cm</option><option>T3b — Gross ETE</option><option>T4a — Invades nearby structures</option></select></div>
-                                <div className={styles.tnmCat}><p className={styles.tnmLabel}>N — Lymph Nodes</p><select className={styles.fSelect}><option>Select N category</option><option>N0 — No metastasis</option><option>N1a — Level VI</option><option>N1b — Other cervical levels</option></select></div>
-                                <div className={styles.tnmCat}><p className={styles.tnmLabel}>M — Metastasis</p><select className={styles.fSelect}><option>Select M category</option><option>M0 — No distant metastasis</option><option>M1 — Distant metastasis</option></select></div>
+                                <div className={styles.tnmCat}>
+                                    <p className={styles.tnmLabel}>T — Primary Tumor</p>
+                                    <select className={styles.fSelect} value={tCategory} onChange={e => setTCategory(e.target.value)}>
+                                        <option value="">Select T category</option>
+                                        <option>T1a — ≤1 cm</option>
+                                        <option>T1b — &gt;1–2 cm</option>
+                                        <option>T2 — &gt;2–4 cm</option>
+                                        <option>T3a — &gt;4 cm</option>
+                                        <option>T3b — Gross ETE</option>
+                                        <option>T4a — Invades nearby structures</option>
+                                    </select>
+                                </div>
+                                <div className={styles.tnmCat}>
+                                    <p className={styles.tnmLabel}>N — Lymph Nodes</p>
+                                    <select className={styles.fSelect} value={nCategory} onChange={e => setNCategory(e.target.value)}>
+                                        <option value="">Select N category</option>
+                                        <option>N0 — No metastasis</option>
+                                        <option>N1a — Level VI</option>
+                                        <option>N1b — Other cervical levels</option>
+                                    </select>
+                                </div>
+                                <div className={styles.tnmCat}>
+                                    <p className={styles.tnmLabel}>M — Metastasis</p>
+                                    <select className={styles.fSelect} value={mCategory} onChange={e => setMCategory(e.target.value)}>
+                                        <option value="">Select M category</option>
+                                        <option>M0 — No distant metastasis</option>
+                                        <option>M1 — Distant metastasis</option>
+                                    </select>
+                                </div>
                                 <div className={styles.tnmCat}>
                                     <p className={styles.tnmLabel}>Metastasis Sites</p>
                                     <div className={styles.checkGroup}>
-                                        {['Lung', 'Bone', 'Brain', 'Liver'].map(s => (
-                                            <label key={s} className={styles.checkOpt}><input type="checkbox" /> {s}</label>
+                                        {['Lung','Bone','Brain','Liver'].map(s => (
+                                            <label key={s} className={styles.checkOpt}>
+                                                <input type="checkbox" checked={metastasisSites.includes(s)} onChange={() => toggleSite(s)} /> {s}
+                                            </label>
                                         ))}
                                     </div>
                                 </div>
-                                <div className={styles.tnmCat}><p className={styles.tnmLabel}>Stage Group</p><select className={styles.fSelect}><option>Stage I</option><option>Stage II</option><option>Stage III</option><option>Stage IVA</option><option>Stage IVB</option></select></div>
-                                <div className={styles.tnmCat}><p className={styles.tnmLabel}>ATA Risk</p><select className={styles.fSelect}><option>Low Risk</option><option>Intermediate Risk</option><option>High Risk</option></select></div>
+                                <div className={styles.tnmCat}>
+                                    <p className={styles.tnmLabel}>Stage Group</p>
+                                    <select className={styles.fSelect} value={stageGroup} onChange={e => setStageGroup(e.target.value)}>
+                                        <option value="">Select stage</option>
+                                        <option>Stage I</option><option>Stage II</option><option>Stage III</option><option>Stage IVA</option><option>Stage IVB</option>
+                                    </select>
+                                </div>
+                                <div className={styles.tnmCat}>
+                                    <p className={styles.tnmLabel}>ATA Risk</p>
+                                    <select className={styles.fSelect} value={ataRisk} onChange={e => setAtaRisk(e.target.value)}>
+                                        <option value="">Select risk</option>
+                                        <option>Low Risk</option><option>Intermediate Risk</option><option>High Risk</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -450,10 +618,17 @@ export default function ThyroidCancerReport() {
                                 <span className={styles.cardTitle}>Molecular Markers</span>
                             </div>
                             <div className={styles.gridMolecular}>
-                                {['BRAF V600E', 'RAS Mutation', 'RET/PTC', 'TERT Promoter'].map(m => (
-                                    <div key={m} className={styles.mutCard}>
-                                        <p className={styles.mutCardLabel}>{m}</p>
-                                        <select className={styles.fSelect}><option>Not tested</option><option>Positive</option><option>Negative</option></select>
+                                {[
+                                    { label: 'BRAF V600E',    value: brafV600e,    set: setBrafV600e    },
+                                    { label: 'RAS Mutation',  value: rasMutation,  set: setRasMutation  },
+                                    { label: 'RET/PTC',       value: retPtc,       set: setRetPtc       },
+                                    { label: 'TERT Promoter', value: tertPromoter, set: setTertPromoter },
+                                ].map(({ label, value, set }) => (
+                                    <div key={label} className={styles.mutCard}>
+                                        <p className={styles.mutCardLabel}>{label}</p>
+                                        <select className={styles.fSelect} value={value} onChange={e => set(e.target.value)}>
+                                            <option>Not tested</option><option>Positive</option><option>Negative</option>
+                                        </select>
                                     </div>
                                 ))}
                             </div>
@@ -464,9 +639,9 @@ export default function ThyroidCancerReport() {
                                 <span className={styles.cardTitle}>Serum Markers</span>
                             </div>
                             <div className={styles.grid3}>
-                                <div className={styles.fGroup}><label className={styles.fLabel}>Tg (Thyroglobulin)</label><input className={styles.fInput} type="number" placeholder="ng/mL" /></div>
-                                <div className={styles.fGroup}><label className={styles.fLabel}>Anti-Tg Antibodies</label><input className={styles.fInput} type="number" placeholder="IU/mL" /></div>
-                                <div className={styles.fGroup}><label className={styles.fLabel}>Calcitonin</label><input className={styles.fInput} type="number" placeholder="pg/mL" /></div>
+                                <div className={styles.fGroup}><label className={styles.fLabel}>Tg (Thyroglobulin)</label><input className={styles.fInput} type="number" placeholder="ng/mL" value={tgLevel} onChange={e => setTgLevel(e.target.value)} /></div>
+                                <div className={styles.fGroup}><label className={styles.fLabel}>Anti-Tg Antibodies</label><input className={styles.fInput} type="number" placeholder="IU/mL" value={antiTg} onChange={e => setAntiTg(e.target.value)} /></div>
+                                <div className={styles.fGroup}><label className={styles.fLabel}>Calcitonin</label><input className={styles.fInput} type="number" placeholder="pg/mL" value={calcitonin} onChange={e => setCalcitonin(e.target.value)} /></div>
                             </div>
                         </div>
                     </div>
@@ -478,8 +653,8 @@ export default function ThyroidCancerReport() {
                         <div className={styles.card}>
                             <div className={styles.cardHead}><div className={styles.cardIconSm}><Stethoscope size={16} /></div><span className={styles.cardTitle}>Surgery</span></div>
                             <div className={styles.grid1}>
-                                <select className={styles.fSelect} style={{ maxWidth: 380 }}>
-                                    <option>Select procedure</option>
+                                <select className={styles.fSelect} style={{ maxWidth: 380 }} value={surgeryProcedure} onChange={e => setSurgeryProcedure(e.target.value)}>
+                                    <option value="">Select procedure</option>
                                     <option>Total Thyroidectomy</option>
                                     <option>Near-total Thyroidectomy</option>
                                     <option>Lobectomy + Isthmusectomy</option>
@@ -492,7 +667,7 @@ export default function ThyroidCancerReport() {
                             <div className={styles.grid2}>
                                 <div className={styles.fGroup}>
                                     <label className={styles.fLabel}>RAI Dose (mCi)</label>
-                                    <input className={styles.fInput} type="number" placeholder="e.g., 30, 100" />
+                                    <input className={styles.fInput} type="number" placeholder="e.g., 30, 100" value={raiDose} onChange={e => setRaiDose(e.target.value)} />
                                 </div>
                                 <div className={styles.fGroup}>
                                     <label className={styles.fLabel}>Date of RAI</label>
@@ -505,7 +680,7 @@ export default function ThyroidCancerReport() {
                             <div className={styles.grid1}>
                                 <div className={styles.fGroup} style={{ maxWidth: 260 }}>
                                     <label className={styles.fLabel}>Levothyroxine Dose</label>
-                                    <input className={styles.fInput} type="number" placeholder="mcg/day" />
+                                    <input className={styles.fInput} type="number" placeholder="mcg/day" value={levothyroxineDose} onChange={e => setLevothyroxineDose(e.target.value)} />
                                 </div>
                             </div>
                         </div>
@@ -527,10 +702,25 @@ export default function ThyroidCancerReport() {
 
                 {/* ════ FINAL ACTIONS ════ */}
                 <div className={styles.finalActions}>
-                    <button className={styles.cancelFinal}>Cancel</button>
-                    <button className={styles.saveFinal}>Save as Draft</button>
-                    <button className={styles.finalizeFinal}>Finalize Report</button>
+                    <button className={styles.cancelFinal} onClick={() => router.back()}>Cancel</button>
+                    <button className={styles.saveFinal} onClick={handleSaveDraft} disabled={loading}>
+                        {loading ? 'Saving...' : 'Save as Draft'}
+                    </button>
+                    <button className={styles.finalizeFinal} onClick={handleSubmit} disabled={loading}>
+                        {loading ? 'Submitting...' : 'Finalize Report'}
+                    </button>
                 </div>
+
+                {/* ════ TOAST ════ */}
+                {toast && (
+                    <div className={`${styles.toast} ${
+                        toast.type === 'success' ? styles.toastSuccess :
+                            toast.type === 'error'   ? styles.toastError   :
+                                styles.toastInfo
+                    }`}>
+                        {toast.type === 'success' ? '✓' : toast.type === 'error' ? '✕' : 'i'} {toast.msg}
+                    </div>
+                )}
 
             </main>
         </div>

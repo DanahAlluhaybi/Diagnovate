@@ -153,25 +153,6 @@
     box-shadow: 0 8px 24px rgba(13,148,136,.38);
 }
 
-.iconBtn {
-    width: 38px; height: 38px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: var(--r-sm);
-    cursor: pointer;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.15s;
-}
-.iconBtn:hover {
-    color: var(--text);
-    border-color: var(--faint);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
 
 /* ── Cards ── */
 .card {
@@ -181,7 +162,7 @@
     box-shadow: var(--shadow-sm);
     padding: 22px 24px;
     margin-bottom: 16px;
-    overflow: visible;     /* ← تغيير من hidden إلى visible لإظهار الكاليندر */
+    overflow: visible;
     position: relative;
 }
 .card::before {
@@ -190,7 +171,7 @@
     height: 3px;
     background: var(--grad-brand);
     margin: -22px -24px 18px;
-    border-radius: var(--r-xl) var(--r-xl) 0 0;  /* ← لتعويض إزالة overflow:hidden */
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
 }
 
 .cardHead {
@@ -249,7 +230,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    position: relative;   /* ← مهم لتحديد سياق الـ dropdown */
+    position: relative;
 }
 
 .fLabel {
