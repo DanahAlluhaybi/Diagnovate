@@ -388,9 +388,10 @@ export default function ThyroidCancerReport() {
 
                 {/* ════ HEADER ════ */}
                 <div className={styles.featureHeader}>
-                    <button className={styles.backBtn} onClick={() => router.back()}>
-                        <ArrowLeft size={13} /> Back
+                    <button className={styles.backBtn} onClick={() => router.push('/dashboard')}>
+                        <ArrowLeft size={13} /> Dashboard
                     </button>
+
                     <div className={styles.eyebrow}>
                         <span className={styles.eyebrowDot} />
                         Oncology
