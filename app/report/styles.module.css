@@ -18,7 +18,12 @@
 }
 
 /* ── Feature Header ── */
-.featureHeader { margin-bottom: 28px; }
+.featureHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 44px;
+}
 
 .backBtn {
     display: inline-flex;
