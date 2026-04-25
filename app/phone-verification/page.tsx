@@ -44,12 +44,24 @@ export default function PhoneVerificationPage() {
         setError(''); setLoading(true);
         try {
             const identifier = new URLSearchParams(window.location.search).get('identifier') ?? '';
-            const data = await auth.verifyOtp(identifier, code.join(''));
+            const data = await auth.verifyOtp(identifier, code.join('')) as {
+                token?: string;
+                user?: unknown;
+                next_step?: string;
+                email?: string;
+            };
             if (data.next_step === 'verify_email') {
                 router.push(`/email-verification?identifier=${encodeURIComponent(data.email ?? '')}`);
                 return;
             }
+            if (!data.token) {
+                setError('Token is missing. Please try again.');
+                setLoading(false);
+                return;
+            }
+
             localStorage.setItem('token', data.token);
+
             if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
             setDone(true);
         } catch (err: unknown) {
@@ -171,7 +183,7 @@ export default function PhoneVerificationPage() {
                                 }
                             </button>
 
-                            <div className="auth-divider" style={{ margin: '0 0 16px' }}>didn't receive it?</div>
+                            <div className="auth-divider" style={{ margin: '0 0 16px' }}>Don&apos;treceive it?</div>
 
                             <button
                                 className="verify-resend"
