@@ -1,3 +1,4 @@
+// Email OTP verification page — user enters the 6-digit code sent to their email, with resend and fallback to phone verification.
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -142,7 +143,7 @@ export default function EmailVerificationPage() {
                             </div>
 
                             <p className="verify-hint">
-                                {filled === 6 ? '✓ Ready to verify' : `${6 - filled} digit${6 - filled !== 1 ? 's' : ''} remaining`}
+                                {filled === 6 ? 'Ready to verify' : `${6 - filled} digit${6 - filled !== 1 ? 's' : ''} remaining`}
                             </p>
 
                             {error && (

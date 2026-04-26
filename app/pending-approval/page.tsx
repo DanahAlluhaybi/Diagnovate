@@ -1,10 +1,9 @@
+// Pending approval page — shown after signup to inform the user their account is awaiting admin review.
 'use client';
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
-
-// No more <style> block — all classes live in auth-card.css + globals.css
 
 export default function PendingApprovalPage() {
   const [visible, setVisible] = useState(false);
@@ -13,11 +12,9 @@ export default function PendingApprovalPage() {
   return (
       <div className="acard-page">
 
-        {/* Ambient glows */}
         <span className="acard-page__glow acard-page__glow--teal" />
         <span className="acard-page__glow acard-page__glow--amber" />
 
-        {/* ── Navbar ── */}
         <nav className="acard-nav">
           <Link href="/" className="acard-nav__logo">
             <div className="acard-nav__mark">
@@ -36,7 +33,6 @@ export default function PendingApprovalPage() {
           </div>
         </nav>
 
-        {/* ── Card ── */}
         <div className="acard-wrap">
           <div
               className="acard"
@@ -45,7 +41,6 @@ export default function PendingApprovalPage() {
                   : { opacity: 0, transform: 'translateY(20px) scale(.98)' }
               }
           >
-            {/* Logo */}
             <Link href="/" className="acard-logo">
               <div className="acard-logo__mark">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -55,13 +50,11 @@ export default function PendingApprovalPage() {
               <span className="acard-logo__word">Diagno<span>vate</span></span>
             </Link>
 
-            {/* Status badge */}
             <div className="acard-status acard-status--amber">
               <span className="acard-status__dot" />
               Pending Approval
             </div>
 
-            {/* Icon */}
             <div className="acard-icon acard-icon--amber">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
@@ -69,7 +62,6 @@ export default function PendingApprovalPage() {
               </svg>
             </div>
 
-            {/* Progress path */}
             <div className="acard-path">
               <div className="acard-path__step">
                 <div className="acard-path__dot acard-path__dot--done">
@@ -104,7 +96,6 @@ export default function PendingApprovalPage() {
               <strong>An admin will review and approve it shortly.</strong>
             </p>
 
-            {/* Warning info box */}
             <div className="acard-info acard-info--amber">
               <svg className="acard-info__icon" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
@@ -116,7 +107,6 @@ export default function PendingApprovalPage() {
               </div>
             </div>
 
-            {/* Next steps */}
             <div className="acard-steps">
               {[
                 'Admin reviews your credentials and specialty',

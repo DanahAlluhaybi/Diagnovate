@@ -1,3 +1,4 @@
+// Phone OTP verification page — user enters the 6-digit SMS code, with resend and fallback to email verification.
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -70,11 +71,9 @@ export default function PhoneVerificationPage() {
 
     return (
         <div className="acard-page">
-            {/* Ambient glows */}
             <span className="acard-page__glow acard-page__glow--teal" />
             <span className="acard-page__glow acard-page__glow--purple" />
 
-            {/* ── Navbar ── */}
             <nav className="acard-nav">
                 <Link href="/" className="acard-nav__logo">
                     <div className="acard-nav__mark">
@@ -93,10 +92,8 @@ export default function PhoneVerificationPage() {
                 </div>
             </nav>
 
-            {/* ── Card ── */}
             <div className="acard-wrap">
                 <div className="acard">
-                    {/* Logo */}
                     <Link href="/" className="acard-logo">
                         <div className="acard-logo__mark">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -126,7 +123,6 @@ export default function PhoneVerificationPage() {
                             </p>
 
 
-                            {/* OTP boxes */}
                             <div className="verify-code-row" onPaste={handlePaste}>
                                 {code.map((d, i) => (
                                     <input
@@ -143,7 +139,7 @@ export default function PhoneVerificationPage() {
                             </div>
 
                             <p className="verify-hint">
-                                {filled === 6 ? '✓ Ready to verify' : `${6 - filled} digit${6 - filled !== 1 ? 's' : ''} remaining`}
+                                {filled === 6 ? 'Ready to verify' : `${6 - filled} digit${6 - filled !== 1 ? 's' : ''} remaining`}
                             </p>
 
                             {error && (

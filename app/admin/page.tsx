@@ -1,3 +1,4 @@
+// Admin dashboard — manages doctor account approvals/rejections, shows pending and active user lists, with stats and search.
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -13,7 +14,6 @@ import { BASE } from '@/lib/api';
 
 const API_BASE_URL = `${BASE}/api`;
 
-// ─── TYPES ──────────────
 interface AdminStats {
     total_users: number;
     pending_approvals: number;
@@ -60,7 +60,6 @@ const REJECTION_REASONS = [
     'Other',
 ];
 
-/* ─── HELPERS ───────────────────────────────────────────────────── */
 const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 const formatTime = (d: string) =>
@@ -354,7 +353,6 @@ export default function AdminPage() {
                                     </div>
                                 </div>
                                 <div style={{ padding: '6px 0' }}>
-                                    {/* ✅ My Profile مرة وحدة بس */}
                                     <Link href="/admin/profile" className={s.navMenuItem}>
                                         <User size={14} /> My Profile
                                     </Link>
@@ -369,9 +367,7 @@ export default function AdminPage() {
                 </div>
             </nav>
 
-            {/* MAIN */}
             <main className={s.main}>
-                {/* HERO */}
                 <div className={s.hero}>
                     <div className={s.heroBlob1} />
                     <div className={s.heroBlob2} />
@@ -408,7 +404,6 @@ export default function AdminPage() {
                     </div>
                 </div>
 
-                {/* SECTION HEADER + TABS + SEARCH */}
                 <div className={s.secHead}>
                     <span className={s.secLabel}>User Accounts</span>
                     <div className={s.secLine} />

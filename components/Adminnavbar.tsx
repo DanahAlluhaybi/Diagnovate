@@ -1,3 +1,4 @@
+// Admin navbar — fixed header for the admin panel, with notification bell and profile dropdown including sign-out.
 'use client';
 
 import { useState } from 'react';
@@ -41,7 +42,6 @@ export default function AdminNavbar({ pendingCount = 0 }: { pendingCount?: numbe
         }
       `}</style>
 
-            {/* Logout overlay */}
             {loggingOut && (
                 <div style={{
                     position:'fixed', inset:0, zIndex:9999,
@@ -88,7 +88,6 @@ export default function AdminNavbar({ pendingCount = 0 }: { pendingCount?: numbe
                     display:'flex', alignItems:'center', justifyContent:'space-between'
                 }}>
 
-                    {/* ── LOGO ── */}
                     <div style={{ display:'flex', alignItems:'center', gap:14 }}>
                         <div style={{ position:'relative' }}>
                             <div style={{
@@ -126,10 +125,8 @@ export default function AdminNavbar({ pendingCount = 0 }: { pendingCount?: numbe
                         </div>
                     </div>
 
-                    {/* ── RIGHT ── */}
                     <div style={{ display:'flex', alignItems:'center', gap:10 }}>
 
-                        {/* Bell */}
                         <div style={{ position:'relative' }}>
                             <button
                                 className="an-icon-btn"
@@ -181,7 +178,6 @@ export default function AdminNavbar({ pendingCount = 0 }: { pendingCount?: numbe
                             )}
                         </div>
 
-                        {/* Profile dropdown */}
                         <div style={{ position:'relative' }}>
                             <button
                                 onClick={() => { setDropdownOpen(o => !o); setBellOpen(false); }}
@@ -226,7 +222,6 @@ export default function AdminNavbar({ pendingCount = 0 }: { pendingCount?: numbe
                                     overflow:'hidden', zIndex:200,
                                     animation:'fadeUp 0.18s ease'
                                 }}>
-                                    {/* Profile info */}
                                     <div style={{ padding:'16px 16px 12px', borderBottom:'1px solid #F1F5F9' }}>
                                         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                                             <div style={{
@@ -247,7 +242,6 @@ export default function AdminNavbar({ pendingCount = 0 }: { pendingCount?: numbe
                                     </div>
 
                                     <div style={{ padding:'8px' }}>
-                                        {/* View Profile */}
                                         <button
                                             className="an-menu-item"
                                             style={{ color:'#334155' }}
@@ -263,7 +257,6 @@ export default function AdminNavbar({ pendingCount = 0 }: { pendingCount?: numbe
 
                                         <div style={{ height:1, background:'#F1F5F9', margin:'6px 0' }}/>
 
-                                        {/* Sign Out */}
                                         <button
                                             className="an-menu-item"
                                             style={{ color:'#EF4444' }}

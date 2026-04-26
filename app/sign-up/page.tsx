@@ -16,7 +16,8 @@ export default function SignUpPage() {
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState<'sms' | 'email' | null>(null);
     const [error,   setError]   = useState('');
-    const [signupIdentifier, setSignupIdentifier] = useState('');
+    const [signupPhone, setSignupPhone] = useState('');
+    const [signupEmail, setSignupEmail] = useState('');
 
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '', phone: '', idNumber: '',
@@ -63,7 +64,9 @@ export default function SignUpPage() {
             });
 
             if (raw?.next_step === 'choose_verification') {
-                setSignupIdentifier(raw?.identifier ?? '');
+                // الـ backend يُرسل phone و email — نحفظهم عشان handleChoose يستخدمهم
+                setSignupPhone(raw?.phone ?? form.phone);
+                setSignupEmail(raw?.email ?? form.email);
                 setStep(2);
             } else {
                 // fallback: backend sends OTP automatically
@@ -80,12 +83,14 @@ export default function SignUpPage() {
     /* ── step 2: user picks verification method ── */
     const handleChoose = async (method: 'sms' | 'email') => {
         setError(''); setSending(method);
+        // SMS يحتاج رقم الجوال، Email يحتاج الإيميل
+        const identifier = method === 'sms' ? signupPhone : signupEmail;
         try {
-            await auth.sendOtp(signupIdentifier, method);
+            await auth.sendOtp(identifier, method);
             if (method === 'sms') {
-                router.push(`/phone-verification?identifier=${encodeURIComponent(signupIdentifier)}`);
+                router.push(`/phone-verification?identifier=${encodeURIComponent(identifier)}`);
             } else {
-                router.push(`/email-verification?identifier=${encodeURIComponent(signupIdentifier)}`);
+                router.push(`/email-verification?identifier=${encodeURIComponent(identifier)}`);
             }
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Failed to send code. Please try again.');
@@ -314,7 +319,7 @@ export default function SignUpPage() {
                                             <div className="auth-pw-str__bars">
                                                 {[1, 2, 3, 4].map(i => (
                                                     <div key={i} className="auth-pw-str__bar"
-                                                        style={{ background: i <= pwStr ? pwMeta[pwStr]!.c : 'var(--border)' }} />
+                                                         style={{ background: i <= pwStr ? pwMeta[pwStr]!.c : 'var(--border)' }} />
                                                 ))}
                                             </div>
                                             <span className="auth-pw-str__lbl" style={{ color: pwMeta[pwStr]?.c }}>
@@ -359,7 +364,7 @@ export default function SignUpPage() {
                                 </button>
 
                                 <button type="button" className="auth-btn-ghost" style={{ marginTop: 8 }}
-                                    onClick={() => { setStep(0); setError(''); }}>
+                                        onClick={() => { setStep(0); setError(''); }}>
                                     <ArrowLeft size={14} /> Back
                                 </button>
                             </form>

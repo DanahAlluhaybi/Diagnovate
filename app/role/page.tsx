@@ -1,3 +1,4 @@
+// Role selection page — lets users choose between Admin and Doctor before being sent to the login page.
 'use client';
 
 import Link from 'next/link';
@@ -21,7 +22,6 @@ export default function RolePage() {
         body{background:var(--bg);color:var(--text);font-family:var(--body);overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
         body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#CBD5E1 1px,transparent 1px);background-size:28px 28px;opacity:.45;pointer-events:none;z-index:0}
 
-        /* NAV */
         .nav{position:relative;z-index:10;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(255,255,255,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
         .nav-logo{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--text)}
         .nav-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#0D9488,#0891B2,#0369A1);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(13,148,136,.32);position:relative}
@@ -31,14 +31,11 @@ export default function RolePage() {
         .nav-back{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;padding:8px 14px;background:white;border:1px solid var(--border);border-radius:10px;transition:all .18s}
         .nav-back:hover{color:var(--teal);border-color:var(--teal-ring);background:var(--teal-light)}
 
-        /* PAGE */
         .page{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px}
 
-        /* blobs */
         .blob1{position:fixed;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(13,148,136,.09) 0%,transparent 65%);top:-250px;right:-200px;pointer-events:none;z-index:0}
         .blob2{position:fixed;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(30,64,175,.07) 0%,transparent 65%);bottom:-150px;left:-100px;pointer-events:none;z-index:0}
 
-        /* HEADER */
         .header{text-align:center;margin-bottom:56px;animation:fadeUp .6s ease both}
         .badge{display:inline-flex;align-items:center;gap:7px;background:var(--teal-light);border:1px solid var(--teal-ring);color:var(--teal);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:100px;margin-bottom:22px}
         .badge-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:blink 2s ease-in-out infinite;box-shadow:0 0 0 3px rgba(13,148,136,.2)}
@@ -46,7 +43,6 @@ export default function RolePage() {
         .h1 em{font-style:italic;background:linear-gradient(120deg,#0D9488,#7C3AED);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
         .sub{font-size:16px;color:var(--muted);max-width:440px;margin:0 auto;line-height:1.65}
 
-        /* CARDS */
         .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:820px;width:100%;animation:fadeUp .6s .15s ease both}
         .role-card{position:relative;background:white;border:2px solid var(--border);border-radius:24px;padding:40px 36px;text-decoration:none;color:var(--text);transition:all .3s cubic-bezier(.16,1,.3,1);overflow:hidden;box-shadow:0 4px 20px rgba(15,23,42,.07)}
         .role-card:hover{transform:translateY(-8px)}
@@ -94,7 +90,6 @@ export default function RolePage() {
                 </div>
 
                 <div className="cards">
-                    {/* ADMIN */}
                     <Link href="/log-in?role=admin" className="role-card"
                           style={{'--hover-border':'#BFDBFE'} as React.CSSProperties}
                           onMouseEnter={e=>{const el=e.currentTarget as HTMLAnchorElement;el.style.borderColor='#BFDBFE';el.style.boxShadow='0 24px 64px rgba(30,64,175,.15)'}}
@@ -119,7 +114,6 @@ export default function RolePage() {
                         </div>
                     </Link>
 
-                    {/* DOCTOR */}
                     <Link href="/log-in?role=doctor" className="role-card"
                           onMouseEnter={e=>{const el=e.currentTarget as HTMLAnchorElement;el.style.borderColor='#99F6E4';el.style.boxShadow='0 24px 64px rgba(13,148,136,.15)'}}
                           onMouseLeave={e=>{const el=e.currentTarget as HTMLAnchorElement;el.style.borderColor='var(--border)';el.style.boxShadow='0 4px 20px rgba(15,23,42,.07)'}}>

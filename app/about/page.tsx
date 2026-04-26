@@ -1,3 +1,4 @@
+// About page — mission statement, platform stats, feature breakdown, CTA, and footer. Public-facing, no auth required.
 'use client';
 
 import Link from 'next/link';
@@ -55,7 +56,6 @@ export default function AboutPage() {
         body{background:var(--bg);color:var(--text);font-family:var(--body);overflow-x:hidden;-webkit-font-smoothing:antialiased}
         body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#CBD5E1 1px,transparent 1px);background-size:28px 28px;opacity:.45;pointer-events:none;z-index:0}
 
-        /* NAV */
         .nav{position:fixed;top:0;left:0;right:0;z-index:100;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(255,255,255,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
         .nav-logo{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--text)}
         .nav-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#0D9488,#0891B2,#0369A1);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(13,148,136,.32),inset 0 1px 0 rgba(255,255,255,.18);position:relative}
@@ -69,10 +69,8 @@ export default function AboutPage() {
         .nav-cta{display:inline-flex;align-items:center;gap:7px;background:var(--grad);color:white;font-size:13.5px;font-weight:700;padding:9px 20px;border-radius:11px;text-decoration:none;box-shadow:0 4px 16px rgba(13,148,136,.3);transition:all .2s}
         .nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(13,148,136,.4)}
 
-        /* PAGE */
         .page{position:relative;z-index:1;padding-top:68px}
 
-        /* HERO */
         .hero{padding:80px 48px 60px;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
         .badge{display:inline-flex;align-items:center;gap:7px;background:var(--teal-light);border:1px solid var(--teal-ring);color:var(--teal);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:100px;margin-bottom:22px;width:fit-content;animation:fadeUp .6s ease both}
         .badge-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:blink 2s ease-in-out infinite;box-shadow:0 0 0 3px rgba(13,148,136,.2)}
@@ -85,7 +83,6 @@ export default function AboutPage() {
         .btn-g:hover{border-color:#CBD5E1;transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.09)}
         .btns{display:flex;gap:12px;animation:fadeUp .6s .3s ease both}
 
-        /* HERO SIDE */
         .hero-side{animation:fadeUp .7s .15s ease both}
         .mission-card{background:white;border:1px solid var(--border);border-radius:22px;padding:32px;box-shadow:0 8px 32px rgba(15,23,42,.09);position:relative;overflow:hidden}
         .mission-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad)}
@@ -96,7 +93,6 @@ export default function AboutPage() {
         .mc-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
         .chip{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--text2)}
 
-        /* STATS */
         .stats-wrap{padding:0 48px 64px;position:relative;z-index:1}
         .stats-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
         .stat-card{background:white;border:1px solid var(--border);border-radius:18px;padding:26px 22px;text-align:center;box-shadow:0 2px 8px rgba(15,23,42,.05);transition:all .25s}
@@ -105,7 +101,6 @@ export default function AboutPage() {
         .stat-lbl{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:4px}
         .stat-sub{font-size:11.5px;color:var(--subtle)}
 
-        /* OFFER */
         .offer-wrap{padding:0 48px 80px;position:relative;z-index:1}
         .sec-head{max-width:1200px;margin:0 auto 48px;display:flex;align-items:center;gap:14px}
         .sec-label{font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--teal);white-space:nowrap}
@@ -119,7 +114,6 @@ export default function AboutPage() {
         .oc-pts{display:flex;flex-direction:column;gap:8px}
         .oc-pt{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;color:var(--text2)}
 
-        /* CTA */
         .cta{padding:0 48px 100px;position:relative;z-index:1}
         .cta-inner{max-width:1200px;margin:0 auto;background:linear-gradient(135deg,#0D9488 0%,#0891B2 50%,#7C3AED 100%);border-radius:28px;padding:72px;text-align:center;position:relative;overflow:hidden}
         .cta-c{position:absolute;border-radius:50%;background:rgba(255,255,255,.06)}
@@ -132,7 +126,6 @@ export default function AboutPage() {
         .btn-ow{display:inline-flex;align-items:center;gap:8px;background:transparent;color:white;font-family:var(--body);font-size:14.5px;font-weight:600;padding:12px 26px;border-radius:12px;border:1.5px solid rgba(255,255,255,.35);cursor:pointer;text-decoration:none;transition:all .22s}
         .btn-ow:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
 
-        /* FOOTER */
         .footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:28px 48px;display:flex;align-items:center;justify-content:space-between;background:white}
         .footer-logo{display:flex;align-items:center;gap:9px;font-family:var(--display);font-size:18px;color:var(--text)}
         .footer-logo span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -153,7 +146,6 @@ export default function AboutPage() {
         }
       `}</style>
 
-        {/* NAV */}
         <nav className="nav">
           <Link href="/" className="nav-logo">
             <div className="nav-mark">
@@ -171,7 +163,6 @@ export default function AboutPage() {
         </nav>
 
         <div className="page">
-          {/* HERO */}
           <div style={{position:'relative',overflow:'hidden'}}>
             <div style={{position:'absolute',width:600,height:600,borderRadius:'50%',background:'radial-gradient(circle,rgba(13,148,136,.1) 0%,transparent 65%)',top:-200,right:-150,pointerEvents:'none'}}/>
             <div style={{position:'absolute',width:400,height:400,borderRadius:'50%',background:'radial-gradient(circle,rgba(124,58,237,.07) 0%,transparent 65%)',bottom:-80,left:-80,pointerEvents:'none'}}/>
@@ -200,7 +191,6 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* STATS */}
           <div className="stats-wrap">
             <div className="stats-grid">
               {stats.map(s=>(
@@ -213,7 +203,6 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* OFFER */}
           <div className="offer-wrap">
             <div className="sec-head">
               <span className="sec-label">What We Offer</span>
@@ -239,7 +228,6 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* CTA */}
           <div className="cta">
             <div className="cta-inner">
               <div className="cta-c" style={{width:400,height:400,top:-160,right:-100}}/>
@@ -254,7 +242,6 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* FOOTER */}
           <footer className="footer">
             <div className="footer-logo">
               <div className="nav-mark" style={{width:30,height:30,borderRadius:9}}>
