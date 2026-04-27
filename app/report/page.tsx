@@ -1,5 +1,5 @@
 'use client';
-
+import Image from "next/image";
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './styles.module.css';
@@ -45,10 +45,6 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
         document.addEventListener('mousedown', h);
         return () => document.removeEventListener('mousedown', h);
     }, []);
-
-    useEffect(() => {
-        if (selected) { setMonth(selected.getMonth()); setYear(selected.getFullYear()); }
-    }, [value]);
 
     const firstDay    = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -236,6 +232,7 @@ interface ToastState { msg: string; type: ToastType; }
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function ThyroidCancerReport() {
+    const [generatedReport, setGeneratedReport] = useState("");
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('tumor');
     const [loading,   setLoading]   = useState(false);
@@ -376,6 +373,91 @@ export default function ThyroidCancerReport() {
             }
         } catch { showToast('Network error. Please try again.', 'error'); }
         finally  { setLoading(false); }
+    };
+    const handleGenerateAIReport = async () => {
+        if (!patientId) {
+            showToast('Patient ID is required', 'error');
+            return;
+        }
+
+        if (!diagnosisDate) {
+            showToast('Date of Diagnosis is required', 'error');
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            const response = await fetch("http://127.0.0.1:8080/api/reports/generate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    patient_name: patientName,
+                    patient_id: patientId,
+                    age: age,
+                    gender: gender,
+                    date_of_diagnosis: diagnosisDate,
+
+                    lobe_involvement: lobeInvolvement,
+                    tumor_size_cm: tumorSize,
+                    number_of_nodules: noduleCount,
+
+                    composition: usComposition,
+                    echogenicity: usEchogenicity,
+                    shape: usShape,
+                    margin: usMargin,
+                    ti_rads_score: tiradsScore,
+
+                    cancer_type: histologicalType,
+                    pathological_features: [
+                        capsularInvasion ? "Capsular invasion" : null,
+                        vascularInvasion ? "Vascular invasion" : null,
+                        lymphaticInvasion ? "Lymphatic invasion" : null,
+                        extrathyroidalExt ? "Extrathyroidal extension" : null,
+                        multifocality ? "Multifocality" : null,
+                    ].filter(Boolean),
+
+                    t_stage: tCategory,
+                    n_stage: nCategory,
+                    m_stage: mCategory,
+                    stage_group: stageGroup,
+                    ata_risk: ataRisk,
+                    metastasis_sites: metastasisSites,
+
+                    braf_v600e: brafV600e,
+                    ras_mutation: rasMutation,
+                    ret_ptc: retPtc,
+                    tert_promoter: tertPromoter,
+
+                    tg_thyroglobulin: tgLevel,
+                    anti_tg_antibodies: antiTg,
+                    calcitonin: calcitonin,
+
+                    surgery_type: surgeryProcedure,
+                    rai_dose: raiDose,
+                    date_of_rai: raiDate,
+                    levothyroxine_dose: levothyroxineDose,
+                    next_visit: nextVisit,
+                    next_tg_check: nextTg,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                setGeneratedReport(result.report.report_text);
+                showToast("AI Report Generated ✓", "success");
+            } else {
+                showToast(result.error || "Failed to generate AI report", "error");
+            }
+        } catch (error) {
+            console.error(error);
+            showToast("Network error while generating report", "error");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const toggleSite = (site: string) =>
@@ -702,10 +784,123 @@ export default function ThyroidCancerReport() {
                     <button className={styles.saveFinal} onClick={handleSaveDraft} disabled={loading}>
                         {loading ? 'Saving...' : 'Save as Draft'}
                     </button>
-                    <button className={styles.finalizeFinal} onClick={handleSubmit} disabled={loading}>
-                        {loading ? 'Submitting...' : 'Finalize Report'}
+                    <button className={styles.finalizeFinal} onClick={handleGenerateAIReport} disabled={loading}>
+                        {loading ? 'Generating...' : 'Finalize Report'}
                     </button>
                 </div>
+                {generatedReport && (
+                    <div style={{
+                        marginTop: "30px",
+                        padding: "32px",
+                        background: "#ffffff",
+                        borderRadius: "16px",
+                        border: "1px solid #e5e7eb",
+                        boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                        maxWidth: "900px"
+                    }}>
+
+                        {/* Header */}
+                        <div style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            borderBottom: "1px solid #eee",
+                            marginBottom: "24px",
+                            paddingBottom: "16px"
+                        }}>
+                            <div style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px"
+                            }}>
+                                <div style={{
+                                    width: "46px",
+                                    height: "46px",
+                                    borderRadius: "14px",
+                                    background: "linear-gradient(145deg, #0D9488 0%, #0891B2 60%, #0369A1 100%)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    boxShadow: "0 6px 18px rgba(13,148,136,0.32)",
+                                    color: "#ffffff",
+                                    fontSize: "24px",
+                                    fontWeight: 800,
+                                    lineHeight: 1
+                                }}>
+                                    +
+                                </div>
+
+                                <div>
+                                    <h2 style={{
+                                        margin: 0,
+                                        color: "#0f172a",
+                                        fontSize: "22px",
+                                        fontWeight: 700
+                                    }}>
+                                        Diagnovate <span style={{ color: "#0f766e" }}>Medical Report</span>
+                                    </h2>
+
+                                    <p style={{
+                                        margin: "3px 0 0",
+                                        fontSize: "12px",
+                                        letterSpacing: "1.5px",
+                                        textTransform: "uppercase",
+                                        color: "#94a3b8",
+                                        fontWeight: 700
+                                    }}>
+                                        AI Generated Clinical Report
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div style={{
+                                fontSize: "12px",
+                                color: "#6b7280",
+                                textAlign: "right",
+                                lineHeight: "1.5"
+                            }}>
+                                Report Date:<br />
+                                {new Date().toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric"
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Report Content */}
+                        <div
+                            style={{
+                                lineHeight: "1.8",
+                                fontSize: "15px",
+                                color: "#1f2937"
+                            }}
+                            dangerouslySetInnerHTML={{
+                                __html: generatedReport
+                                    .replace(/^# (.*)$/gm,
+                                        '<h1 style="color:#0f172a;font-size:26px;margin:0 0 20px;font-weight:800;">$1</h1>')
+
+                                    .replace(/^## (.*)$/gm,
+                                        '<h2 style="color:#0f766e;margin:30px 0 12px;font-size:18px;font-weight:800;border-bottom:1px solid #e5e7eb;padding-bottom:8px;">$1</h2>')
+
+                                    .replace(/\*\*(.*?)\*\*/g,
+                                        '<strong>$1</strong>')
+
+                                    .replace(/---/g,
+                                        '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;" />')
+
+                                    .replace(/Report Generated by:\s*(.*)/g,
+                                        '<p style="margin:8px 0;"><strong>Report Generated by:</strong> $1</p>')
+
+                                    .replace(/Platform:\s*(.*)/g,
+                                        '<p style="margin:8px 0;"><strong>Platform:</strong> $1</p>')
+
+                                    .replace(/Date of Report:\s*(.*)/g,
+                                        '<p style="margin:8px 0;"><strong>Date of Report:</strong> $1</p>')
+                            }}
+                        />
+                    </div>
+                )}
 
                 {/* ════ TOAST ════ */}
                 {toast && (
