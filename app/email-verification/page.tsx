@@ -1,6 +1,7 @@
+// Email OTP verification page — user enters the 6-digit code sent to their email, with resend and fallback to phone verification.
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Loader2, RotateCcw } from 'lucide-react';
@@ -13,6 +14,11 @@ export default function EmailVerificationPage() {
     const [done,    setDone]    = useState(false);
     const [error,   setError]   = useState('');
     const [resent,  setResent]  = useState(false);
+    const [identifier, setIdentifier] = useState('');
+
+    useEffect(() => {
+        setIdentifier(new URLSearchParams(window.location.search).get('identifier') ?? '');
+    }, []);
 
     const r0 = useRef<HTMLInputElement>(null);
     const r1 = useRef<HTMLInputElement>(null);
@@ -137,7 +143,7 @@ export default function EmailVerificationPage() {
                             </div>
 
                             <p className="verify-hint">
-                                {filled === 6 ? '✓ Ready to verify' : `${6 - filled} digit${6 - filled !== 1 ? 's' : ''} remaining`}
+                                {filled === 6 ? 'Ready to verify' : `${6 - filled} digit${6 - filled !== 1 ? 's' : ''} remaining`}
                             </p>
 
                             {error && (
@@ -180,6 +186,10 @@ export default function EmailVerificationPage() {
                             <Link href="/sign-up" className="verify-back">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6" /></svg>
                                 Back to sign up
+                            </Link>
+                            <Link href={`/phone-verification?identifier=${encodeURIComponent(identifier)}`} className="verify-back" style={{ marginTop: 8 }}>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7A2 2 0 0 1 22 16.9z"/></svg>
+                                Verify with phone instead
                             </Link>
                         </>
                     ) : (

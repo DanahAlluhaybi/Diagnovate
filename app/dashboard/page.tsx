@@ -1,6 +1,4 @@
-// ═══════════════════════════════════════════════════════════
-// DOCTOR DASHBOARD  —  app/dashboard/page.tsx
-// ═══════════════════════════════════════════════════════════
+// Doctor dashboard — shows greeting, live stats from the API, quick-access module cards, and a recent cases table with clickable rows.
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -48,7 +46,6 @@ export default function DoctorDashboard() {
     const hour      = new Date().getHours();
     const greeting  = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
-    // Navigate to patient detail page with diagnosis tab open
     const openCase = (c: any) => {
         const patientId = c?.patient_id || c?.id || c?.case_id;
         if (patientId) {
@@ -132,7 +129,6 @@ export default function DoctorDashboard() {
                 th{padding:12px 20px;text-align:left;font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
                 td{padding:14px 20px;border-bottom:1px solid #F1F5F9;font-size:13.5px;vertical-align:middle}
                 tr:last-child td{border-bottom:none}
-                /* FIX: clickable rows */
                 .case-row{cursor:pointer;transition:background .15s}
                 .case-row:hover{background:#fafffe}
                 .status-chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:20px}
@@ -146,7 +142,6 @@ export default function DoctorDashboard() {
             <Navbar />
 
             <main className="page">
-                {/* Hero */}
                 <div className="hero">
                     <div className="hero-left">
                         <div className="greeting">{greeting}</div>
@@ -168,7 +163,6 @@ export default function DoctorDashboard() {
                     </div>
                 </div>
 
-                {/* Modules */}
                 <div className="sec-head">
                     <span className="sec-label">Modules</span>
                     <div className="sec-line" />
@@ -201,7 +195,6 @@ export default function DoctorDashboard() {
                     ))}
                 </div>
 
-                {/* Recent Cases */}
                 <div className="sec-head">
                     <span className="sec-label">Recent Cases</span>
                     <div className="sec-line" />

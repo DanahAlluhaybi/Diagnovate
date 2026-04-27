@@ -1,6 +1,7 @@
+// Phone OTP verification page — user enters the 6-digit SMS code, with resend and fallback to email verification.
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Loader2, RotateCcw } from 'lucide-react';
@@ -13,6 +14,11 @@ export default function PhoneVerificationPage() {
     const [done,    setDone]    = useState(false);
     const [error,   setError]   = useState('');
     const [resent,  setResent]  = useState(false);
+    const [identifier, setIdentifier] = useState('');
+
+    useEffect(() => {
+        setIdentifier(new URLSearchParams(window.location.search).get('identifier') ?? '');
+    }, []);
 
     const r0 = useRef<HTMLInputElement>(null);
     const r1 = useRef<HTMLInputElement>(null);
@@ -44,24 +50,8 @@ export default function PhoneVerificationPage() {
         setError(''); setLoading(true);
         try {
             const identifier = new URLSearchParams(window.location.search).get('identifier') ?? '';
-            const data = await auth.verifyOtp(identifier, code.join('')) as {
-                token?: string;
-                user?: unknown;
-                next_step?: string;
-                email?: string;
-            };
-            if (data.next_step === 'verify_email') {
-                router.push(`/email-verification?identifier=${encodeURIComponent(data.email ?? '')}`);
-                return;
-            }
-            if (!data.token) {
-                setError('Token is missing. Please try again.');
-                setLoading(false);
-                return;
-            }
-
+            const data = await auth.verifyOtp(identifier, code.join(''));
             localStorage.setItem('token', data.token);
-
             if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
             setDone(true);
         } catch (err: unknown) {
@@ -81,11 +71,9 @@ export default function PhoneVerificationPage() {
 
     return (
         <div className="acard-page">
-            {/* Ambient glows */}
             <span className="acard-page__glow acard-page__glow--teal" />
             <span className="acard-page__glow acard-page__glow--purple" />
 
-            {/* ── Navbar ── */}
             <nav className="acard-nav">
                 <Link href="/" className="acard-nav__logo">
                     <div className="acard-nav__mark">
@@ -104,10 +92,8 @@ export default function PhoneVerificationPage() {
                 </div>
             </nav>
 
-            {/* ── Card ── */}
             <div className="acard-wrap">
                 <div className="acard">
-                    {/* Logo */}
                     <Link href="/" className="acard-logo">
                         <div className="acard-logo__mark">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -137,7 +123,6 @@ export default function PhoneVerificationPage() {
                             </p>
 
 
-                            {/* OTP boxes */}
                             <div className="verify-code-row" onPaste={handlePaste}>
                                 {code.map((d, i) => (
                                     <input
@@ -154,7 +139,7 @@ export default function PhoneVerificationPage() {
                             </div>
 
                             <p className="verify-hint">
-                                {filled === 6 ? '✓ Ready to verify' : `${6 - filled} digit${6 - filled !== 1 ? 's' : ''} remaining`}
+                                {filled === 6 ? 'Ready to verify' : `${6 - filled} digit${6 - filled !== 1 ? 's' : ''} remaining`}
                             </p>
 
                             {error && (
@@ -183,7 +168,7 @@ export default function PhoneVerificationPage() {
                                 }
                             </button>
 
-                            <div className="auth-divider" style={{ margin: '0 0 16px' }}>Don&apos;treceive it?</div>
+                            <div className="auth-divider" style={{ margin: '0 0 16px' }}>didn't receive it?</div>
 
                             <button
                                 className="verify-resend"
@@ -198,7 +183,7 @@ export default function PhoneVerificationPage() {
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6" /></svg>
                                 Back to sign up
                             </Link>
-                            <Link href="/email-verification" className="verify-back" style={{ marginTop: 8 }}>
+                            <Link href={`/email-verification?identifier=${encodeURIComponent(identifier)}`} className="verify-back" style={{ marginTop: 8 }}>
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="3"/><polyline points="2,4 12,13 22,4"/></svg>
                                 Verify with email instead
                             </Link>

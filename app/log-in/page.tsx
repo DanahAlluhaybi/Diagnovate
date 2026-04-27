@@ -1,3 +1,4 @@
+// Login page — handles both doctor and admin login, with an OTP step when the backend requires it.
 'use client';
 
 import { useState, Suspense } from 'react';
@@ -18,12 +19,10 @@ function LoginForm() {
     const [loading,    setLoading]    = useState(false);
     const [error,    setError]    = useState('');
     const [pwError,  setPwError]  = useState('');
-    // OTP step state
     const [otpStep,    setOtpStep]    = useState(false);
     const [otp,        setOtp]        = useState('');
     const [identifier, setIdentifier] = useState('');
 
-    /* ── Step 1: Email + Password ── */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -31,14 +30,12 @@ function LoginForm() {
         try {
             const result = isAdmin ? await auth.adminLogin(email, password) : await auth.login(email, password);
 
-            // Backend responded with OTP required
             if ((result as any)?.otpRequired) {
                 setIdentifier((result as any).identifier);
                 setOtpStep(true);
                 return;
             }
 
-            // Direct token (admin or no-OTP flow)
             const { token, user } = result as { token: string; user: unknown };
             localStorage.setItem(isAdmin ? 'admin_token' : 'token', token);
             if (user) localStorage.setItem(isAdmin ? 'admin_user' : 'user', JSON.stringify(user));
@@ -51,7 +48,6 @@ function LoginForm() {
         }
     };
 
-    /* ── Step 2: OTP Verification ── */
     const handleVerifyOtp = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -75,7 +71,6 @@ function LoginForm() {
     return (
         <div className="auth-page" style={roleVars as React.CSSProperties}>
 
-            {/* ══ LEFT PANEL ══ */}
             <div className="auth-left">
                 <div className="auth-left__dots" />
                 <span className="auth-left__blob auth-left__blob--1" />
@@ -128,7 +123,6 @@ function LoginForm() {
                 </div>
             </div>
 
-            {/* ══ RIGHT PANEL ══ */}
             <div className="auth-right">
                 <nav className="auth-right__nav">
                     <Link href="/"        className="auth-right__nav-link">Home</Link>
@@ -147,7 +141,6 @@ function LoginForm() {
                             {isAdmin ? 'Admin Portal' : 'Doctor Portal'}
                         </div>
 
-                        {/* ── OTP Step ── */}
                         {otpStep ? (
                             <>
                                 <h2 className="auth-form-h2">Check your email.</h2>
@@ -206,7 +199,6 @@ function LoginForm() {
                                 </div>
                             </>
                         ) : (
-                            /* ── Login Step ── */
                             <>
                                 <h2 className="auth-form-h2">Welcome back.</h2>
                                 <p className="auth-form-sub">

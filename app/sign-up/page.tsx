@@ -6,16 +6,19 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, ArrowRight, ArrowLeft, Loader2, Check } from 'lucide-react';
 import { auth } from '@/lib/api';
 
-// No more <style> block — all classes live in auth-shared.css + globals.css
-
 const SPECIALTIES = ['Pathology', 'Radiology', 'Endocrinology', 'Surgery', 'Oncology', 'General Practice'];
+const STEP_LABELS  = ['Personal Info', 'Account Setup', 'Verify'];
 
 export default function SignUpPage() {
     const router = useRouter();
     const [step,    setStep]    = useState(0);
     const [showPw,  setShowPw]  = useState(false);
     const [loading, setLoading] = useState(false);
+    const [sending, setSending] = useState<'sms' | 'email' | null>(null);
     const [error,   setError]   = useState('');
+    const [signupPhone, setSignupPhone] = useState('');
+    const [signupEmail, setSignupEmail] = useState('');
+
     const [form, setForm] = useState({
         firstName: '', lastName: '', email: '', phone: '', idNumber: '',
         specialty: '', password: '', confirm: '',
@@ -23,61 +26,53 @@ export default function SignUpPage() {
 
     const set = (k: string) =>
         (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-            setError('');  //
+            setError('');
             setForm(f => ({ ...f, [k]: e.target.value }));
         };
+
+    /* ── step 0 → 1 validation ── */
     const goNext = () => {
-        const nameValid = /^[a-zA-Z\u0600-\u06FF\s]+$/.test(form.firstName) &&
-            /^[a-zA-Z\u0600-\u06FF\s]+$/.test(form.lastName);
-        if (!nameValid) {
-            setError('First and last name must contain letters only, no numbers allowed.'); return;
-        }
-        const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
-        if (!emailValid) {
-            setError('Please enter a valid email address.'); return;
-        }
-        const phoneValid = /^05\d{8}$/.test(form.phone);
-        if (!phoneValid) {
-            setError('Phone number must start with 05 and be 10 digits.'); return;
-        }
+        const nameValid = /^[a-zA-Z؀-ۿ\s]+$/.test(form.firstName) &&
+            /^[a-zA-Z؀-ۿ\s]+$/.test(form.lastName);
+        if (!nameValid) { setError('First and last name must contain letters only, no numbers allowed.'); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) { setError('Please enter a valid email address.'); return; }
+        if (!/^05\d{8}$/.test(form.phone)) { setError('Phone number must start with 05 and be 10 digits.'); return; }
         const idValid = /^[12]\d{9}$/.test(form.idNumber);
         if (!idValid) {
-            if (form.idNumber.length !== 10) {
-                setError('ID number must be 10 digits.'); return;
-            }
-            if (!form.idNumber.startsWith('1') && !form.idNumber.startsWith('2')) {
-                setError('ID number must start with 1 or 2.'); return;
-            }
+            setError(form.idNumber.length !== 10 ? 'ID number must be 10 digits.' : 'ID number must start with 1 or 2.');
+            return;
         }
         setError(''); setStep(1);
     };
 
+    /* ── step 1 submit ── */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!form.specialty)                { setError('Please select your specialty.'); return; }
         if (form.password !== form.confirm) { setError('Passwords do not match.'); return; }
         if (form.password.length < 8)       { setError('Password must be at least 8 characters.'); return; }
 
-        setError('');
-        setLoading(true);
-
+        setError(''); setLoading(true);
         try {
-            // ✅ دمج الاسم الأول والأخير في حقل name واحد
-            const fullName = `${form.firstName} ${form.lastName}`.trim();
-
-            // ✅ إرسال البيانات بالشكل الذي ينتظره الباك اند
-            await auth.signup({
-                name: fullName,
-                email: form.email,
-                password: form.password,
-                specialty: form.specialty,
-                phone: form.phone,
-                license_number: form.idNumber
+            const raw = await auth.signup({
+                name:           `${form.firstName} ${form.lastName}`.trim(),
+                email:          form.email,
+                password:       form.password,
+                specialty:      form.specialty,
+                phone:          form.phone,
+                license_number: form.idNumber,
             });
 
-            localStorage.setItem('userEmail', form.email);
-            router.push('/email-verification');
-
+            if (raw?.next_step === 'choose_verification') {
+                // الـ backend يُرسل phone و email — نحفظهم عشان handleChoose يستخدمهم
+                setSignupPhone(raw?.phone ?? form.phone);
+                setSignupEmail(raw?.email ?? form.email);
+                setStep(2);
+            } else {
+                // fallback: backend sends OTP automatically
+                localStorage.setItem('userEmail', form.email);
+                router.push('/email-verification');
+            }
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Something went wrong.');
         } finally {
@@ -85,43 +80,53 @@ export default function SignUpPage() {
         }
     };
 
-    // Password strength
-    const pw     = form.password;
-    const pwStr  = !pw ? 0 : pw.length < 6 ? 1 : pw.length < 8 ? 2 : /[^a-zA-Z0-9]/.test(pw) ? 4 : 3;
+    /* ── step 2: user picks verification method ── */
+    const handleChoose = async (method: 'sms' | 'email') => {
+        setError(''); setSending(method);
+        // SMS يحتاج رقم الجوال، Email يحتاج الإيميل
+        const identifier = method === 'sms' ? signupPhone : signupEmail;
+        try {
+            await auth.sendOtp(identifier, method);
+            if (method === 'sms') {
+                router.push(`/phone-verification?identifier=${encodeURIComponent(identifier)}`);
+            } else {
+                router.push(`/email-verification?identifier=${encodeURIComponent(identifier)}`);
+            }
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Failed to send code. Please try again.');
+            setSending(null);
+        }
+    };
+
+    /* ── password strength ── */
+    const pw    = form.password;
+    const pwStr = !pw ? 0 : pw.length < 6 ? 1 : pw.length < 8 ? 2 : /[^a-zA-Z0-9]/.test(pw) ? 4 : 3;
     const pwMeta = [null,
-        { c: '#EF4444', l: 'Weak' },
-        { c: '#F59E0B', l: 'Fair' },
-        { c: '#0891B2', l: 'Good' },
+        { c: '#EF4444', l: 'Weak'   },
+        { c: '#F59E0B', l: 'Fair'   },
+        { c: '#0891B2', l: 'Good'   },
         { c: '#0D9488', l: 'Strong' },
     ];
 
-    // Left panel content per step
+    /* ── left panel content per step ── */
     const leftContent = [
         {
             title: <>Join the future<br />of <em>thyroid</em><br />diagnostics.</>,
             sub: 'Create your account and get access to AI-powered tools built for clinical professionals.',
-            points: [
-                'AI-enhanced ultrasound imaging',
-                'Context-aware diagnostic recommendations',
-                'HIPAA-compliant & secure',
-                'Trusted by leading pathology labs',
-            ],
+            points: ['AI-enhanced ultrasound imaging', 'Context-aware diagnostic recommendations', 'HIPAA-compliant & secure', 'Trusted by leading pathology labs'],
         },
         {
             title: <>Almost<br /><em>there.</em></>,
             sub: 'Set your specialty and create a secure password to complete your account.',
-            points: [
-                'Your data is encrypted end-to-end',
-                'Accounts reviewed within 24 hours',
-                'Full access after admin approval',
-                'Join hundreds of verified clinicians',
-            ],
+            points: ['Your data is encrypted end-to-end', 'Accounts reviewed within 24 hours', 'Full access after admin approval', 'Join hundreds of verified clinicians'],
+        },
+        {
+            title: <>Verify your<br /><em>identity.</em></>,
+            sub: 'Choose how you want to receive your one-time verification code.',
+            points: ['Codes expire in 10 minutes', 'Both options are equally secure', 'You can switch methods if needed', 'Verification protects your account'],
         },
     ];
     const lc = leftContent[step];
-
-    const stepStates = (i: number) =>
-        i < step ? 'done' : i === step ? 'curr' : 'idle';
 
     return (
         <div className="auth-page">
@@ -133,7 +138,6 @@ export default function SignUpPage() {
                 <span className="auth-left__blob auth-left__blob--2" />
                 <span className="auth-left__blob auth-left__blob--3" />
 
-                {/* Logo */}
                 <Link href="/" className="auth-logo">
                     <div className="auth-logo__mark">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -143,21 +147,19 @@ export default function SignUpPage() {
                     <span className="auth-logo__word">Diagno<span>vate</span></span>
                 </Link>
 
-                {/* Body */}
                 <div className="auth-left__body">
-
                     {/* Step progress */}
                     <div className="auth-steps">
-                        {['Personal Info', 'Account Setup'].map((s, i) => {
-                            const state = stepStates(i);
+                        {STEP_LABELS.map((s, i) => {
+                            const state = i < step ? 'done' : i === step ? 'curr' : 'idle';
                             return (
                                 <div key={s} className="auth-step">
                                     <div className={`auth-step__dot auth-step__dot--${state}`}>
                                         {state === 'done' ? <Check size={13} /> : i + 1}
                                     </div>
                                     <span className={`auth-step__lbl auth-step__lbl--${state}`}>{s}</span>
-                                    {i === 0 && (
-                                        <div className={`auth-step__line auth-step__line--${step > 0 ? 'done' : 'idle'}`} />
+                                    {i < STEP_LABELS.length - 1 && (
+                                        <div className={`auth-step__line auth-step__line--${step > i ? 'done' : 'idle'}`} />
                                     )}
                                 </div>
                             );
@@ -182,7 +184,6 @@ export default function SignUpPage() {
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="auth-left__foot">
                     {['HIPAA', 'ICCR', 'WHO', 'TI-RADS', 'GDPR'].map(t => (
                         <span key={t} className="auth-compliance">{t}</span>
@@ -193,14 +194,14 @@ export default function SignUpPage() {
             {/* ══ RIGHT PANEL ══ */}
             <div className="auth-right">
                 <nav className="auth-right__nav">
-                    <Link href="/"       className="auth-right__nav-link">Home</Link>
-                    <Link href="/about"  className="auth-right__nav-link">About</Link>
-                    <Link href="/contact"className="auth-right__nav-link">Contact</Link>
+                    <Link href="/"        className="auth-right__nav-link">Home</Link>
+                    <Link href="/about"   className="auth-right__nav-link">About</Link>
+                    <Link href="/contact" className="auth-right__nav-link">Contact</Link>
                 </nav>
 
                 <div className="auth-form-area">
 
-                    {/* ── STEP 0 ── */}
+                    {/* ── STEP 0: Personal Info ── */}
                     {step === 0 && (
                         <div className="auth-form-inner auth-slide-in">
                             <h2 className="auth-form-h2">Create your account.</h2>
@@ -275,7 +276,7 @@ export default function SignUpPage() {
                         </div>
                     )}
 
-                    {/* ── STEP 1 ── */}
+                    {/* ── STEP 1: Account Setup ── */}
                     {step === 1 && (
                         <div className="auth-form-inner auth-slide-in">
                             <h2 className="auth-form-h2">Account setup.</h2>
@@ -283,7 +284,6 @@ export default function SignUpPage() {
 
                             <form className="auth-fields" onSubmit={handleSubmit}>
 
-                                {/* Specialty */}
                                 <div className="auth-field">
                                     <label className="dv-label">Specialty</label>
                                     <div className="auth-iw">
@@ -297,7 +297,6 @@ export default function SignUpPage() {
                                     </div>
                                 </div>
 
-                                {/* Password */}
                                 <div className="auth-field">
                                     <label className="dv-label">Password</label>
                                     <div className="auth-iw">
@@ -319,11 +318,8 @@ export default function SignUpPage() {
                                         <div className="auth-pw-str">
                                             <div className="auth-pw-str__bars">
                                                 {[1, 2, 3, 4].map(i => (
-                                                    <div
-                                                        key={i}
-                                                        className="auth-pw-str__bar"
-                                                        style={{ background: i <= pwStr ? pwMeta[pwStr]!.c : 'var(--border)' }}
-                                                    />
+                                                    <div key={i} className="auth-pw-str__bar"
+                                                         style={{ background: i <= pwStr ? pwMeta[pwStr]!.c : 'var(--border)' }} />
                                                 ))}
                                             </div>
                                             <span className="auth-pw-str__lbl" style={{ color: pwMeta[pwStr]?.c }}>
@@ -333,7 +329,6 @@ export default function SignUpPage() {
                                     )}
                                 </div>
 
-                                {/* Confirm password */}
                                 <div className="auth-field">
                                     <label className="dv-label">Confirm Password</label>
                                     <div className="auth-iw">
@@ -344,9 +339,7 @@ export default function SignUpPage() {
                                             type="password" className="dv-input"
                                             placeholder="Repeat your password"
                                             value={form.confirm} onChange={set('confirm')}
-                                            style={form.confirm
-                                                ? { borderColor: form.confirm === form.password ? 'var(--teal)' : 'var(--red)' }
-                                                : {}}
+                                            style={form.confirm ? { borderColor: form.confirm === form.password ? 'var(--teal)' : 'var(--red)' } : {}}
                                         />
                                     </div>
                                     {form.confirm && form.confirm === form.password && (
@@ -370,14 +363,90 @@ export default function SignUpPage() {
                                     }
                                 </button>
 
-                                <button
-                                    type="button" className="auth-btn-ghost"
-                                    style={{ marginTop: 8 }}
-                                    onClick={() => { setStep(0); setError(''); }}
-                                >
+                                <button type="button" className="auth-btn-ghost" style={{ marginTop: 8 }}
+                                        onClick={() => { setStep(0); setError(''); }}>
                                     <ArrowLeft size={14} /> Back
                                 </button>
                             </form>
+                        </div>
+                    )}
+
+                    {/* ── STEP 2: Choose Verification Method ── */}
+                    {step === 2 && (
+                        <div className="auth-form-inner auth-slide-in">
+                            <h2 className="auth-form-h2">Choose verification.</h2>
+                            <p className="auth-form-sub">
+                                How would you like to receive your verification code?
+                            </p>
+
+                            <div className="auth-fields">
+                                {/* Phone option */}
+                                <button
+                                    type="button"
+                                    className="auth-btn-ghost"
+                                    disabled={!!sending}
+                                    onClick={() => handleChoose('sms')}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: 14,
+                                        padding: '16px 18px', height: 'auto', textAlign: 'left',
+                                        opacity: sending && sending !== 'sms' ? 0.45 : 1,
+                                    }}
+                                >
+                                    <div style={{
+                                        width: 44, height: 44, borderRadius: 10, flexShrink: 0,
+                                        background: 'rgba(13,148,136,.1)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    }}>
+                                        {sending === 'sms'
+                                            ? <Loader2 size={20} style={{ animation: 'spinIcon .75s linear infinite', color: '#0D9488' }} />
+                                            : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="1.8" strokeLinecap="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                                        }
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 3 }}>Verify with Phone</div>
+                                        <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 400, lineHeight: 1.4 }}>
+                                            Send a 6-digit SMS to your registered number
+                                        </div>
+                                    </div>
+                                </button>
+
+                                {/* Email option */}
+                                <button
+                                    type="button"
+                                    className="auth-btn-ghost"
+                                    disabled={!!sending}
+                                    onClick={() => handleChoose('email')}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: 14,
+                                        padding: '16px 18px', height: 'auto', textAlign: 'left',
+                                        opacity: sending && sending !== 'email' ? 0.45 : 1,
+                                    }}
+                                >
+                                    <div style={{
+                                        width: 44, height: 44, borderRadius: 10, flexShrink: 0,
+                                        background: 'rgba(13,148,136,.1)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    }}>
+                                        {sending === 'email'
+                                            ? <Loader2 size={20} style={{ animation: 'spinIcon .75s linear infinite', color: '#0D9488' }} />
+                                            : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="3"/><polyline points="2,4 12,13 22,4"/></svg>
+                                        }
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 3 }}>Verify with Email</div>
+                                        <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 400, lineHeight: 1.4 }}>
+                                            Send a 6-digit code to your registered email
+                                        </div>
+                                    </div>
+                                </button>
+
+                                {error && (
+                                    <div className="dv-alert dv-alert-error">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                                        {error}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
 

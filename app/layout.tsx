@@ -1,3 +1,4 @@
+// Root layout — sets global font, metadata, and wraps all pages in the HTML shell.
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';

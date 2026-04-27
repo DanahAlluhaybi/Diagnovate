@@ -1,3 +1,4 @@
+// Shared navbar for the doctor-facing app — shows nav links, notification bell, and user profile dropdown. Also handles the logout overlay.
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -93,7 +94,6 @@ export default function Navbar({ pendingCount = 0, variant }: NavbarProps) {
             <nav className={`${styles.nav} ${scrolled ? styles.navScrolled : ''}`}>
                 <div className={styles.navInner}>
 
-                    {/* Logo */}
                     <Link href={role === 'admin' ? '/admin' : '/dashboard'} className={styles.logo}>
                         <div className={styles.logoMark}>
                             <LogoIcon size={20} />
@@ -105,7 +105,6 @@ export default function Navbar({ pendingCount = 0, variant }: NavbarProps) {
                         </div>
                     </Link>
 
-                    {/* Nav links */}
                     <div className={styles.links}>
                         {links.map(l => {
                             const active = (l.href === '/dashboard' || l.href === '/admin')
@@ -120,10 +119,8 @@ export default function Navbar({ pendingCount = 0, variant }: NavbarProps) {
                         })}
                     </div>
 
-                    {/* Right */}
                     <div className={styles.right}>
 
-                        {/* Bell */}
                         <div className={styles.dropWrap} ref={bellRef}>
                             <button className={`${styles.iconBtn} ${bellOpen ? styles.iconBtnActive : ''}`}
                                     onClick={() => { setBellOpen(o => !o); setProfOpen(false); }}>
@@ -166,7 +163,6 @@ export default function Navbar({ pendingCount = 0, variant }: NavbarProps) {
 
                         <div className={styles.divider} />
 
-                        {/* Profile */}
                         <div className={styles.dropWrap} ref={profRef}>
                             <button className={styles.profileBtn} onClick={() => { setProfOpen(o => !o); setBellOpen(false); }}>
                                 <div className={styles.profileInfo}>

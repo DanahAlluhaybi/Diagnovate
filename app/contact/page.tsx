@@ -1,3 +1,4 @@
+// Contact page — shows team members, contact info cards, and a CTA section. Public-facing.
 'use client';
 
 import Link from 'next/link';
@@ -48,7 +49,6 @@ export default function ContactPage() {
 
         .page{position:relative;z-index:1;padding-top:68px}
 
-        /* HERO */
         .hero{padding:72px 48px 56px;max-width:1200px;margin:0 auto;text-align:center;position:relative}
         .blob1{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(13,148,136,.1) 0%,transparent 65%);top:-200px;right:-100px;pointer-events:none}
         .blob2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.07) 0%,transparent 65%);bottom:-80px;left:-80px;pointer-events:none}
@@ -58,7 +58,6 @@ export default function ContactPage() {
         .h1 em{font-style:italic;background:linear-gradient(120deg,#0D9488,#7C3AED);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
         .sub{font-size:17px;color:var(--muted);max-width:520px;margin:0 auto;line-height:1.7;animation:fadeUp .6s .2s ease both}
 
-        /* INFO ROW */
         .info-wrap{padding:40px 48px;max-width:1200px;margin:0 auto}
         .info-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
         .info-card{background:white;border:1.5px solid var(--border);border-radius:18px;padding:22px 24px;display:flex;align-items:center;gap:16px;transition:all .25s;box-shadow:0 2px 8px rgba(15,23,42,.05)}
@@ -67,7 +66,6 @@ export default function ContactPage() {
         .info-label{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
         .info-value{font-size:15px;font-weight:700;color:var(--text)}
 
-        /* TEAM */
         .team-wrap{padding:0 48px 80px;max-width:1200px;margin:0 auto}
         .sec-head{display:flex;align-items:center;gap:14px;margin-bottom:40px}
         .sec-label{font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--teal);white-space:nowrap}
@@ -84,7 +82,6 @@ export default function ContactPage() {
         .tc-social{width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--subtle);transition:all .18s;cursor:pointer}
         .tc-social:hover{background:var(--teal-light);border-color:var(--teal-ring);color:var(--teal)}
 
-        /* CTA */
         .cta{padding:0 48px 100px;position:relative;z-index:1}
         .cta-inner{max-width:1200px;margin:0 auto;background:linear-gradient(135deg,#0D9488 0%,#0891B2 50%,#7C3AED 100%);border-radius:28px;padding:72px;text-align:center;position:relative;overflow:hidden}
         .cta-c{position:absolute;border-radius:50%;background:rgba(255,255,255,.06)}
@@ -134,7 +131,6 @@ export default function ContactPage() {
             </nav>
 
             <div className="page">
-                {/* HERO */}
                 <div style={{position:'relative',overflow:'hidden'}}>
                     <div className="blob1"/><div className="blob2"/>
                     <div className="hero">
@@ -144,7 +140,6 @@ export default function ContactPage() {
                     </div>
                 </div>
 
-                {/* INFO */}
                 <div className="info-wrap">
                     <div className="info-row">
                         {info.map(i=>(
@@ -161,7 +156,6 @@ export default function ContactPage() {
                     </div>
                 </div>
 
-                {/* TEAM */}
                 <div className="team-wrap">
                     <div className="sec-head">
                         <span className="sec-label">Our Team</span>
@@ -194,7 +188,6 @@ export default function ContactPage() {
                     </div>
                 </div>
 
-                {/* CTA */}
                 <div className="cta">
                     <div className="cta-inner">
                         <div className="cta-c" style={{width:400,height:400,top:-160,right:-100}}/>

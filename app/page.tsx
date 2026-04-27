@@ -1,3 +1,4 @@
+// Home landing page — hero section, trust strip, stats, feature tabs panel, CTA, and footer. Public-facing.
 'use client';
 
 import Link from 'next/link';
@@ -66,7 +67,6 @@ export default function HomePage() {
           background-size: 28px 28px; opacity: 0.45; pointer-events: none; z-index: 0;
         }
 
-        /* NAV */
         .nav {
           position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 68px;
           display: flex; align-items: center; justify-content: space-between; padding: 0 48px;
@@ -107,10 +107,8 @@ export default function HomePage() {
         }
         .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(13,148,136,0.4); }
 
-        /* PAGE */
         .page { position: relative; z-index: 1; }
 
-        /* HERO */
         .hero { min-height: 100vh; padding: 108px 48px 80px; display: flex; align-items: center; position: relative; overflow: hidden; }
         .blob1 { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(13,148,136,0.11) 0%, transparent 65%); top: -200px; right: -100px; pointer-events: none; }
         .blob2 { position: absolute; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 65%); bottom: -100px; left: -100px; pointer-events: none; }
@@ -154,7 +152,6 @@ export default function HomePage() {
         }
         .btn-g:hover { border-color: #CBD5E1; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
 
-        /* HERO VISUAL */
         .hero-visual { position: relative; animation: fadeUp 0.7s 0.15s ease both; }
         .illus-card { background: white; border-radius: 22px; border: 1px solid var(--border); box-shadow: 0 28px 72px rgba(15,23,42,0.13); overflow: hidden; }
         .illus-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface2); }
@@ -176,7 +173,6 @@ export default function HomePage() {
         .fblbl { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
         .fbval { font-size: 16px; font-weight: 800; font-family: var(--display); letter-spacing: -0.5px; }
 
-        /* TRUST STRIP */
         .trust { position: relative; z-index: 1; padding: 20px 48px 56px; }
         .trust-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 40px; }
         .trust-label { font-size: 11px; color: var(--muted); font-weight: 700; white-space: nowrap; letter-spacing: 1px; text-transform: uppercase; }
@@ -184,7 +180,6 @@ export default function HomePage() {
         .trust-badges { display: flex; gap: 10px; }
         .trust-badge { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; font-size: 11.5px; font-weight: 700; color: var(--muted); letter-spacing: 0.5px; }
 
-        /* STATS */
         .stats { padding: 0 48px 72px; position: relative; z-index: 1; }
         .stats-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
         .stat-card {
@@ -197,7 +192,6 @@ export default function HomePage() {
         .stat-val { font-family: var(--display); font-size: 32px; font-weight: 400; letter-spacing: -1.5px; color: var(--text); line-height: 1; }
         .stat-lbl { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
-        /* FEATURES */
         .features { padding: 80px 48px; position: relative; z-index: 1; }
         .sec-label { text-align: center; font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: var(--teal); margin-bottom: 14px; }
         .sec-h2 { font-family: var(--display); font-size: clamp(32px,4vw,52px); font-weight: 400; text-align: center; letter-spacing: -0.5px; color: var(--text); margin-bottom: 16px; }
@@ -230,7 +224,6 @@ export default function HomePage() {
         .pt:hover { border-color: #CBD5E1; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(15,23,42,0.07); }
         .pt-txt { font-size: 13.5px; color: var(--text2); line-height: 1.5; }
 
-        /* CTA */
         .cta { padding: 80px 48px 100px; position: relative; z-index: 1; }
         .cta-inner { max-width: 1200px; margin: 0 auto; background: linear-gradient(135deg, #0D9488 0%, #0891B2 50%, #7C3AED 100%); border-radius: 28px; padding: 80px 72px; text-align: center; position: relative; overflow: hidden; }
         .cta-c1 { position: absolute; width: 400px; height: 400px; border-radius: 50%; background: rgba(255,255,255,0.06); top: -150px; right: -100px; }
@@ -244,7 +237,6 @@ export default function HomePage() {
         .btn-outline-white { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: white; font-family: var(--body); font-size: 15px; font-weight: 600; padding: 13px 28px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.35); cursor: pointer; text-decoration: none; transition: all 0.22s; }
         .btn-outline-white:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
 
-        /* FOOTER */
         .footer { position: relative; z-index: 1; border-top: 1px solid var(--border); padding: 28px 48px; display: flex; align-items: center; justify-content: space-between; background: white; }
         .footer-logo { display: flex; align-items: center; gap: 9px; font-family: var(--display); font-size: 18px; color: var(--text); }
         .footer-logo span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -269,7 +261,6 @@ export default function HomePage() {
         }
       `}</style>
 
-            {/* NAV */}
             <nav className="nav">
                 <Link href="/" className="nav-logo">
                     <div className="nav-mark">
@@ -290,7 +281,6 @@ export default function HomePage() {
 
             <div className="page">
 
-                {/* HERO */}
                 <section className="hero">
                     <div className="blob1"/><div className="blob2"/><div className="blob3"/>
                     <div className="hero-inner">
@@ -376,7 +366,6 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* TRUST */}
                 <div className="trust">
                     <div className="trust-inner">
                         <span className="trust-label">Trusted Standards</span>
@@ -387,7 +376,6 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* STATS */}
                 <div className="stats">
                     <div className="stats-grid">
                         {[
@@ -403,7 +391,6 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* FEATURES */}
                 <section className="features">
                     <div className="sec-label">Capabilities</div>
                     <h2 className="sec-h2">AI-Powered Features</h2>
@@ -446,7 +433,6 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* CTA */}
                 <section className="cta">
                     <div className="cta-inner">
                         <div className="cta-c1"/><div className="cta-c2"/>
@@ -460,7 +446,6 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* FOOTER */}
                 <footer className="footer">
                     <div className="footer-logo">
                         <div className="nav-mark" style={{width:30,height:30,borderRadius:9}}>
