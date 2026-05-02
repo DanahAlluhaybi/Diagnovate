@@ -10,7 +10,7 @@ import { BASE } from '@/lib/api';
 type Gender   = 'Male' | 'Female';
 type Status   = 'Active' | 'Inactive';
 type View     = 'list' | 'detail';
-type Tab      = 'info' | 'images' | 'diagnosis';
+type Tab      = 'info' | 'images' | 'diagnosis' | 'reports';
 type ScanType = 'Ultrasound';
 
 const SCAN_TYPE_STYLES: Record<string, { color: string; bg: string; border: string }> = {
@@ -276,6 +276,7 @@ function PatientManagementPage() {
                             { id: 'info',      label: 'Personal Info',  icon: '👤' },
                             { id: 'images',    label: 'Medical Images', icon: '🔬' },
                             { id: 'diagnosis', label: 'AI Diagnoses',   icon: '🧠' },
+                            { id: 'reports',   label: 'Reports',        icon: '📄' },
                         ] as { id: Tab; label: string; icon: string }[]).map(t => (
                             <button key={t.id}
                                     className={`${styles.tabBtn} ${activeTab === t.id ? styles.tabBtnActive : ''}`}
@@ -439,8 +440,7 @@ function PatientManagementPage() {
                                                         </div>
                                                     </div>
                                                     <div className={styles.dxCardHeadRight}>
-                                                        <div className={styles.dxSeverityBadge}
-                                                             style={{ background: sev.color + '18', color: sev.color, borderColor: sev.border }}>
+                                                        <div className={styles.dxSeverityBadge} style={{ background: sev.color + '18', color: sev.color, borderColor: sev.border }}>
                                                             {sev.icon} {dx.severity} Risk
                                                         </div>
                                                         <div className={styles.dxScore} style={{ color: sev.color }}>
@@ -509,6 +509,16 @@ function PatientManagementPage() {
                                     })}
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {activeTab === 'reports' && (
+                        <div className={styles.emptyTab}>
+                            <span style={{ fontSize: 32 }}>📄</span>
+                            <p>No reports yet</p>
+                            <span style={{ fontSize: 13, color: '#94a3b8' }}>
+                                Reports will appear here after AI diagnosis is complete
+                            </span>
                         </div>
                     )}
                 </div>
