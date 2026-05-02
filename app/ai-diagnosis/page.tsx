@@ -697,131 +697,102 @@ export default function AIDiagnosisPage() {
 
                         {/* ════ RESULTS ════ */}
                         {result && sev && (
-                            <div style={{ marginTop: 24 }}>
+                            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-                                {/* Score card */}
-                                <div className={s.resultCard} style={{ borderColor: sev.border, marginBottom: 16 }}>
-                                    <div className={s.resultCardHead} style={{ background: sev.bg }}>
+                                <div className={s.resultCard} style={{ borderColor: sev.border }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', background: sev.bg, borderBottom: `1px solid ${sev.border}` }}>
                                         <div>
-                                            <p className={s.resultCardLabel}>Malignancy Score</p>
-                                            <div className={s.resultScoreRow}>
-                                                <span className={s.resultScore} style={{ color: sev.color }}>
-                                                    {result.malignancyScore}
-                                                </span>
-                                                <span className={s.resultScoreMax}>/100</span>
+                                            <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.6px', textTransform: 'uppercase', color: sev.color, marginBottom: 6 }}>Malignancy Score</p>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                                                <span style={{ fontSize: 48, fontWeight: 800, color: sev.color, lineHeight: 1 }}>{result.malignancyScore}</span>
+                                                <span style={{ fontSize: 16, color: '#94a3b8', fontWeight: 500 }}>/100</span>
                                             </div>
                                         </div>
-                                        <div className={s.resultSeverityBadge}
-                                             style={{ background: sev.color + '18', color: sev.color, borderColor: sev.border }}>
-                                            {sev.icon} {result.severity} Risk
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 20, border: `1px solid ${sev.border}`, background: sev.color + '18', color: sev.color, fontSize: 13, fontWeight: 800, marginBottom: 8 }}>
+                                                {sev.icon} {result.severity} Risk
+                                            </div>
+                                            <p style={{ fontSize: 13, color: '#64748b' }}>Confidence: <strong style={{ color: sev.color }}>{result.confidence}%</strong></p>
                                         </div>
                                     </div>
-                                    <div className={s.resultScoreBar}>
-                                        <div className={s.resultScoreTrack}>
-                                            <div className={s.resultScoreFill}
-                                                 style={{ width: `${result.malignancyScore}%`, background: sev.color }} />
+                                    <div style={{ padding: '12px 24px' }}>
+                                        <div style={{ height: 8, background: '#e2e8f0', borderRadius: 99, overflow: 'hidden' }}>
+                                            <div style={{ height: '100%', width: `${result.malignancyScore}%`, background: sev.color, borderRadius: 99, transition: 'width .8s cubic-bezier(.16,1,.3,1)' }} />
                                         </div>
-                                    </div>
-                                    <div className={s.resultMeta}>
-                                        <span>Confidence: <strong>{result.confidence}%</strong></span>
                                     </div>
                                 </div>
 
-                                {/* Top Models */}
-                                <div className={s.infoCard} style={{ marginBottom: 16 }}>
-                                    <div className={s.infoCardHead}>
-                                        <div className={s.infoCardIcon} style={{ background: '#EEF2FF', border: '1px solid #C7D2FE' }}>
-                                            <Activity size={14} color="#4F46E5" />
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                                    <div className={s.infoCard}>
+                                        <div className={s.infoCardHead}>
+                                            <div className={s.infoCardIcon}><span style={{ fontSize: 14 }}>📊</span></div>
+                                            <span className={s.infoCardTitle}>Top Models</span>
                                         </div>
-                                        <span className={s.infoCardTitle}>Top Models</span>
-                                    </div>
-                                    <div className={s.infoCardBody}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                            {result.topModels.map((m, i) => (
-                                                <div key={i} style={{
-                                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                                    padding: '10px 14px',
-                                                    background: m.available ? '#F8FAFC' : '#F1F5F9',
-                                                    borderRadius: 8,
-                                                    border: '1px solid #E2E8F0',
-                                                    opacity: m.available ? 1 : 0.5,
-                                                }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            {result.topModels.map((m: any, i: number) => (
+                                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 18px', borderBottom: i < result.topModels.length - 1 ? '1px solid #f1f5f9' : 'none', opacity: m.available ? 1 : 0.4 }}>
                                                     <div>
-                                                        <div style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>
-                                                            Model {i + 1}: {m.name}
-                                                        </div>
-                                                        <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
-                                                            {m.available ? `Result: ${m.result}` : 'Not available yet'}
-                                                        </div>
+                                                        <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>Model {i + 1}: {m.name}</div>
+                                                        <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{m.available ? `Result: ${m.result}` : 'Not available yet'}</div>
                                                     </div>
                                                     <div style={{ textAlign: 'right' }}>
-                                                        <div style={{ fontSize: 13, fontWeight: 700, color: m.available ? sev!.color : '#94a3b8' }}>
-                                                            {m.available ? `${m.confidence}%` : '—'}
-                                                        </div>
-                                                        {m.available && (
-                                                            <div style={{ fontSize: 11, color: '#94a3b8' }}>confidence</div>
+                                                        {m.available ? (
+                                                            <>
+                                                                <div style={{ fontSize: 15, fontWeight: 800, color: sev.color }}>{m.confidence}%</div>
+                                                                <div style={{ fontSize: 11, color: '#94a3b8' }}>confidence</div>
+                                                            </>
+                                                        ) : (
+                                                            <span style={{ fontSize: 18, color: '#cbd5e1' }}>—</span>
                                                         )}
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Majority Voting */}
-                                <div className={s.infoCard} style={{ marginBottom: 16, borderColor: sev.border, background: sev.bg }}>
-                                    <div className={s.infoCardHead}>
-                                        <div className={s.infoCardIcon} style={{ background: sev.color + '18', border: `1px solid ${sev.border}` }}>
-                                            <CheckCircle2 size={14} color={sev.color} />
+                                    <div className={s.infoCard} style={{ borderColor: sev.border }}>
+                                        <div className={s.infoCardHead} style={{ background: sev.bg, borderBottom: `1px solid ${sev.border}` }}>
+                                            <div className={s.infoCardIcon} style={{ background: sev.color + '18', border: `1px solid ${sev.border}` }}><span style={{ fontSize: 14 }}>⚖️</span></div>
+                                            <span className={s.infoCardTitle} style={{ color: sev.color }}>Majority Voting</span>
                                         </div>
-                                        <span className={s.infoCardTitle}>Majority Voting</span>
-                                    </div>
-                                    <div className={s.infoCardBody}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div style={{ padding: '24px 18px', background: sev.bg, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 16 }}>
                                             <div>
-                                                <div style={{ fontSize: 13, color: '#64748b' }}>Result</div>
-                                                <div style={{ fontSize: 18, fontWeight: 700, color: sev.color }}>{result.votingResult}</div>
+                                                <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: sev.color, marginBottom: 6 }}>Result</p>
+                                                <p style={{ fontSize: 28, fontWeight: 800, color: sev.color, fontFamily: 'var(--font-display)' }}>{result.votingResult}</p>
                                             </div>
-                                            <div style={{ textAlign: 'right' }}>
-                                                <div style={{ fontSize: 13, color: '#64748b' }}>Confidence</div>
-                                                <div style={{ fontSize: 18, fontWeight: 700, color: sev.color }}>{result.votingConfidence}%</div>
+                                            <div>
+                                                <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: sev.color, marginBottom: 6 }}>Confidence</p>
+                                                <p style={{ fontSize: 28, fontWeight: 800, color: sev.color, fontFamily: 'var(--font-display)' }}>{result.votingConfidence}%</p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Key Findings */}
-                                <div className={s.infoCard} style={{ marginBottom: 16 }}>
+                                <div className={s.infoCard}>
                                     <div className={s.infoCardHead}>
-                                        <div className={s.infoCardIcon} style={{ background: sev.bg, border: `1px solid ${sev.border}` }}>
-                                            <FileText size={14} color={sev.color} />
-                                        </div>
+                                        <div className={s.infoCardIcon}><span style={{ fontSize: 14 }}>🔍</span></div>
                                         <span className={s.infoCardTitle}>Key Findings</span>
                                     </div>
-                                    <div className={s.infoCardBody}>
-                                        <div className={s.findingsList}>
-                                            {result.findings.map((f, i) => (
-                                                <div key={i} className={s.findingItem}>
-                                                    <div className={s.findingDot} style={{ background: sev.color }} />
-                                                    <span className={s.findingText}>{f}</span>
-                                                </div>
-                                            ))}
-                                        </div>
+                                    <div style={{ padding: '4px 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
+                                        {result.findings.map((f: string, i: number) => (
+                                            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 18px', borderBottom: i < result.findings.length - 2 ? '1px solid #f1f5f9' : 'none' }}>
+                                                <div style={{ width: 7, height: 7, borderRadius: '50%', background: sev.color, flexShrink: 0, marginTop: 5 }} />
+                                                <span style={{ fontSize: 13, color: '#334155', lineHeight: 1.5 }}>{f}</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
 
-                                {/* Recommendation */}
-                                <div className={s.infoCard} style={{ marginBottom: 16, borderColor: sev.border }}>
-                                    <div className={s.infoCardHead}>
-                                        <div className={s.infoCardIcon} style={{ background: sev.bg, border: `1px solid ${sev.border}` }}>
-                                            <CheckCircle2 size={14} color={sev.color} />
-                                        </div>
-                                        <span className={s.infoCardTitle}>Recommendation</span>
+                                <div className={s.infoCard} style={{ borderColor: sev.border }}>
+                                    <div className={s.infoCardHead} style={{ background: sev.bg, borderBottom: `1px solid ${sev.border}` }}>
+                                        <div className={s.infoCardIcon} style={{ background: sev.color + '18', border: `1px solid ${sev.border}` }}><span style={{ fontSize: 14 }}>💊</span></div>
+                                        <span className={s.infoCardTitle} style={{ color: sev.color }}>Recommendation</span>
                                     </div>
-                                    <div className={s.infoCardBody}>
-                                        <p className={s.recommendText}>{result.recommendation}</p>
+                                    <div style={{ padding: '16px 18px' }}>
+                                        <p style={{ fontSize: 14, color: '#334155', lineHeight: 1.7, fontWeight: 500 }}>{result.recommendation}</p>
                                     </div>
                                 </div>
+
                             </div>
                         )}
                     </div>
