@@ -37,8 +37,8 @@ export default function DoctorDashboard() {
                 if (userData) setUser(JSON.parse(userData));
 
                 // FIX: cast to Stats type
-                const statsData = await dashboard.getStats() as Stats;
-                if (statsData) setStats(statsData);
+                const statsData = await dashboard.getStats();
+                if (statsData) setStats(statsData as unknown as Stats);
 
                 const casesData = await dashboard.getRecentCases() as any[];
                 if (casesData && Array.isArray(casesData)) setRecentCases(casesData);
