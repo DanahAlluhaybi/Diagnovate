@@ -10,7 +10,7 @@ import Navbar from '@/components/Navbar';
 import { BASE } from '@/lib/api';
 
 interface EnhanceResponse {
-    success: boolean; original: string; enhanced: string;
+    success: boolean; original_image: string; enhanced_image: string;
     loading?: boolean; error?: string;
 }
 
@@ -138,8 +138,8 @@ export default function ImageEnhancementPage() {
             if (data.success) {
                 clearTimers(); setProgress(100);
                 setTimeout(async () => {
-                    setOriginalSrc(data.original);
-                    setEnhancedSrc(data.enhanced);
+                    setOriginalSrc(data.original_image);
+                    setEnhancedSrc(data.enhanced_image);
                     if (patientId.trim()) {
                         // Always use MRN as the key — fall back to whatever was typed if no patient was selected from dropdown
                         const img: SavedImage = {
@@ -148,8 +148,8 @@ export default function ImageEnhancementPage() {
                             type: scanType,
                             date: new Date().toISOString(),
                             label: scanLabel.trim() || `${scanType} scan`,
-                            originalSrc: data.original,
-                            enhancedSrc: data.enhanced,
+                            originalSrc: data.original_image,
+                            enhancedSrc: data.enhanced_image,
                             isEnhanced: true,
                         };
                         saveImageToPatient(mrn, img);
@@ -171,7 +171,7 @@ export default function ImageEnhancementPage() {
                                     await fetch(`${BASE}/api/cases/${caseId}`, {
                                         method: 'PATCH',
                                         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ enhanced_image_path: data.enhanced }),
+                                        body: JSON.stringify({ enhanced_image_path: data.enhanced_image }),
                                     });
                                 }
                             }
