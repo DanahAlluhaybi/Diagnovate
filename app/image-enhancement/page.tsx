@@ -133,18 +133,10 @@ export default function ImageEnhancementPage() {
                     setOriginalSrc(data.original);
                     setEnhancedSrc(data.enhanced);
                     if (patientId.trim()) {
-                        let finalOriginal = data.original_image;
-                        let finalEnhanced = data.enhanced_image;
-                        try {
-                            const [origRes, enhRes] = await Promise.all([
-                                fetch(data.original_image).then(r => r.blob()).then(b => uploadToCloudinary(b as File, 'diagnovate/originals')),
-                                fetch(data.enhanced_image).then(r => r.blob()).then(b => uploadToCloudinary(b as File, 'diagnovate/enhanced')),
-                            ]);
-                            finalOriginal = origRes.url;
-                            finalEnhanced = enhRes.url;
-                            setOriginalSrc(finalOriginal);
-                            setEnhancedSrc(finalEnhanced);
-                        } catch {}
+                        const finalOriginal = data.original_image;
+                        const finalEnhanced = data.enhanced_image;
+                        setOriginalSrc(finalOriginal);
+                        setEnhancedSrc(finalEnhanced);
 
                         saveImageRecord(mrn, {
                             id          : `IMG-${Date.now()}`,
