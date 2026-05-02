@@ -130,14 +130,11 @@ export default function ImageEnhancementPage() {
                 clearTimers(); setProgress(100);
                 setTimeout(async () => {
                     console.log('API response:', data);
-                    setOriginalSrc(data.original);
-                    setEnhancedSrc(data.enhanced);
+                    const finalOriginal = data.original_image;
+                    const finalEnhanced = data.enhanced_image;
+                    setOriginalSrc(finalOriginal);
+                    setEnhancedSrc(finalEnhanced);
                     if (patientId.trim()) {
-                        const finalOriginal = data.original_image;
-                        const finalEnhanced = data.enhanced_image;
-                        setOriginalSrc(finalOriginal);
-                        setEnhancedSrc(finalEnhanced);
-
                         saveImageRecord(mrn, {
                             id          : `IMG-${Date.now()}`,
                             patientId   : mrn,
