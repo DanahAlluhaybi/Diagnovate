@@ -1,0 +1,217 @@
+/* ===== Page Wrapper ===== */
+.pageWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: ghostwhite;
+    padding: 20px;
+}
+
+/* ===== Forgot Password Card ===== */
+.forgotContainer {
+    max-width: 510px;
+    width: 100%;
+    border-radius: 14px;
+    background-color: #ffffff;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e5e7eb;
+}
+
+/* ===== Title ===== */
+.formTitle {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    color: #1e3a8a; /* midnightblue */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.subtitle {
+    text-align: center;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* ===== Form ===== */
+.forgotForm {
+    width: 100%;
+}
+
+/* ===== Input Wrapper ===== */
+.inputWrapper {
+    position: relative;
+    height: 56px;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+/* ===== Input Field ===== */
+.inputField {
+    height: 100%;
+    width: 100%;
+    outline: none;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #c7d2fe;
+    padding-left: 3rem;
+    transition: 0.25s ease;
+    color: black;
+}
+
+.inputField:focus {
+    border-color: #3b82f6; /* dodgerblue */
+    background: white;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.inputField::placeholder {
+    color: #9ca3af;
+}
+
+.inputField:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* ===== Icon ===== */
+.icon {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    color: #6b7280;
+    font-size: 1.2rem;
+    pointer-events: none;
+    transition: color 0.3s ease;
+}
+
+.inputField:focus + .icon {
+    color: #1e3a8a;
+}
+
+/* ===== Button ===== */
+.submitButton {
+    width: 100%;
+    height: 52px;
+    margin-top: 0.5rem;
+    font-size: 1.05rem;
+    cursor: pointer;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.submitButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+}
+
+.submitButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ===== Login Link ===== */
+.loginText {
+    margin-top: 1.8rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: #4b5563;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.loginLink {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.loginLink:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+/* ===== Error & Success Messages ===== */
+.errorText {
+    color: #dc2626;
+    background: #fef2f2;
+    padding: 0.875rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    border: 1px solid #fecaca;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.successText {
+    color: #059669;
+    background: #f0fdf4;
+    padding: 0.875rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    border: 1px solid #bbf7d0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: pre-line;
+    line-height: 1.5;
+}
+
+/* ===== Success Box ===== */
+.successBox {
+    background: #f0fdf4;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #bbf7d0;
+}
+
+.testButton {
+    display: block;
+    width: 100%;
+    padding: 0.875rem;
+    margin: 1rem 0;
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.testButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(5, 150, 105, 0.3);
+    background: linear-gradient(135deg, #047857, #0d9488);
+}
+
+.testNote {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 0.75rem;
+    font-style: italic;
+    text-align: center;
+    line-height: 1.4;
+}
