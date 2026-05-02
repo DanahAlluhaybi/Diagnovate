@@ -129,6 +129,7 @@ export default function ImageEnhancementPage() {
             if (data.success) {
                 clearTimers(); setProgress(100);
                 setTimeout(async () => {
+                    console.log('API response:', data);
                     setOriginalSrc(data.original);
                     setEnhancedSrc(data.enhanced);
                     if (patientId.trim()) {
