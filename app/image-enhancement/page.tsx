@@ -8,6 +8,7 @@ import s from './styles.module.css';
 import ProgressBar from '@/components/progressBar';
 import Navbar from '@/components/Navbar';
 import { BASE } from '@/lib/api';
+import { uploadToCloudinary, saveImageRecord } from '@/lib/imageStorage';
 
 interface EnhanceResponse {
     success: boolean; original: string; enhanced: string;
@@ -38,16 +39,6 @@ const PROCESS_STEPS = [
 const fmtSize = (b: number) =>
     b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
 
-function loadPatientImages(): Record<string, SavedImage[]> {
-    try { return JSON.parse(localStorage.getItem('patient_images') || '{}'); }
-    catch { return {}; }
-}
-
-function saveImageToPatient(mrn: string, image: SavedImage) {
-    const all = loadPatientImages();
-    all[mrn] = [image, ...(all[mrn] || [])];
-    localStorage.setItem('patient_images', JSON.stringify(all));
-}
 
 export default function ImageEnhancementPage() {
     const router = useRouter();
@@ -141,18 +132,29 @@ export default function ImageEnhancementPage() {
                     setOriginalSrc(data.original);
                     setEnhancedSrc(data.enhanced);
                     if (patientId.trim()) {
-                        // Always use MRN as the key — fall back to whatever was typed if no patient was selected from dropdown
-                        const img: SavedImage = {
-                            id: `IMG-${Date.now()}`,
-                            patientId: mrn,          // key is always MRN
-                            type: scanType,
-                            date: new Date().toISOString(),
-                            label: scanLabel.trim() || `${scanType} scan`,
-                            originalSrc: data.original,
-                            enhancedSrc: data.enhanced,
-                            isEnhanced: true,
-                        };
-                        saveImageToPatient(mrn, img);
+                        let finalOriginal = data.original_image;
+                        let finalEnhanced = data.enhanced_image;
+                        try {
+                            const [origRes, enhRes] = await Promise.all([
+                                fetch(data.original_image).then(r => r.blob()).then(b => uploadToCloudinary(b as File, 'diagnovate/originals')),
+                                fetch(data.enhanced_image).then(r => r.blob()).then(b => uploadToCloudinary(b as File, 'diagnovate/enhanced')),
+                            ]);
+                            finalOriginal = origRes.url;
+                            finalEnhanced = enhRes.url;
+                            setOriginalSrc(finalOriginal);
+                            setEnhancedSrc(finalEnhanced);
+                        } catch {}
+
+                        saveImageRecord(mrn, {
+                            id          : `IMG-${Date.now()}`,
+                            patientId   : mrn,
+                            type        : scanType,
+                            date        : new Date().toISOString(),
+                            label       : scanLabel.trim() || `${scanType} scan`,
+                            originalSrc : finalOriginal,
+                            enhancedSrc : finalEnhanced,
+                            isEnhanced  : true,
+                        });
                         setSavedOk(true);
 
                         // Save enhanced image to backend case record
