@@ -118,7 +118,7 @@ export default function ProfilePage() {
                 setPhone(data.doctor.phone || '');
                 setLicenseNumber(data.doctor.license_number || '');
 
-                // ← حدّث localStorage عشان الـ Navbar يشوف الاسم الجديد فوراً
+                // Sync the updated profile to localStorage so the Navbar reflects changes immediately.
                 const current = JSON.parse(localStorage.getItem('user') || '{}');
                 localStorage.setItem('user', JSON.stringify({
                     ...current,

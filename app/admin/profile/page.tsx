@@ -200,7 +200,6 @@ export default function AdminProfilePage() {
             <div className="wrap">
                 <div className="blob"/>
 
-                {/* ── NAVBAR (نفس الداشبورد) ── */}
                 <nav className="pf-nav">
                     <Link href="/admin" className="pf-nav-logo">
                         <div className="pf-nav-logomark">
@@ -259,7 +258,6 @@ export default function AdminProfilePage() {
                                         </div>
                                     </div>
                                     <div style={{ padding: '6px 0' }}>
-                                        {/* ✅ My Profile مرة وحدة */}
                                         <Link href="/admin/profile" className="pf-nav-menuitem">
                                             <User size={14} /> My Profile
                                         </Link>

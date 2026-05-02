@@ -30,25 +30,19 @@ export default function ProgressBar({
     return (
         <div className={`${styles.wrap} ${className}`}>
 
-            {/* Top row — label + percentage */}
             <div className={styles.top}>
                 <span className={styles.label}>{label}</span>
                 <span className={styles.pct}>{progress}%</span>
             </div>
 
-            {/* Track */}
             <div className={styles.track}>
-                {/* Glow layer behind the bar */}
                 <div className={styles.glow} style={{ width: `${progress}%` }} />
-                {/* Bar */}
                 <div className={styles.bar} style={{ width: `${progress}%` }} />
-                {/* Tip dot */}
                 {progress > 2 && progress < 100 && (
                     <div className={styles.tip} style={{ left: `${progress}%` }} />
                 )}
             </div>
 
-            {/* Step pills */}
             {steps && steps.length > 0 && (
                 <div className={styles.steps}>
                     {steps.map(({ label: sl, threshold }) => (

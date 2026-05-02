@@ -334,8 +334,8 @@ export async function getRecentActivity(patientsList: PatientLike[]): Promise<Ac
 
         for (const patient of patientsList) {
             for (const key of [patient.mrn, patient.id]) {
-// ✅ بعد
-                const imgs = await new Promise<Record<string, string>[]>((resolve) => {                    const tx = db.transaction(STORE, 'readonly');
+                const imgs = await new Promise<Record<string, string>[]>((resolve) => {
+                    const tx = db.transaction(STORE, 'readonly');
                     const r  = tx.objectStore(STORE).get(key);
                     r.onsuccess = () => resolve(r.result || []);
                     r.onerror   = () => resolve([]);

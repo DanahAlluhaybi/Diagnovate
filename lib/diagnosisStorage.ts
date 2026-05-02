@@ -1,13 +1,12 @@
-// lib/diagnosisStorage.ts
-// يحفظ نتائج التشخيص في IndexedDB بنفس pattern الصور
+/** Persists AI diagnosis records to IndexedDB, keyed by patient MRN. */
 
-const DB_NAME    = 'diagnovate_images';   // نفس الـ DB عشان نفتح connection واحد
-const DB_VERSION = 2;                     // رفعنا الـ version عشان نضيف store جديد
+const DB_NAME    = 'diagnovate_images';
+const DB_VERSION = 2;
 const STORE      = 'patient_diagnoses';
 
 export interface DiagnosisRecord {
-    id          : string;   // uuid
-    date        : string;   // ISO string
+    id          : string;
+    date        : string;
     mode        : 'image' | 'lab' | 'both';
     modelName   : string;
     votingResult: string;
@@ -23,13 +22,12 @@ function openDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
         const req = indexedDB.open(DB_NAME, DB_VERSION);
 
-        req.onupgradeneeded = (e) => {
+        req.onupgradeneeded = () => {
             const db = req.result;
-            // نفس الـ store القديم — لا تمسحه
+            // Preserve the existing image store from DB version 1.
             if (!db.objectStoreNames.contains('patient_images')) {
                 db.createObjectStore('patient_images');
             }
-            // الـ store الجديد للتشخيصات
             if (!db.objectStoreNames.contains(STORE)) {
                 db.createObjectStore(STORE);
             }
@@ -40,7 +38,7 @@ function openDB(): Promise<IDBDatabase> {
     });
 }
 
-/** يحفظ تشخيص جديد للمريض (by mrn) */
+/** Prepends a new diagnosis record for the patient, keyed by MRN. */
 export async function saveDiagnosis(mrn: string, record: DiagnosisRecord): Promise<void> {
     const db  = await openDB();
     const tx  = db.transaction(STORE, 'readwrite');
@@ -52,7 +50,6 @@ export async function saveDiagnosis(mrn: string, record: DiagnosisRecord): Promi
         r.onerror   = () => rej(r.error);
     });
 
-    // أحدث التشخيصات فوق
     const updated = [record, ...existing];
 
     await new Promise<void>((res, rej) => {
@@ -64,7 +61,7 @@ export async function saveDiagnosis(mrn: string, record: DiagnosisRecord): Promi
     db.close();
 }
 
-/** يجيب كل تشخيصات المريض */
+/** Loads all diagnosis records for a patient, merging MRN and ID keys and deduplicating by record ID. */
 export async function loadDiagnoses(mrn: string, patientId?: string): Promise<DiagnosisRecord[]> {
     const db = await openDB();
     const tx = db.transaction(STORE, 'readonly');
@@ -87,12 +84,11 @@ export async function loadDiagnoses(mrn: string, patientId?: string): Promise<Di
 
     db.close();
 
-    // Deduplicate by id
     const merged = [...fromMrn, ...fromId];
     return merged.filter((d, idx, arr) => arr.findIndex(x => x.id === d.id) === idx);
 }
 
-/** يحذف تشخيص معين */
+/** Removes a specific diagnosis record from all storage keys associated with the patient. */
 export async function deleteDiagnosis(mrn: string, patientId: string, diagId: string): Promise<void> {
     const db = await openDB();
     const tx = db.transaction(STORE, 'readwrite');

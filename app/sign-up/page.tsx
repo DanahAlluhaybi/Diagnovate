@@ -64,7 +64,7 @@ export default function SignUpPage() {
             });
 
             if (raw?.next_step === 'choose_verification') {
-                // الـ backend يُرسل phone و email — نحفظهم عشان handleChoose يستخدمهم
+                // Store phone and email from the backend response for use in the OTP channel selection step.
                 setSignupPhone(raw?.phone ?? form.phone);
                 setSignupEmail(raw?.email ?? form.email);
                 setStep(2);

@@ -725,7 +725,7 @@ export default function AIDiagnosisPage() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                                     <div className={s.infoCard}>
                                         <div className={s.infoCardHead}>
-                                            <div className={s.infoCardIcon}><span style={{ fontSize: 14 }}>📊</span></div>
+                                            <div className={s.infoCardIcon}><Activity size={14} /></div>
                                             <span className={s.infoCardTitle}>Top Models</span>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -752,7 +752,7 @@ export default function AIDiagnosisPage() {
 
                                     <div className={s.infoCard} style={{ borderColor: sev.border }}>
                                         <div className={s.infoCardHead} style={{ background: sev.bg, borderBottom: `1px solid ${sev.border}` }}>
-                                            <div className={s.infoCardIcon} style={{ background: sev.color + '18', border: `1px solid ${sev.border}` }}><span style={{ fontSize: 14 }}>⚖️</span></div>
+                                            <div className={s.infoCardIcon} style={{ background: sev.color + '18', border: `1px solid ${sev.border}` }}><CheckCircle2 size={14} color={sev.color} /></div>
                                             <span className={s.infoCardTitle} style={{ color: sev.color }}>Majority Voting</span>
                                         </div>
                                         <div style={{ padding: '24px 18px', background: sev.bg, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 16 }}>
@@ -770,7 +770,7 @@ export default function AIDiagnosisPage() {
 
                                 <div className={s.infoCard}>
                                     <div className={s.infoCardHead}>
-                                        <div className={s.infoCardIcon}><span style={{ fontSize: 14 }}>🔍</span></div>
+                                        <div className={s.infoCardIcon}><FileText size={14} /></div>
                                         <span className={s.infoCardTitle}>Key Findings</span>
                                     </div>
                                     <div style={{ padding: '4px 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
@@ -785,7 +785,7 @@ export default function AIDiagnosisPage() {
 
                                 <div className={s.infoCard} style={{ borderColor: sev.border }}>
                                     <div className={s.infoCardHead} style={{ background: sev.bg, borderBottom: `1px solid ${sev.border}` }}>
-                                        <div className={s.infoCardIcon} style={{ background: sev.color + '18', border: `1px solid ${sev.border}` }}><span style={{ fontSize: 14 }}>💊</span></div>
+                                        <div className={s.infoCardIcon} style={{ background: sev.color + '18', border: `1px solid ${sev.border}` }}><CheckCircle2 size={14} color={sev.color} /></div>
                                         <span className={s.infoCardTitle} style={{ color: sev.color }}>Recommendation</span>
                                     </div>
                                     <div style={{ padding: '16px 18px' }}>

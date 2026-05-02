@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './styles.module.css';
-import { X, ArrowLeft, Search, UserPlus, Scan, Trash2, Brain, CheckCircle2, AlertTriangle, Minus } from 'lucide-react';
+import { X, ArrowLeft, Search, UserPlus, Scan, Trash2, Brain, CheckCircle2, AlertTriangle, Minus, FileText } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { BASE } from '@/lib/api';
 
@@ -273,15 +273,15 @@ function PatientManagementPage() {
 
                     <div className={styles.tabBar}>
                         {([
-                            { id: 'info',      label: 'Personal Info',  icon: '👤' },
-                            { id: 'images',    label: 'Medical Images', icon: '🔬' },
-                            { id: 'diagnosis', label: 'AI Diagnoses',   icon: '🧠' },
-                            { id: 'reports',   label: 'Reports',        icon: '📄' },
-                        ] as { id: Tab; label: string; icon: string }[]).map(t => (
+                            { id: 'info',      label: 'Personal Info'  },
+                            { id: 'images',    label: 'Medical Images' },
+                            { id: 'diagnosis', label: 'AI Diagnoses'   },
+                            { id: 'reports',   label: 'Reports'        },
+                        ] as { id: Tab; label: string }[]).map(t => (
                             <button key={t.id}
                                     className={`${styles.tabBtn} ${activeTab === t.id ? styles.tabBtnActive : ''}`}
                                     onClick={() => setActiveTab(t.id)}>
-                                {t.icon} {t.label}
+                                {t.label}
                                 {t.id === 'diagnosis' && localDiagnoses.length > 0 && (
                                     <span className={styles.tabCount}>{localDiagnoses.length}</span>
                                 )}
@@ -514,7 +514,7 @@ function PatientManagementPage() {
 
                     {activeTab === 'reports' && (
                         <div className={styles.emptyTab}>
-                            <span style={{ fontSize: 32 }}>📄</span>
+                            <FileText size={32} color="#CBD5E1" />
                             <p>No reports yet</p>
                             <span style={{ fontSize: 13, color: '#94a3b8' }}>
                                 Reports will appear here after AI diagnosis is complete
