@@ -1,22 +1,20 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './styles.module.css';
 import { X, ArrowLeft, Search, UserPlus, Scan, Trash2, Brain, CheckCircle2, AlertTriangle, Minus } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import { BASE } from '@/lib/api';
 
 type Gender   = 'Male' | 'Female';
 type Status   = 'Active' | 'Inactive';
 type View     = 'list' | 'detail';
 type Tab      = 'info' | 'images' | 'diagnosis';
-type ScanType = 'Ultrasound' | 'CT Scan' | 'MRI' | 'X-Ray';
+type ScanType = 'Ultrasound';
 
 const SCAN_TYPE_STYLES: Record<string, { color: string; bg: string; border: string }> = {
     'Ultrasound': { color: '#0D9488', bg: '#F0FDFA', border: '#99F6E4' },
-    'CT Scan':    { color: '#0891B2', bg: '#F0F9FF', border: '#BAE6FD' },
-    'MRI':        { color: '#7C3AED', bg: '#F5F3FF', border: '#DDD6FE' },
-    'X-Ray':      { color: '#F59E0B', bg: '#FFFBEB', border: '#FDE68A' },
 };
 
 const SEVERITY_META = {
@@ -69,7 +67,7 @@ async function loadImagesForPatient(patient: { id: string; mrn: string }): Promi
     try {
         const raw = await loadImages(patient.mrn, patient.id);
         return raw.map((img: any): MedicalImage => ({
-            id: img.id, date: img.date, type: img.type as ScanType,
+            id: img.id, date: img.date, type: 'Ultrasound' as ScanType,
             label: img.label, enhanced: img.isEnhanced ?? true,
             enhancedSrc: img.enhancedSrc, originalSrc: img.originalSrc,
         }));
@@ -87,31 +85,30 @@ async function deleteImageFromStorage(patient: { id: string; mrn: string }, imag
 }
 
 const getAgeGroup  = (age: number) => age <= 18 ? '0-18' : age <= 40 ? '19-40' : '40+';
-const formatDate   = (d: string)   => new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-const formatTime   = (d: string)   => new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+const formatDate   = (d: string)   => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+const formatTime   = (d: string)   => d ? new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
 const getInitials  = (f: string, l: string) => `${f[0] ?? ''}${l[0] ?? ''}`.toUpperCase();
 
-export default function PatientManagementPage() {
+// ── Inner component (uses useSearchParams) ─────────────────────────────────
+function PatientManagementPage() {
     const router       = useRouter();
     const searchParams = useSearchParams();
 
-    const [patients,       setPatients]       = useState<Patient[]>([]);
-    const [loading,        setLoading]        = useState(true);
-    const [currentView,    setCurrentView]    = useState<View>('list');
-    const [selectedPatient,setSelectedPatient]= useState<Patient | null>(null);
-    const [activeTab,      setActiveTab]      = useState<Tab>('info');
-    const [searchQuery,    setSearchQuery]    = useState('');
-    const [activeFilter,   setActiveFilter]   = useState('all');
-    const [showModal,      setShowModal]      = useState(false);
-    const [form,           setForm]           = useState(EMPTY_FORM);
-    const [formError,      setFormError]      = useState('');
-    const [localImages,    setLocalImages]    = useState<MedicalImage[]>([]);
-    const [localDiagnoses, setLocalDiagnoses] = useState<DiagnosisRecord[]>([]);
-    const [confirmDeleteId,setConfirmDeleteId]= useState<string | null>(null);
-    const [editingStatus,  setEditingStatus]  = useState(false);
-    const [confirmDxDelete,setConfirmDxDelete]= useState<string | null>(null);
-
-    const BASE = 'http://localhost:5002';
+    const [patients,        setPatients]        = useState<Patient[]>([]);
+    const [loading,         setLoading]         = useState(true);
+    const [currentView,     setCurrentView]     = useState<View>('list');
+    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+    const [activeTab,       setActiveTab]       = useState<Tab>('info');
+    const [searchQuery,     setSearchQuery]     = useState('');
+    const [activeFilter,    setActiveFilter]    = useState('all');
+    const [showModal,       setShowModal]       = useState(false);
+    const [form,            setForm]            = useState(EMPTY_FORM);
+    const [formError,       setFormError]       = useState('');
+    const [localImages,     setLocalImages]     = useState<MedicalImage[]>([]);
+    const [localDiagnoses,  setLocalDiagnoses]  = useState<DiagnosisRecord[]>([]);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+    const [editingStatus,   setEditingStatus]   = useState(false);
+    const [confirmDxDelete, setConfirmDxDelete] = useState<string | null>(null);
 
     const fetchPatients = async () => {
         try {
@@ -162,12 +159,12 @@ export default function PatientManagementPage() {
     }, [searchParams, patients]);
 
     const filters = [
-        { id: 'all',    label: 'All'   },
-        { id: 'male',   label: 'Male'  },
-        { id: 'female', label: 'Female'},
-        { id: '0-18',   label: '0–18'  },
-        { id: '19-40',  label: '19–40' },
-        { id: '40+',    label: '40+'   },
+        { id: 'all',    label: 'All'    },
+        { id: 'male',   label: 'Male'   },
+        { id: 'female', label: 'Female' },
+        { id: '0-18',   label: '0–18'   },
+        { id: '19-40',  label: '19–40'  },
+        { id: '40+',    label: '40+'    },
     ];
 
     const filtered = useMemo(() => {
@@ -233,12 +230,9 @@ export default function PatientManagementPage() {
         setActiveTab('info'); setConfirmDeleteId(null); setConfirmDxDelete(null);
     };
 
-    /* ══════════════════════════════════════════
-       DETAIL VIEW
-    ══════════════════════════════════════════ */
+    /* ── DETAIL VIEW ── */
     if (currentView === 'detail' && selectedPatient) {
         const images = localImages;
-
         return (
             <div className={styles.container}>
                 <Navbar />
@@ -251,7 +245,6 @@ export default function PatientManagementPage() {
                         <h2 className={styles.pageTitle}>Patient <em>Details</em></h2>
                     </div>
 
-                    {/* Profile strip */}
                     <div className={styles.profileStrip}>
                         <div className={`${styles.avatarLg} ${selectedPatient.gender === 'Female' ? styles.female : styles.male}`}>
                             {getInitials(selectedPatient.firstName, selectedPatient.lastName)}
@@ -265,10 +258,10 @@ export default function PatientManagementPage() {
                         </div>
                         <div className={styles.profileMeta}>
                             {[
-                                { label: 'Age',       val: `${selectedPatient.age} yrs`    },
-                                { label: 'Gender',    val: selectedPatient.gender           },
-                                { label: 'Scans',     val: String(images.length)            },
-                                { label: 'Diagnoses', val: String(localDiagnoses.length)    },
+                                { label: 'Age',       val: `${selectedPatient.age} yrs`     },
+                                { label: 'Gender',    val: selectedPatient.gender            },
+                                { label: 'Scans',     val: String(images.length)             },
+                                { label: 'Diagnoses', val: String(localDiagnoses.length)     },
                             ].map(m => (
                                 <div key={m.label} className={styles.metaChip}>
                                     <span className={styles.metaLabel}>{m.label}</span>
@@ -278,7 +271,6 @@ export default function PatientManagementPage() {
                         </div>
                     </div>
 
-                    {/* Tab bar */}
                     <div className={styles.tabBar}>
                         {([
                             { id: 'info',      label: 'Personal Info',  icon: '👤' },
@@ -296,7 +288,7 @@ export default function PatientManagementPage() {
                         ))}
                     </div>
 
-                    {/* ── INFO TAB ── */}
+                    {/* INFO TAB */}
                     {activeTab === 'info' && (
                         <div className={styles.detailCard}>
                             <div className={styles.detailGrid}>
@@ -342,89 +334,80 @@ export default function PatientManagementPage() {
                         </div>
                     )}
 
-                    {/* ── IMAGES TAB ── */}
+                    {/* IMAGES TAB — Ultrasound only */}
                     {activeTab === 'images' && (
                         <div className={styles.imagesSection}>
                             {images.length === 0 ? (
                                 <div className={styles.emptyTab}>
                                     <Scan size={32} color="#CBD5E1" />
-                                    <p>No medical images yet</p>
+                                    <p>No ultrasound images yet</p>
                                     <span style={{ fontSize: 13, color: '#94a3b8' }}>
-                                        Go to Image Enhancement to upload and enhance scans
+                                        Go to Image Enhancement to upload and enhance ultrasound scans
                                     </span>
                                 </div>
                             ) : (
-                                (() => {
-                                    const byType: Record<string, MedicalImage[]> = {};
-                                    for (const img of images) {
-                                        if (!byType[img.type]) byType[img.type] = [];
-                                        byType[img.type].push(img);
-                                    }
-                                    return (
-                                        <div className={styles.imagesByType}>
-                                            {Object.entries(byType).map(([type, imgs]) => {
-                                                const st = SCAN_TYPE_STYLES[type] ?? SCAN_TYPE_STYLES['Ultrasound'];
-                                                return (
-                                                    <div key={type} className={styles.typeGroup}>
-                                                        <div className={styles.typeGroupHead}>
-                                                            <span className={styles.typeGroupBadge}
-                                                                  style={{ background: st.bg, color: st.color, borderColor: st.border }}>
-                                                                {type}
-                                                            </span>
-                                                            <span className={styles.typeGroupCount}>{imgs.length} scan{imgs.length > 1 ? 's' : ''}</span>
-                                                            <div className={styles.typeGroupLine} style={{ background: st.border }} />
-                                                        </div>
-                                                        <div className={styles.imagesGrid}>
-                                                            {imgs.map(img => (
-                                                                <div key={img.id} className={styles.imgCard}>
-                                                                    <div className={styles.imgRealWrap}>
-                                                                        {img.enhancedSrc || img.originalSrc ? (
-                                                                            <img src={img.enhancedSrc || img.originalSrc}
-                                                                                 className={styles.imgReal} alt={img.label} />
-                                                                        ) : (
-                                                                            <div className={styles.imgNoise} />
-                                                                        )}
-                                                                        {img.enhanced && (
-                                                                            <div className={styles.enhancedBadge}>Enhanced</div>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className={styles.imgMeta}>
-                                                                        <span className={styles.imgTypeTag}
-                                                                              style={{ background: st.bg, color: st.color, borderColor: st.border }}>
-                                                                            {type}
-                                                                        </span>
-                                                                        <div className={styles.imgDesc}>{img.label}</div>
-                                                                        <div className={styles.imgFooter}>
-                                                                            <span className={styles.imgDate}>{formatDate(img.date)}</span>
-                                                                            {confirmDeleteId === img.id ? (
-                                                                                <div className={styles.deleteConfirm}>
-                                                                                    <span className={styles.deleteConfirmText}>Delete?</span>
-                                                                                    <div className={styles.deleteConfirmBtns}>
-                                                                                        <button className={styles.deleteConfirmYes} onClick={() => handleDeleteImage(img.id)}>Yes</button>
-                                                                                        <button className={styles.deleteConfirmNo} onClick={() => setConfirmDeleteId(null)}>No</button>
-                                                                                    </div>
-                                                                                </div>
-                                                                            ) : (
-                                                                                <button className={styles.deleteImgBtn} onClick={() => setConfirmDeleteId(img.id)}>
-                                                                                    <Trash2 size={13} /> Delete
-                                                                                </button>
-                                                                            )}
+                                <div className={styles.imagesByType}>
+                                    {(() => {
+                                        const st = SCAN_TYPE_STYLES['Ultrasound'];
+                                        return (
+                                            <div className={styles.typeGroup}>
+                                                <div className={styles.typeGroupHead}>
+                                                    <span className={styles.typeGroupBadge}
+                                                          style={{ background: st.bg, color: st.color, borderColor: st.border }}>
+                                                        Ultrasound
+                                                    </span>
+                                                    <span className={styles.typeGroupCount}>{images.length} scan{images.length > 1 ? 's' : ''}</span>
+                                                    <div className={styles.typeGroupLine} style={{ background: st.border }} />
+                                                </div>
+                                                <div className={styles.imagesGrid}>
+                                                    {images.map(img => (
+                                                        <div key={img.id} className={styles.imgCard}>
+                                                            <div className={styles.imgRealWrap}>
+                                                                {img.enhancedSrc || img.originalSrc ? (
+                                                                    <img src={img.enhancedSrc || img.originalSrc}
+                                                                         className={styles.imgReal} alt={img.label} />
+                                                                ) : (
+                                                                    <div className={styles.imgNoise} />
+                                                                )}
+                                                                {img.enhanced && (
+                                                                    <div className={styles.enhancedBadge}>Enhanced</div>
+                                                                )}
+                                                            </div>
+                                                            <div className={styles.imgMeta}>
+                                                                <span className={styles.imgTypeTag}
+                                                                      style={{ background: st.bg, color: st.color, borderColor: st.border }}>
+                                                                    Ultrasound
+                                                                </span>
+                                                                <div className={styles.imgDesc}>{img.label}</div>
+                                                                <div className={styles.imgFooter}>
+                                                                    <span className={styles.imgDate}>{formatDate(img.date)}</span>
+                                                                    {confirmDeleteId === img.id ? (
+                                                                        <div className={styles.deleteConfirm}>
+                                                                            <span className={styles.deleteConfirmText}>Delete?</span>
+                                                                            <div className={styles.deleteConfirmBtns}>
+                                                                                <button className={styles.deleteConfirmYes} onClick={() => handleDeleteImage(img.id)}>Yes</button>
+                                                                                <button className={styles.deleteConfirmNo} onClick={() => setConfirmDeleteId(null)}>No</button>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
+                                                                    ) : (
+                                                                        <button className={styles.deleteImgBtn} onClick={() => setConfirmDeleteId(img.id)}>
+                                                                            <Trash2 size={13} /> Delete
+                                                                        </button>
+                                                                    )}
                                                                 </div>
-                                                            ))}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    );
-                                })()
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
                             )}
                         </div>
                     )}
 
-                    {/* ── DIAGNOSIS TAB ── */}
+                    {/* DIAGNOSIS TAB */}
                     {activeTab === 'diagnosis' && (
                         <div className={styles.diagnosisSection}>
                             {localDiagnoses.length === 0 ? (
@@ -434,36 +417,25 @@ export default function PatientManagementPage() {
                                     <span style={{ fontSize: 13, color: '#94a3b8' }}>
                                         Run a diagnosis from the AI Diagnosis page and select this patient
                                     </span>
-                                    <button
-                                        className={styles.goToDxBtn}
-                                        onClick={() => router.push('/ai-diagnosis')}>
+                                    <button className={styles.goToDxBtn} onClick={() => router.push('/ai-diagnosis')}>
                                         <Brain size={14} /> Go to AI Diagnosis
                                     </button>
                                 </div>
                             ) : (
                                 <div className={styles.dxList}>
-                                    {localDiagnoses.map((dx, idx) => {
+                                    {localDiagnoses.map((dx) => {
                                         const sev = SEVERITY_META[dx.severity] ?? SEVERITY_META.Moderate;
-                                        const SevIcon = dx.severity === 'High'
-                                            ? AlertTriangle
-                                            : dx.severity === 'Moderate'
-                                                ? Minus
-                                                : CheckCircle2;
+                                        const SevIcon = dx.severity === 'High' ? AlertTriangle : dx.severity === 'Moderate' ? Minus : CheckCircle2;
                                         return (
                                             <div key={dx.id} className={styles.dxCard}>
-                                                {/* ── Card Header ── */}
                                                 <div className={styles.dxCardHead} style={{ borderColor: sev.border, background: sev.bg }}>
                                                     <div className={styles.dxCardHeadLeft}>
                                                         <div className={styles.dxSevIcon} style={{ background: sev.color + '18', border: `1px solid ${sev.border}` }}>
                                                             <SevIcon size={14} color={sev.color} />
                                                         </div>
                                                         <div>
-                                                            <div className={styles.dxVoting} style={{ color: sev.color }}>
-                                                                {dx.votingResult}
-                                                            </div>
-                                                            <div className={styles.dxDate}>
-                                                                {formatDate(dx.date)} · {formatTime(dx.date)}
-                                                            </div>
+                                                            <div className={styles.dxVoting} style={{ color: sev.color }}>{dx.votingResult}</div>
+                                                            <div className={styles.dxDate}>{formatDate(dx.date)} · {formatTime(dx.date)}</div>
                                                         </div>
                                                     </div>
                                                     <div className={styles.dxCardHeadRight}>
@@ -476,49 +448,28 @@ export default function PatientManagementPage() {
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                {/* ── Card Body ── */}
                                                 <div className={styles.dxCardBody}>
-                                                    {/* Meta row */}
                                                     <div className={styles.dxMetaRow}>
-                                                        <div className={styles.dxMeta}>
-                                                            <span className={styles.dxMetaLabel}>Mode</span>
-                                                            <span className={styles.dxMetaVal}>{MODE_LABELS[dx.mode] ?? dx.mode}</span>
-                                                        </div>
-                                                        <div className={styles.dxMeta}>
-                                                            <span className={styles.dxMetaLabel}>Model</span>
-                                                            <span className={styles.dxMetaVal}>{dx.modelName}</span>
-                                                        </div>
-                                                        <div className={styles.dxMeta}>
-                                                            <span className={styles.dxMetaLabel}>Confidence</span>
-                                                            <span className={styles.dxMetaVal} style={{ color: sev.color }}>{dx.confidence}%</span>
-                                                        </div>
+                                                        <div className={styles.dxMeta}><span className={styles.dxMetaLabel}>Mode</span><span className={styles.dxMetaVal}>{MODE_LABELS[dx.mode] ?? dx.mode}</span></div>
+                                                        <div className={styles.dxMeta}><span className={styles.dxMetaLabel}>Model</span><span className={styles.dxMetaVal}>{dx.modelName}</span></div>
+                                                        <div className={styles.dxMeta}><span className={styles.dxMetaLabel}>Confidence</span><span className={styles.dxMetaVal} style={{ color: sev.color }}>{dx.confidence}%</span></div>
                                                     </div>
-
-                                                    {/* Score bar */}
                                                     <div className={styles.dxScoreBar}>
                                                         <div className={styles.dxScoreTrack}>
-                                                            <div className={styles.dxScoreFill}
-                                                                 style={{ width: `${dx.malignancyScore}%`, background: sev.color }} />
+                                                            <div className={styles.dxScoreFill} style={{ width: `${dx.malignancyScore}%`, background: sev.color }} />
                                                         </div>
                                                         <span className={styles.dxScoreLabel}>Malignancy Score</span>
                                                     </div>
-
-                                                    {/* Top models */}
                                                     <div className={styles.dxModelsRow}>
                                                         {dx.topModels.map((m, i) => (
-                                                            <div key={i} className={styles.dxModelChip}
-                                                                 style={{ opacity: m.available ? 1 : 0.45 }}>
+                                                            <div key={i} className={styles.dxModelChip} style={{ opacity: m.available ? 1 : 0.45 }}>
                                                                 <span className={styles.dxModelName}>{m.name}</span>
-                                                                <span className={styles.dxModelResult}
-                                                                      style={{ color: m.available ? sev.color : '#94a3b8' }}>
+                                                                <span className={styles.dxModelResult} style={{ color: m.available ? sev.color : '#94a3b8' }}>
                                                                     {m.available ? `${m.result} · ${m.confidence}%` : 'N/A'}
                                                                 </span>
                                                             </div>
                                                         ))}
                                                     </div>
-
-                                                    {/* Findings */}
                                                     <div className={styles.dxFindings}>
                                                         <div className={styles.dxFindingsLabel}>Key Findings</div>
                                                         <div className={styles.dxFindingsList}>
@@ -529,20 +480,14 @@ export default function PatientManagementPage() {
                                                                 </div>
                                                             ))}
                                                             {dx.findings.length > 4 && (
-                                                                <div className={styles.dxFindingItem} style={{ color: '#94a3b8' }}>
-                                                                    +{dx.findings.length - 4} more findings
-                                                                </div>
+                                                                <div className={styles.dxFindingItem} style={{ color: '#94a3b8' }}>+{dx.findings.length - 4} more findings</div>
                                                             )}
                                                         </div>
                                                     </div>
-
-                                                    {/* Recommendation */}
                                                     <div className={styles.dxRec} style={{ borderColor: sev.border, background: sev.bg }}>
                                                         <CheckCircle2 size={13} color={sev.color} style={{ flexShrink: 0, marginTop: 2 }} />
                                                         <span>{dx.recommendation}</span>
                                                     </div>
-
-                                                    {/* Delete */}
                                                     <div className={styles.dxActions}>
                                                         {confirmDxDelete === dx.id ? (
                                                             <div className={styles.deleteConfirm}>
@@ -571,9 +516,7 @@ export default function PatientManagementPage() {
         );
     }
 
-    /* ══════════════════════════════════════════
-       LIST VIEW
-    ══════════════════════════════════════════ */
+    /* ── LIST VIEW ── */
     return (
         <div className={styles.container}>
             <Navbar />
@@ -588,16 +531,11 @@ export default function PatientManagementPage() {
                     </div>
                 </div>
 
-                {/* Search + filter */}
                 <div className={styles.searchCard}>
                     <div className={styles.searchWrapper}>
                         <Search size={15} className={styles.searchIcon} />
-                        <input
-                            className={styles.searchInput}
-                            placeholder="Search by name, MRN, or phone..."
-                            value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
-                        />
+                        <input className={styles.searchInput} placeholder="Search by name, MRN, or phone..."
+                               value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                     </div>
                     <div className={styles.filterRow}>
                         {filters.map(f => (
@@ -610,7 +548,6 @@ export default function PatientManagementPage() {
                     </div>
                 </div>
 
-                {/* Table */}
                 <div className={styles.tableCard}>
                     <div className={styles.tableHead}>
                         <span className={styles.tableCount}>{filtered.length} patient{filtered.length !== 1 ? 's' : ''}</span>
@@ -626,14 +563,8 @@ export default function PatientManagementPage() {
                         <table className={styles.table}>
                             <thead>
                             <tr>
-                                <th>Patient</th>
-                                <th>MRN</th>
-                                <th>Age</th>
-                                <th>Gender</th>
-                                <th>Condition</th>
-                                <th>Status</th>
-                                <th>Last Visit</th>
-                                <th></th>
+                                <th>Patient</th><th>MRN</th><th>Age</th><th>Gender</th>
+                                <th>Condition</th><th>Status</th><th>Last Visit</th><th></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -673,7 +604,6 @@ export default function PatientManagementPage() {
                 </div>
             </div>
 
-            {/* Add Patient Modal */}
             {showModal && (
                 <div className={styles.overlay} onClick={() => setShowModal(false)}>
                     <div className={styles.modal} onClick={e => e.stopPropagation()}>
@@ -684,12 +614,12 @@ export default function PatientManagementPage() {
                         <div className={styles.modalBody}>
                             <div className={styles.formGrid}>
                                 {([
-                                    { k: 'firstName', label: 'First Name', placeholder: 'John',        type: 'text'   },
-                                    { k: 'lastName',  label: 'Last Name',  placeholder: 'Doe',         type: 'text'   },
-                                    { k: 'mrn',       label: 'MRN',        placeholder: 'MRN-001',     type: 'text'   },
-                                    { k: 'age',       label: 'Age',        placeholder: '35',          type: 'number' },
-                                    { k: 'phone',     label: 'Phone',      placeholder: '+966 5xx xxx',type: 'text'   },
-                                    { k: 'email',     label: 'Email',      placeholder: 'optional',    type: 'email'  },
+                                    { k: 'firstName', label: 'First Name', placeholder: 'John',         type: 'text'   },
+                                    { k: 'lastName',  label: 'Last Name',  placeholder: 'Doe',          type: 'text'   },
+                                    { k: 'mrn',       label: 'MRN',        placeholder: 'MRN-001',      type: 'text'   },
+                                    { k: 'age',       label: 'Age',        placeholder: '35',           type: 'number' },
+                                    { k: 'phone',     label: 'Phone',      placeholder: '+966 5xx xxx', type: 'text'   },
+                                    { k: 'email',     label: 'Email',      placeholder: 'optional',     type: 'email'  },
                                 ] as const).map(f => (
                                     <div key={f.k} className={styles.formField}>
                                         <label className={styles.formLabel}>{f.label}</label>
@@ -722,5 +652,14 @@ export default function PatientManagementPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+// ── Wrapper with Suspense (required for useSearchParams in Next.js) ──────────
+export default function Page() {
+    return (
+        <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
+            <PatientManagementPage />
+        </Suspense>
     );
 }
