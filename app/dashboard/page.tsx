@@ -5,21 +5,28 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
-import { Scan, Brain, Users, FileText, ExternalLink } from 'lucide-react';
+import { Scan, Brain, Users, FileText } from 'lucide-react';
 import { dashboard } from '@/lib/api';
 
+interface Stats {
+    active_cases: number;
+    urgent_cases: number;
+    total_patients: number;
+    completed_cases: number;
+}
+
 const MODULES = [
-    { href: '/patient-management', icon: <Users size={26} />, label: 'Patient Management', desc: 'View, add, and manage patient records', color: '#0D9488', bg: '#F0FDFA', border: '#99F6E4' },
-    { href: '/image-enhancement',  icon: <Scan size={26} />,  label: 'Image Enhancement',  desc: 'AI-powered ultrasound image clarity boost', color: '#0891B2', bg: '#F0F9FF', border: '#BAE6FD' },
-    { href: '/ai-diagnosis',        icon: <Brain size={26} />, label: 'AI Diagnosis',        desc: 'Context-aware diagnostic recommendations',  color: '#0D9488', bg: '#F0FDFA', border: '#99F6E4' },
-    { href: '/report',              icon: <FileText size={26} />, label: 'Reports',          desc: 'Generate and export clinical diagnostic reports', color: '#0D9488', bg: '#F0FDFA', border: '#99F6E4' },
+    { href: '/patient-management', icon: <Users size={26} />,    label: 'Patient Management', desc: 'View, add, and manage patient records',           color: '#0D9488', bg: '#F0FDFA', border: '#99F6E4' },
+    { href: '/image-enhancement',  icon: <Scan size={26} />,     label: 'Image Enhancement',  desc: 'AI-powered ultrasound image clarity boost',       color: '#0891B2', bg: '#F0F9FF', border: '#BAE6FD' },
+    { href: '/ai-diagnosis',       icon: <Brain size={26} />,    label: 'AI Diagnosis',        desc: 'Context-aware diagnostic recommendations',        color: '#7C3AED', bg: '#F5F3FF', border: '#DDD6FE' },
+    { href: '/report',             icon: <FileText size={26} />, label: 'Reports',             desc: 'Generate and export clinical diagnostic reports', color: '#F59E0B', bg: '#FFFBEB', border: '#FDE68A' },
 ];
 
 export default function DoctorDashboard() {
     const router = useRouter();
     const [user,        setUser]        = useState<any>(null);
     const [loading,     setLoading]     = useState(true);
-    const [stats,       setStats]       = useState({ active_cases: 0, urgent_cases: 0, total_patients: 0, completed_cases: 0 });
+    const [stats,       setStats]       = useState<Stats>({ active_cases: 0, urgent_cases: 0, total_patients: 0, completed_cases: 0 });
     const [recentCases, setRecentCases] = useState<any[]>([]);
 
     useEffect(() => {
@@ -29,10 +36,11 @@ export default function DoctorDashboard() {
                 const userData = localStorage.getItem('user');
                 if (userData) setUser(JSON.parse(userData));
 
-                const statsData = await dashboard.getStats();
+                // FIX: cast to Stats type
+                const statsData = await dashboard.getStats() as Stats;
                 if (statsData) setStats(statsData);
 
-                const casesData = await dashboard.getRecentCases();
+                const casesData = await dashboard.getRecentCases() as any[];
                 if (casesData && Array.isArray(casesData)) setRecentCases(casesData);
             } catch (error) {
                 console.error('Failed to fetch dashboard data:', error);
@@ -46,13 +54,6 @@ export default function DoctorDashboard() {
     const firstName = user?.name?.replace(/^dr\.?\s*/i, '').split(' ')[0] ?? 'Doctor';
     const hour      = new Date().getHours();
     const greeting  = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-
-    const openCase = (c: any) => {
-        const patientId = c?.patient_id || c?.id || c?.case_id;
-        if (patientId) {
-            router.push(`/patient-management?patientId=${patientId}&tab=diagnosis`);
-        }
-    };
 
     if (loading) {
         return (
@@ -137,6 +138,7 @@ export default function DoctorDashboard() {
                 .score-badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;font-size:13px;font-weight:800;border:1px solid transparent}
                 .open-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--teal);background:var(--teal-light);border:1px solid var(--teal-ring);border-radius:8px;padding:5px 11px;cursor:pointer;transition:all .18s;white-space:nowrap}
                 .open-btn:hover{background:var(--teal);color:white;border-color:var(--teal)}
+                .empty-state{padding:48px 20px;text-align:center;color:var(--muted);font-size:14px}
                 @media(max-width:900px){.hero{flex-direction:column;align-items:flex-start;gap:20px}.recent-wrap{overflow-x:auto}}
             `}</style>
 
@@ -154,7 +156,7 @@ export default function DoctorDashboard() {
                             { val: stats.active_cases,    lbl: 'Active Cases' },
                             { val: stats.urgent_cases,    lbl: 'Urgent Cases' },
                             { val: stats.total_patients,  lbl: 'Total Patients' },
-                            { val: stats.completed_cases, lbl: 'Completed (Month)' }
+                            { val: stats.completed_cases, lbl: 'Completed (Month)' },
                         ].map(s => (
                             <div key={s.lbl} className="stat-pill">
                                 <div className="stat-val">{s.val}</div>
@@ -175,12 +177,12 @@ export default function DoctorDashboard() {
                             onMouseEnter={e => {
                                 const el = e.currentTarget;
                                 el.style.borderColor = m.border;
-                                el.style.boxShadow = `0 20px 56px ${m.color}14`;
+                                el.style.boxShadow   = `0 20px 56px ${m.color}14`;
                             }}
                             onMouseLeave={e => {
                                 const el = e.currentTarget;
                                 el.style.borderColor = 'var(--border)';
-                                el.style.boxShadow = '0 2px 8px rgba(15,23,42,.05)';
+                                el.style.boxShadow   = '0 2px 8px rgba(15,23,42,.05)';
                             }}
                         >
                             <div className="mc-icon" style={{ background: m.bg, border: `1px solid ${m.border}`, color: m.color }}>{m.icon}</div>
@@ -201,89 +203,90 @@ export default function DoctorDashboard() {
                     <div className="sec-line" />
                 </div>
                 <div className="recent-wrap">
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Case ID</th><th>Patient</th><th>Type</th>
-                            <th>TI-RADS</th><th>Risk</th><th>Status</th><th>Date</th><th></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {recentCases.map((c, index) => {
-                            const caseItem = {
-                                id:        c?.case_id || c?.id || `Case-${index + 1}`,
-                                patient:   c?.patient_name || c?.patient || 'Unknown Patient',
-                                patientId: c?.patient_id || c?.id || c?.case_id,
-                                type:      c?.type || 'Thyroid Scan',
-                                score:     String(c?.tirads ?? '3'),
-                                risk:      c?.risk || '0%',
-                                status:    c?.status || 'pending',
-                                date:      c?.created_at
-                                    ? new Date(c.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric' })
-                                    : 'Today'
-                            };
+                    {recentCases.length === 0 ? (
+                        <div className="empty-state">No recent cases yet.</div>
+                    ) : (
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Case ID</th><th>Patient</th><th>TI-RADS</th>
+                                <th>Bethesda</th><th>Status</th><th>Date</th><th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {recentCases.map((c, index) => {
+                                const caseItem = {
+                                    id:        c?.case_id || `Case-${index + 1}`,
+                                    patient:   c?.patient_name || 'Unknown Patient',
+                                    patientId: c?.patient_id || c?.case_id,
+                                    score:     String(c?.tirads_score ?? '-'),
+                                    bethesda:  c?.bethesda_category || '-',
+                                    status:    c?.status || 'active',
+                                    date:      c?.created_at
+                                        ? new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                        : 'Today',
+                                };
 
-                            const sc = caseItem.status === 'urgent' ? { bg:'#FFF1F2', col:'#EF4444', dot:'#EF4444', border:'#FECDD3' }
-                                : caseItem.status === 'pending' ? { bg:'#FFFBEB', col:'#D97706', dot:'#F59E0B', border:'#FDE68A' }
-                                    : { bg:'#F0FDFA', col:'#0D9488', dot:'#0D9488', border:'#99F6E4' };
+                                const sc = caseItem.status === 'completed'
+                                    ? { bg: '#F0FDFA', col: '#0D9488', dot: '#0D9488', border: '#99F6E4' }
+                                    : caseItem.status === 'follow-up'
+                                        ? { bg: '#FFFBEB', col: '#D97706', dot: '#F59E0B', border: '#FDE68A' }
+                                        : { bg: '#F0F9FF', col: '#0891B2', dot: '#0891B2', border: '#BAE6FD' };
 
-                            const scoreNum   = parseInt(caseItem.score, 10);
-                            const safeScore  = isNaN(scoreNum) ? 0 : scoreNum;
-                            const sr = safeScore >= 4 ? { bg:'#FFF1F2', col:'#EF4444', border:'#FECDD3' }
-                                : safeScore === 3 ? { bg:'#FFFBEB', col:'#D97706', border:'#FDE68A' }
-                                    : { bg:'#F0FDFA', col:'#0D9488', border:'#99F6E4' };
+                                const scoreNum  = parseInt(caseItem.score, 10);
+                                const safeScore = isNaN(scoreNum) ? 0 : scoreNum;
+                                const sr = safeScore >= 4
+                                    ? { bg: '#FFF1F2', col: '#EF4444', border: '#FECDD3' }
+                                    : safeScore === 3
+                                        ? { bg: '#FFFBEB', col: '#D97706', border: '#FDE68A' }
+                                        : { bg: '#F0FDFA', col: '#0D9488', border: '#99F6E4' };
 
-                            const statusLabel = caseItem.status
-                                ? caseItem.status.charAt(0).toUpperCase() + caseItem.status.slice(1)
-                                : 'Pending';
+                                const statusLabel = caseItem.status.charAt(0).toUpperCase() + caseItem.status.slice(1);
 
-                            return (
-                                <tr
-                                    key={caseItem.id}
-                                    className="case-row"
-                                    onClick={() => router.push(`/patient-management?patientId=${caseItem.patientId}&tab=diagnosis`)}
-                                    title="View patient details"
-                                >
-                                    <td style={{ fontFamily:"'DM Serif Display',serif", fontSize:15, color:'var(--text)' }}>
-                                        {caseItem.id}
-                                    </td>
-                                    <td style={{ fontWeight:600, color:'var(--text2)' }}>
-                                        {caseItem.patient}
-                                    </td>
-                                    <td style={{ color:'var(--muted)', fontSize:13 }}>
-                                        {caseItem.type}
-                                    </td>
-                                    <td>
-                                        <div className="score-badge" style={{ background:sr.bg, color:sr.col, border:`1px solid ${sr.border}` }}>
-                                            {caseItem.score}
-                                        </div>
-                                    </td>
-                                    <td style={{ fontWeight:700, color:'var(--text2)' }}>
-                                        {caseItem.risk}
-                                    </td>
-                                    <td>
-                                        <span className="status-chip" style={{ background:sc.bg, color:sc.col, border:`1px solid ${sc.border}` }}>
-                                            <span className="status-dot" style={{ background:sc.dot }} />
-                                            {statusLabel}
-                                        </span>
-                                    </td>
-                                    <td style={{ color:'var(--muted)', fontSize:13 }}>{caseItem.date}</td>
-                                    <td onClick={e => e.stopPropagation()}>
-                                        <button
-                                            className="open-btn"
-                                            onClick={() => router.push(`/patient-management?patientId=${caseItem.patientId}&tab=diagnosis`)}
-                                        >
-                                            View
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                                                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                        </tbody>
-                    </table>
+                                return (
+                                    <tr
+                                        key={caseItem.id}
+                                        className="case-row"
+                                        onClick={() => router.push(`/patient-management?patientId=${caseItem.patientId}&tab=diagnosis`)}
+                                    >
+                                        <td style={{ fontFamily: "'DM Serif Display',serif", fontSize: 15, color: 'var(--text)' }}>
+                                            {caseItem.id}
+                                        </td>
+                                        <td style={{ fontWeight: 600, color: 'var(--text2)' }}>
+                                            {caseItem.patient}
+                                        </td>
+                                        <td>
+                                            <div className="score-badge" style={{ background: sr.bg, color: sr.col, border: `1px solid ${sr.border}` }}>
+                                                {caseItem.score}
+                                            </div>
+                                        </td>
+                                        <td style={{ color: 'var(--muted)', fontSize: 13 }}>
+                                            {caseItem.bethesda}
+                                        </td>
+                                        <td>
+                                                <span className="status-chip" style={{ background: sc.bg, color: sc.col, border: `1px solid ${sc.border}` }}>
+                                                    <span className="status-dot" style={{ background: sc.dot }} />
+                                                    {statusLabel}
+                                                </span>
+                                        </td>
+                                        <td style={{ color: 'var(--muted)', fontSize: 13 }}>{caseItem.date}</td>
+                                        <td onClick={e => e.stopPropagation()}>
+                                            <button
+                                                className="open-btn"
+                                                onClick={() => router.push(`/patient-management?patientId=${caseItem.patientId}&tab=diagnosis`)}
+                                            >
+                                                View
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                                                    <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </main>
         </>
