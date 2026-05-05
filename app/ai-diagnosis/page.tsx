@@ -241,9 +241,12 @@ export default function AIDiagnosisPage() {
                 const data = await res.json() as UltrasoundApiResponse;
                 if (!res.ok || !data.success) throw new Error(data.error ?? 'Ultrasound analysis failed');
 
-                const effResult   = data.models[0];
-                const swinResult  = data.models[1];
-                const denseResult = data.models[2];
+                console.log('IMAGE RESPONSE:', JSON.stringify(data));
+
+                const models      = data.models || (data as any).models_detail || [];
+                const effResult   = models[0];
+                const swinResult  = models[1];
+                const denseResult = models[2];
 
                 const topModels: ModelResult[] = [
                     {
@@ -256,13 +259,13 @@ export default function AIDiagnosisPage() {
                         name: 'Swin Transformer',
                         result: swinResult ? (swinResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
                         confidence: swinResult?.confidence ? Math.round(swinResult.confidence * 100) : 0,
-                        available: !!(swinResult && swinResult.confidence),
+                        available: !!(swinResult),
                     },
                     {
                         name: 'DenseNet-121',
                         result: denseResult ? (denseResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
                         confidence: denseResult?.confidence ? Math.round(denseResult.confidence * 100) : 0,
-                        available: !!(denseResult && denseResult.confidence),
+                        available: !!(denseResult),
                     },
                 ];
                 const votingResult    = data.diagnosis;
