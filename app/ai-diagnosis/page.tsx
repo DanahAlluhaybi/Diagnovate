@@ -52,20 +52,21 @@ interface LabApiResponse {
     confidence   : number;
     severity     : string;
     probabilities: Record<string, number>;
+    models?      : Record<string, { result: string; confidence: number }>;
     error?       : string;
 }
 
 interface UltrasoundApiResponse {
-    success                : boolean;
-    nodule_detected        : boolean;
-    detection_confidence   : number;
-    benign_probability     : number;
-    malignant_probability  : number;
-    risk_level             : string;
-    recommendation         : string;
-    follow_up              : string;
-    bbox?                  : number[];
-    error?                 : string;
+    success      : boolean;
+    diagnosis    : 'Malignant' | 'Benign';
+    severity     : string;
+    confidence   : number;
+    vote_summary : string;
+    unanimous    : boolean;
+    recommendation: string;
+    models_detail: Array<{ model: string; vote: 0 | 1; confidence?: number }>;
+    disclaimer?  : string;
+    error?       : string;
 }
 
 const PROCESS_STEPS = [
@@ -232,47 +233,55 @@ export default function AIDiagnosisPage() {
                 const formData = new FormData();
                 formData.append('image', imageFile!);
 
-                const res  = await fetch(`${BASE}/api/diagnosis/ultrasound`, {
+                const res  = await fetch(`${BASE}/api/diagnosis/predict-image`, {
                     method: 'POST',
                     headers: { Authorization: `Bearer ${token}` },
                     body: formData,
                 });
                 const data = await res.json() as UltrasoundApiResponse;
                 if (!res.ok || !data.success) throw new Error(data.error ?? 'Ultrasound analysis failed');
-                if (!data.nodule_detected)
-                    throw new Error('No thyroid nodule detected in this image. Please upload a clearer ultrasound scan.');
 
-                const model1: ModelResult = {
-                    name: 'YOLO + EfficientNet-B4',
-                    result: data.malignant_probability >= 50 ? 'Malignant' : 'Benign',
-                    confidence: Math.max(data.benign_probability, data.malignant_probability),
-                    available: true,
-                };
                 const topModels: ModelResult[] = [
-                    model1,
-                    { name: 'Ultrasound Model 2', result: '—', confidence: 0, available: false },
-                    { name: 'Ultrasound Model 3', result: '—', confidence: 0, available: false },
+                    {
+                        name: 'EfficientNet+YOLO',
+                        result: data.models_detail[0].vote === 1 ? 'Malignant' : 'Benign',
+                        confidence: Math.round(data.confidence),
+                        available: true,
+                    },
+                    {
+                        name: 'Swin Transformer',
+                        result: data.models_detail[1].vote === 1 ? 'Malignant' : 'Benign',
+                        confidence: Math.round(data.models_detail[1].confidence ?? 0),
+                        available: true,
+                    },
+                    {
+                        name: 'DenseNet-121',
+                        result: data.models_detail[2].vote === 1 ? 'Malignant' : 'Benign',
+                        confidence: Math.round(data.models_detail[2].confidence ?? 0),
+                        available: true,
+                    },
                 ];
-                const { result: votingResult, confidence: votingConf } = majorityVote(topModels);
+                const votingResult    = data.diagnosis;
+                const votingConfidence = Math.round(data.confidence);
+                const malignancyScore  = data.diagnosis === 'Malignant'
+                    ? Math.round(data.confidence)
+                    : Math.round(100 - data.confidence);
+                const severity: Severity = data.severity === 'high' ? 'High' : 'Low';
 
                 diagResult = {
-                    malignancyScore : Math.round(data.malignant_probability),
-                    severity        : riskToSeverity(data.risk_level),
+                    malignancyScore,
+                    severity,
                     recommendation  : data.recommendation,
-                    confidence      : model1.confidence,
+                    confidence      : Math.round(data.confidence),
                     findings: [
-                        `Nodule Detected: Yes`,
-                        `Detection Confidence: ${data.detection_confidence}%`,
-                        `Benign Probability: ${data.benign_probability}%`,
-                        `Malignant Probability: ${data.malignant_probability}%`,
-                        `Risk Level: ${data.risk_level.toUpperCase()}`,
-                        `Follow-up: ${data.follow_up}`,
+                        `Final Diagnosis: ${data.diagnosis}`,
+                        `Vote Summary: ${data.vote_summary}`,
+                        `Unanimous: ${data.unanimous ? 'Yes' : 'No'}`,
+                        `Confidence: ${data.confidence}%`,
                     ],
                     topModels,
                     votingResult,
-                    votingConfidence: votingConf,
-                    noduleDetected  : true,
-                    bbox            : data.bbox,
+                    votingConfidence,
                 };
             }
 
@@ -290,11 +299,12 @@ export default function AIDiagnosisPage() {
 
                 const severityMap: Record<string, Severity> = { high: 'High', medium: 'Moderate', low: 'Low' };
                 const topModels: ModelResult[] = [
-                    { name: 'XGBoost', result: data.diagnosis, confidence: Math.round(data.confidence), available: true },
-                    { name: 'Lab Model 2', result: '—', confidence: 0, available: false },
-                    { name: 'Lab Model 3', result: '—', confidence: 0, available: false },
+                    { name: 'XGBoost', result: data.models?.XGBoost?.result ?? data.diagnosis, confidence: Math.round(data.models?.XGBoost?.confidence ?? data.confidence), available: true },
+                    { name: 'CatBoost', result: data.models?.CatBoost?.result ?? '—', confidence: Math.round(data.models?.CatBoost?.confidence ?? 0), available: !!(data.models?.CatBoost) },
+                    { name: 'Random Forest', result: data.models?.['Random Forest']?.result ?? '—', confidence: Math.round(data.models?.['Random Forest']?.confidence ?? 0), available: !!(data.models?.['Random Forest']) },
                 ];
-                const { result: votingResult, confidence: votingConf } = majorityVote(topModels);
+                const votingResult = data.diagnosis;
+                const votingConf   = Math.round(data.confidence);
 
                 diagResult = {
                     malignancyScore : Math.round(data.confidence),
@@ -333,7 +343,7 @@ export default function AIDiagnosisPage() {
                     if (!imageFile) return null;
                     const fd = new FormData();
                     fd.append('image', imageFile);
-                    const r = await fetch(`${BASE}/api/diagnosis/ultrasound`, {
+                    const r = await fetch(`${BASE}/api/diagnosis/predict-image`, {
                         method: 'POST',
                         headers: { Authorization: `Bearer ${token}` },
                         body: fd,
@@ -349,29 +359,29 @@ export default function AIDiagnosisPage() {
                 const labSeverity   = severityMap[labData.severity] ?? 'Moderate';
                 const labConfidence = Math.round(labData.confidence);
 
-                const imgOk = !!(imgData?.success && imgData?.nodule_detected);
+                const imgOk = !!(imgData?.success && imgData?.models_detail);
 
                 const topModels: ModelResult[] = [
                     { name: 'XGBoost (Lab)', result: labData.diagnosis, confidence: labConfidence, available: true },
                     imgOk
-                        ? {
-                            name: 'YOLO + EfficientNet-B4 (Image)',
-                            result: (imgData!.malignant_probability ?? 0) >= 50 ? 'Malignant' : 'Benign',
-                            confidence: Math.max(imgData!.benign_probability ?? 0, imgData!.malignant_probability ?? 0),
-                            available: true,
-                        }
-                        : { name: 'YOLO + EfficientNet-B4 (Image)', result: '—', confidence: 0, available: false },
-                    { name: 'Ensemble Model 3', result: '—', confidence: 0, available: false },
+                        ? { name: 'EfficientNet+YOLO (Image)', result: imgData!.models_detail[0].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round(imgData!.confidence), available: true }
+                        : { name: 'EfficientNet+YOLO (Image)', result: '—', confidence: 0, available: false },
+                    imgOk
+                        ? { name: 'Swin Transformer (Image)', result: imgData!.models_detail[1].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round(imgData!.models_detail[1].confidence ?? 0), available: true }
+                        : { name: 'Swin Transformer (Image)', result: '—', confidence: 0, available: false },
+                    imgOk
+                        ? { name: 'DenseNet-121 (Image)', result: imgData!.models_detail[2].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round(imgData!.models_detail[2].confidence ?? 0), available: true }
+                        : { name: 'DenseNet-121 (Image)', result: '—', confidence: 0, available: false },
                 ];
 
                 const { result: votingResult, confidence: votingConf } = majorityVote(topModels);
 
                 const imgFindings: string[] = imgOk ? [
-                    `Nodule Detected: Yes`,
-                    `Benign Probability: ${imgData!.benign_probability}%`,
-                    `Malignant Probability: ${imgData!.malignant_probability}%`,
-                    `Image Risk Level: ${imgData!.risk_level.toUpperCase()}`,
-                ] : imageFile ? [`Image: No nodule detected or analysis failed`] : [];
+                    `Image Diagnosis: ${imgData!.diagnosis}`,
+                    `Vote Summary: ${imgData!.vote_summary}`,
+                    `Image Confidence: ${imgData!.confidence}%`,
+                    `Image Severity: ${imgData!.severity.toUpperCase()}`,
+                ] : imageFile ? [`Image: Analysis failed or no results`] : [];
 
                 diagResult = {
                     malignancyScore : labConfidence,
@@ -388,8 +398,7 @@ export default function AIDiagnosisPage() {
                     topModels,
                     votingResult,
                     votingConfidence: votingConf,
-                    noduleDetected  : imgData?.nodule_detected ?? false,
-                    bbox            : imgData?.bbox,
+                    noduleDetected  : imgData?.success ?? false,
                 };
             }
 
