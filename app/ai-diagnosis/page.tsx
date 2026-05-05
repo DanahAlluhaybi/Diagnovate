@@ -260,24 +260,29 @@ export default function AIDiagnosisPage() {
                         available: !!(denseResult),
                     },
                 ];
-                const chosenImgModel   = selectedModel !== 'majority' ? topModels.find(m => m.name === selectedModel) : null;
+                const isSingleImgModel = selectedModel !== 'majority';
+                const chosenImgModel   = isSingleImgModel ? topModels.find(m => m.name === selectedModel) : null;
                 const votingResult     = chosenImgModel?.result ?? data.diagnosis;
                 const votingConfidence = chosenImgModel?.confidence ?? Math.round(data.confidence);
                 const malignancyScore  = votingResult === 'Malignant' ? votingConfidence : Math.round(100 - votingConfidence);
                 const severity: Severity = data.severity === 'high' ? 'High' : 'Low';
 
+                const filteredImgModels = isSingleImgModel
+                    ? topModels.map(m => ({ ...m, available: m.name === selectedModel }))
+                    : topModels;
+
                 diagResult = {
                     malignancyScore,
                     severity,
                     recommendation  : data.recommendation,
-                    confidence      : Math.round(data.confidence),
+                    confidence      : votingConfidence,
                     findings: [
-                        `Final Diagnosis: ${data.diagnosis}`,
+                        `Final Diagnosis: ${votingResult}`,
                         `Vote Summary: ${data.vote_summary}`,
                         `Unanimous: ${data.unanimous ? 'Yes' : 'No'}`,
-                        `Confidence: ${data.confidence}%`,
+                        `Confidence: ${votingConfidence}%`,
                     ],
-                    topModels,
+                    topModels       : filteredImgModels,
                     votingResult,
                     votingConfidence,
                 };
