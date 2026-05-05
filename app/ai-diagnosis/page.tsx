@@ -241,24 +241,28 @@ export default function AIDiagnosisPage() {
                 const data = await res.json() as UltrasoundApiResponse;
                 if (!res.ok || !data.success) throw new Error(data.error ?? 'Ultrasound analysis failed');
 
+                const effResult   = data.models_detail[0];
+                const swinResult  = data.models_detail[1];
+                const denseResult = data.models_detail[2];
+
                 const topModels: ModelResult[] = [
                     {
                         name: 'EfficientNet+YOLO',
-                        result: data.models_detail[0].vote === 1 ? 'Malignant' : 'Benign',
-                        confidence: Math.round(data.confidence),
-                        available: true,
+                        result: effResult ? (effResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
+                        confidence: 0,
+                        available: false,
                     },
                     {
                         name: 'Swin Transformer',
-                        result: data.models_detail[1].vote === 1 ? 'Malignant' : 'Benign',
-                        confidence: Math.round(data.models_detail[1].confidence ?? 0),
-                        available: true,
+                        result: swinResult ? (swinResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
+                        confidence: swinResult?.confidence ? Math.round(swinResult.confidence * 100) : 0,
+                        available: !!(swinResult && swinResult.confidence),
                     },
                     {
                         name: 'DenseNet-121',
-                        result: data.models_detail[2].vote === 1 ? 'Malignant' : 'Benign',
-                        confidence: Math.round(data.models_detail[2].confidence ?? 0),
-                        available: true,
+                        result: denseResult ? (denseResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
+                        confidence: denseResult?.confidence ? Math.round(denseResult.confidence * 100) : 0,
+                        available: !!(denseResult && denseResult.confidence),
                     },
                 ];
                 const votingResult    = data.diagnosis;
