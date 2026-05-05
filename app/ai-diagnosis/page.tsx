@@ -104,8 +104,12 @@ function majorityVote(models: ModelResult[]): { result: string; confidence: numb
     return { result: winner, confidence: Math.round(avgConf) };
 }
 
-function buildLabPayload(lab: LabValues) {
+function buildLabPayload(lab: LabValues, selectedModel: string) {
+    const modelName =
+        selectedModel === 'majority' ? 'majority voting' : selectedModel;
+
     return {
+        model:             modelName,
         age:               lab.age  ? Number(lab.age)  : null,
         sex:               lab.sex === 'female' ? 'F' : 'M',
         TSH_measured:      lab.tsh  ? 't' : 'f', TSH:  lab.tsh  ? Number(lab.tsh)  : null,
@@ -283,7 +287,7 @@ export default function AIDiagnosisPage() {
                 const res  = await fetch(`${BASE}/api/diagnosis/predict`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify(buildLabPayload(lab)),
+                    body: JSON.stringify(buildLabPayload(lab, selectedModel)),
                 });
                 const data = await res.json() as LabApiResponse;
                 if (!res.ok || !data.success) throw new Error(data.error ?? 'Lab prediction failed');
@@ -312,9 +316,8 @@ export default function AIDiagnosisPage() {
                         available: true,
                     },
                 ];
-                const chosenLabModel   = selectedModel !== 'majority' ? topModels.find(m => m.name === selectedModel) : null;
-                const votingResult     = chosenLabModel?.result ?? (data.majority_result ?? data.diagnosis);
-                const votingConfidence = chosenLabModel?.confidence ?? Math.round(data.confidence);
+                const votingResult     = data.majority_result ?? data.diagnosis;
+                const votingConfidence = Math.round(data.confidence);
 
                 diagResult = {
                     malignancyScore : votingConfidence,
@@ -341,7 +344,7 @@ export default function AIDiagnosisPage() {
                     const r = await fetch(`${BASE}/api/diagnosis/predict`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                        body: JSON.stringify(buildLabPayload(lab)),
+                        body: JSON.stringify(buildLabPayload(lab, selectedModel)),
                     });
                     return r.json() as Promise<LabApiResponse>;
                 };
