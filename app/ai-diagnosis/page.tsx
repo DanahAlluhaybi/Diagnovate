@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-    ArrowLeft, Brain, Upload, FlaskConical, Layers,
+    ArrowLeft, Brain, Upload,
     AlertTriangle, CheckCircle2,
     Info, User, Check, Zap, FileText, Activity
 } from 'lucide-react';
@@ -14,15 +14,8 @@ import { BASE } from '@/lib/api';
 import { saveDiagnosis } from '@/lib/diagnosisStorage';
 import type { DiagnosisRecord } from '@/lib/diagnosisStorage';
 
-type InputMode  = 'image' | 'lab' | 'both';
 type DiagStage  = 'idle' | 'uploading' | 'analyzing' | 'done';
 type Severity   = 'Low' | 'Moderate' | 'High';
-type RiskLevel  = 'low' | 'intermediate' | 'high';
-
-interface LabValues {
-    tsh: string; t3: string; tt4: string;
-    t4u: string; fti: string; age: string; sex: 'female' | 'male';
-}
 
 interface ModelResult {
     name      : string;
@@ -45,17 +38,6 @@ interface DiagResult {
 }
 
 // ── Typed API responses ──
-interface LabApiResponse {
-    success      : boolean;
-    diagnosis    : string;
-    raw_label    : string;
-    confidence   : number;
-    severity     : string;
-    probabilities: Record<string, number>;
-    models?      : Record<string, { result: string; confidence: number }>;
-    error?       : string;
-}
-
 interface UltrasoundApiResponse {
     success      : boolean;
     diagnosis    : 'Malignant' | 'Benign';
@@ -87,62 +69,9 @@ const fmtSize = (b: number) =>
 
 const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-function riskToSeverity(risk: RiskLevel | string): Severity {
-    if (risk === 'high')         return 'High';
-    if (risk === 'intermediate') return 'Moderate';
-    return 'Low';
-}
-
-// ── Fixed majorityVote — no undefined reference bug ──
-function majorityVote(models: ModelResult[]): { result: string; confidence: number } {
-    const available = models.filter(m => m.available);
-    if (available.length === 0) return { result: 'Inconclusive', confidence: 0 };
-
-    const votes: Record<string, number[]> = {};
-    for (const m of available) {
-        if (!votes[m.result]) votes[m.result] = [];
-        votes[m.result].push(m.confidence);
-    }
-
-    let winner   = '';
-    let maxScore = -1;
-    for (const [res, confs] of Object.entries(votes)) {
-        const avg   = confs.reduce((a, b) => a + b, 0) / confs.length;
-        const score = confs.length * 1000 + avg; // vote count > avg confidence
-        if (score > maxScore) { maxScore = score; winner = res; }
-    }
-
-    const avgConf = votes[winner].reduce((a, b) => a + b, 0) / votes[winner].length;
-    return { result: winner, confidence: Math.round(avgConf) };
-}
-
-// ── Build lab payload helper (avoid repetition) ──
-function buildLabPayload(lab: LabValues) {
-    return {
-        age:                 lab.age  ? Number(lab.age)  : null,
-        sex:                 lab.sex === 'female' ? 'F' : 'M',
-        TSH_measured:        lab.tsh  ? 't' : 'f',
-        TSH:                 lab.tsh  ? Number(lab.tsh)  : null,
-        T3_measured:         lab.t3   ? 't' : 'f',
-        T3:                  lab.t3   ? Number(lab.t3)   : null,
-        TT4_measured:        lab.tt4  ? 't' : 'f',
-        TT4:                 lab.tt4  ? Number(lab.tt4)  : null,
-        T4U_measured:        lab.t4u  ? 't' : 'f',
-        T4U:                 lab.t4u  ? Number(lab.t4u)  : null,
-        FTI_measured:        lab.fti  ? 't' : 'f',
-        FTI:                 lab.fti  ? Number(lab.fti)  : null,
-        TBG_measured:        'f', TBG: null,
-        on_thyroxine:        'f', query_on_thyroxine: 'f', on_antithyroid_meds: 'f',
-        sick:                'f', pregnant: 'f', thyroid_surgery: 'f', I131_treatment: 'f',
-        query_hypothyroid:   'f', query_hyperthyroid: 'f', lithium: 'f',
-        goitre:              'f', tumor: 'f', hypopituitary: 'f', psych: 'f',
-    };
-}
-
 export default function AIDiagnosisPage() {
     const router = useRouter();
 
-    const [inputMode,    setInputMode]    = useState<InputMode>('both');
     const [stage,        setStage]        = useState<DiagStage>('idle');
     const [progress,     setProgress]     = useState(0);
     const [result,       setResult]       = useState<DiagResult | null>(null);
@@ -158,10 +87,6 @@ export default function AIDiagnosisPage() {
     const [allPatients,     setAllPatients]     = useState<{ id: string; mrn: string; name: string }[]>([]);
     const [showSuggest,     setShowSuggest]     = useState(false);
     const [savedOk,         setSavedOk]         = useState(false);
-
-    const [lab, setLab] = useState<LabValues>({
-        tsh: '', t3: '', tt4: '', t4u: '', fti: '', age: '', sex: 'female',
-    });
 
     const timerIds = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -208,11 +133,7 @@ export default function AIDiagnosisPage() {
             .forEach(({ t, d }) => { timerIds.current.push(setTimeout(() => setProgress(t), d)); });
     };
 
-    // FIXED: proper hasInput per mode
-    const hasInput =
-        inputMode === 'image' ? !!imageFile :
-            inputMode === 'lab'   ? !!(lab.tsh || lab.t3 || lab.tt4) :
-                /* both */              !!imageFile || !!(lab.tsh || lab.t3 || lab.tt4);
+    const hasInput = !!imageFile;
 
     const runDiagnosis = async () => {
         if (!hasInput) return;
@@ -224,190 +145,66 @@ export default function AIDiagnosisPage() {
             await delay(400);
             setStage('analyzing');
 
-            let diagResult: DiagResult | null = null;
+            const formData = new FormData();
+            formData.append('image', imageFile!);
 
-            // ══════════════════════════════════
-            // IMAGE ONLY
-            // ══════════════════════════════════
-            if (inputMode === 'image') {
-                const formData = new FormData();
-                formData.append('image', imageFile!);
+            const res  = await fetch(`${BASE}/api/diagnosis/predict-image`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData,
+            });
+            const data = await res.json() as UltrasoundApiResponse;
+            if (!res.ok || !data.success) throw new Error(data.error ?? 'Ultrasound analysis failed');
 
-                const res  = await fetch(`${BASE}/api/diagnosis/predict-image`, {
-                    method: 'POST',
-                    headers: { Authorization: `Bearer ${token}` },
-                    body: formData,
-                });
-                const data = await res.json() as UltrasoundApiResponse;
-                if (!res.ok || !data.success) throw new Error(data.error ?? 'Ultrasound analysis failed');
+            console.log('IMAGE RESPONSE:', JSON.stringify(data));
 
-                console.log('IMAGE RESPONSE:', JSON.stringify(data));
+            const models      = data.models || (data as any).models_detail || [];
+            const effResult   = models[0];
+            const swinResult  = models[1];
+            const denseResult = models[2];
 
-                const models      = data.models || (data as any).models_detail || [];
-                const effResult   = models[0];
-                const swinResult  = models[1];
-                const denseResult = models[2];
+            const topModels: ModelResult[] = [
+                {
+                    name: 'EfficientNet+YOLO',
+                    result: effResult ? (effResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
+                    confidence: effResult?.confidence ? Math.round(effResult.confidence * 100) : 0,
+                    available: !!(effResult),
+                },
+                {
+                    name: 'Swin Transformer',
+                    result: swinResult ? (swinResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
+                    confidence: swinResult?.confidence ? Math.round(swinResult.confidence * 100) : 0,
+                    available: !!(swinResult),
+                },
+                {
+                    name: 'DenseNet-121',
+                    result: denseResult ? (denseResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
+                    confidence: denseResult?.confidence ? Math.round(denseResult.confidence * 100) : 0,
+                    available: !!(denseResult),
+                },
+            ];
+            const votingResult     = data.diagnosis;
+            const votingConfidence = Math.round(data.confidence);
+            const malignancyScore  = data.diagnosis === 'Malignant'
+                ? Math.round(data.confidence)
+                : Math.round(100 - data.confidence);
+            const severity: Severity = data.severity === 'high' ? 'High' : 'Low';
 
-                const topModels: ModelResult[] = [
-                    {
-                        name: 'EfficientNet+YOLO',
-                        result: effResult ? (effResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
-                        confidence: effResult?.confidence ? Math.round(effResult.confidence * 100) : 0,
-                        available: !!(effResult),
-                    },
-                    {
-                        name: 'Swin Transformer',
-                        result: swinResult ? (swinResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
-                        confidence: swinResult?.confidence ? Math.round(swinResult.confidence * 100) : 0,
-                        available: !!(swinResult),
-                    },
-                    {
-                        name: 'DenseNet-121',
-                        result: denseResult ? (denseResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
-                        confidence: denseResult?.confidence ? Math.round(denseResult.confidence * 100) : 0,
-                        available: !!(denseResult),
-                    },
-                ];
-                const votingResult    = data.diagnosis;
-                const votingConfidence = Math.round(data.confidence);
-                const malignancyScore  = data.diagnosis === 'Malignant'
-                    ? Math.round(data.confidence)
-                    : Math.round(100 - data.confidence);
-                const severity: Severity = data.severity === 'high' ? 'High' : 'Low';
-
-                diagResult = {
-                    malignancyScore,
-                    severity,
-                    recommendation  : data.recommendation,
-                    confidence      : Math.round(data.confidence),
-                    findings: [
-                        `Final Diagnosis: ${data.diagnosis}`,
-                        `Vote Summary: ${data.vote_summary}`,
-                        `Unanimous: ${data.unanimous ? 'Yes' : 'No'}`,
-                        `Confidence: ${data.confidence}%`,
-                    ],
-                    topModels,
-                    votingResult,
-                    votingConfidence,
-                };
-            }
-
-                // ══════════════════════════════════
-                // LAB ONLY
-            // ══════════════════════════════════
-            else if (inputMode === 'lab') {
-                const res  = await fetch(`${BASE}/api/diagnosis/predict`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify(buildLabPayload(lab)),
-                });
-                const data = await res.json() as LabApiResponse;
-                if (!res.ok || !data.success) throw new Error(data.error ?? 'Lab prediction failed');
-
-                const severityMap: Record<string, Severity> = { high: 'High', medium: 'Moderate', low: 'Low' };
-                const topModels: ModelResult[] = [
-                    { name: 'XGBoost', result: data.models?.XGBoost?.result ?? data.diagnosis, confidence: Math.round(data.models?.XGBoost?.confidence ?? data.confidence), available: true },
-                    { name: 'CatBoost', result: data.models?.CatBoost?.result ?? '—', confidence: Math.round(data.models?.CatBoost?.confidence ?? 0), available: !!(data.models?.CatBoost) },
-                    { name: 'Random Forest', result: data.models?.['Random Forest']?.result ?? '—', confidence: Math.round(data.models?.['Random Forest']?.confidence ?? 0), available: !!(data.models?.['Random Forest']) },
-                ];
-                const votingResult = data.diagnosis;
-                const votingConf   = Math.round(data.confidence);
-
-                diagResult = {
-                    malignancyScore : Math.round(data.confidence),
-                    severity        : severityMap[data.severity] ?? 'Moderate',
-                    recommendation  : `Diagnosis: ${data.diagnosis}. Please consult a specialist.`,
-                    confidence      : Math.round(data.confidence),
-                    findings: [
-                        `Primary Diagnosis: ${data.diagnosis}`,
-                        ...(lab.tsh  ? [`TSH: ${lab.tsh} mIU/L`]  : []),
-                        ...(lab.t3   ? [`T3: ${lab.t3} nmol/L`]   : []),
-                        ...(lab.tt4  ? [`TT4: ${lab.tt4} nmol/L`] : []),
-                        ...(lab.t4u  ? [`T4U: ${lab.t4u} ratio`]  : []),
-                        ...(lab.fti  ? [`FTI: ${lab.fti} index`]  : []),
-                        ...Object.entries(data.probabilities || {}).map(([k, v]) => `${k}: ${v}% probability`),
-                    ],
-                    topModels,
-                    votingResult,
-                    votingConfidence: votingConf,
-                };
-            }
-
-                // ══════════════════════════════════
-                // BOTH — FIXED: run both in parallel
-            // ══════════════════════════════════
-            else {
-                const fetchLab  = async (): Promise<LabApiResponse> => {
-                    const r = await fetch(`${BASE}/api/diagnosis/predict`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                        body: JSON.stringify(buildLabPayload(lab)),
-                    });
-                    return r.json() as Promise<LabApiResponse>;
-                };
-
-                const fetchImg = async (): Promise<UltrasoundApiResponse | null> => {
-                    if (!imageFile) return null;
-                    const fd = new FormData();
-                    fd.append('image', imageFile);
-                    const r = await fetch(`${BASE}/api/diagnosis/predict-image`, {
-                        method: 'POST',
-                        headers: { Authorization: `Bearer ${token}` },
-                        body: fd,
-                    });
-                    return r.json() as Promise<UltrasoundApiResponse>;
-                };
-
-                const [labData, imgData] = await Promise.all([fetchLab(), fetchImg()]);
-
-                if (!labData.success) throw new Error(labData.error ?? 'Lab prediction failed');
-
-                const severityMap: Record<string, Severity> = { high: 'High', medium: 'Moderate', low: 'Low' };
-                const labSeverity   = severityMap[labData.severity] ?? 'Moderate';
-                const labConfidence = Math.round(labData.confidence);
-
-                const imgOk = !!(imgData?.success && imgData?.models);
-
-                const topModels: ModelResult[] = [
-                    { name: 'XGBoost (Lab)', result: labData.diagnosis, confidence: labConfidence, available: true },
-                    imgOk
-                        ? { name: 'EfficientNet+YOLO (Image)', result: imgData!.models[0].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round(imgData!.confidence), available: true }
-                        : { name: 'EfficientNet+YOLO (Image)', result: '—', confidence: 0, available: false },
-                    imgOk
-                        ? { name: 'Swin Transformer (Image)', result: imgData!.models[1].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round(imgData!.models[1].confidence ?? 0), available: true }
-                        : { name: 'Swin Transformer (Image)', result: '—', confidence: 0, available: false },
-                    imgOk
-                        ? { name: 'DenseNet-121 (Image)', result: imgData!.models[2].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round(imgData!.models[2].confidence ?? 0), available: true }
-                        : { name: 'DenseNet-121 (Image)', result: '—', confidence: 0, available: false },
-                ];
-
-                const { result: votingResult, confidence: votingConf } = majorityVote(topModels);
-
-                const imgFindings: string[] = imgOk ? [
-                    `Image Diagnosis: ${imgData!.diagnosis}`,
-                    `Vote Summary: ${imgData!.vote_summary}`,
-                    `Image Confidence: ${imgData!.confidence}%`,
-                    `Image Severity: ${imgData!.severity.toUpperCase()}`,
-                ] : imageFile ? [`Image: Analysis failed or no results`] : [];
-
-                diagResult = {
-                    malignancyScore : labConfidence,
-                    severity        : labSeverity,
-                    recommendation  : `Lab Diagnosis: ${labData.diagnosis}. ${imgData?.recommendation ?? ''} Please consult a specialist.`.trim(),
-                    confidence      : labConfidence,
-                    findings: [
-                        `Primary Diagnosis: ${labData.diagnosis}`,
-                        ...(lab.tsh  ? [`TSH: ${lab.tsh} mIU/L`]  : []),
-                        ...(lab.t3   ? [`T3: ${lab.t3} nmol/L`]   : []),
-                        ...(lab.tt4  ? [`TT4: ${lab.tt4} nmol/L`] : []),
-                        ...imgFindings,
-                    ],
-                    topModels,
-                    votingResult,
-                    votingConfidence: votingConf,
-                    noduleDetected  : imgData?.success ?? false,
-                };
-            }
+            const diagResult: DiagResult = {
+                malignancyScore,
+                severity,
+                recommendation  : data.recommendation,
+                confidence      : Math.round(data.confidence),
+                findings: [
+                    `Final Diagnosis: ${data.diagnosis}`,
+                    `Vote Summary: ${data.vote_summary}`,
+                    `Unanimous: ${data.unanimous ? 'Yes' : 'No'}`,
+                    `Confidence: ${data.confidence}%`,
+                ],
+                topModels,
+                votingResult,
+                votingConfidence,
+            };
 
             clearTimers(); setProgress(100);
             await delay(300);
@@ -419,7 +216,7 @@ export default function AIDiagnosisPage() {
                 const record: DiagnosisRecord = {
                     id             : `dx-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
                     date           : new Date().toISOString(),
-                    mode           : inputMode,
+                    mode           : 'image',
                     modelName      : diagResult.topModels.find(m => m.available)?.name ?? 'Unknown',
                     votingResult   : diagResult.votingResult,
                     confidence     : diagResult.confidence,
@@ -447,7 +244,6 @@ export default function AIDiagnosisPage() {
     const reset = () => {
         setStage('idle'); setResult(null); setError('');
         setImageFile(null); setImagePreview(''); setProgress(0); setSavedOk(false);
-        setLab({ tsh: '', t3: '', tt4: '', t4u: '', fti: '', age: '', sex: 'female' });
     };
 
     const isRunning = stage === 'uploading' || stage === 'analyzing';
@@ -472,7 +268,7 @@ export default function AIDiagnosisPage() {
 
                 <div className={s.featureHeader}>
                     <Link href="/dashboard" className={s.backBtn}>
-                        <ArrowLeft size={13} /> Dashboard
+                        <ArrowLeft size={14} /><span>Back</span>
                     </Link>
                     <div className={s.eyebrow}>
                         <span className={s.eyebrowDot} />
@@ -540,127 +336,48 @@ export default function AIDiagnosisPage() {
                             </div>
                         </div>
 
-                        {/* Input Data */}
+                        {/* Scan Upload */}
                         <div className={s.card} style={{ marginBottom: 16 }}>
                             <div className={s.cardHead}>
                                 <div className={s.cardIcon}>
-                                    <Layers size={18} color="white" />
+                                    <Upload size={18} color="white" />
                                 </div>
-                                <span className={s.cardTitle}>Input Data</span>
-                                <span className={s.scanTypePill} style={
-                                    inputMode === 'both'  ? { background: '#EEF2FF', color: '#4F46E5', borderColor: '#C7D2FE' } :
-                                        inputMode === 'image' ? { background: '#F0F9FF', color: '#0891B2', borderColor: '#BAE6FD' } :
-                                            { background: '#F0FDFA', color: '#0D9488', borderColor: '#99F6E4' }
-                                }>
-                                    {inputMode === 'both' ? 'Multi-Modal' : inputMode === 'image' ? 'Image Only' : 'Lab Only'}
+                                <span className={s.cardTitle}>Thyroid Scan</span>
+                                <span className={s.scanTypePill} style={{ background: '#F0F9FF', color: '#0891B2', borderColor: '#BAE6FD' }}>
+                                    Image Only
                                 </span>
                             </div>
                             <div className={s.cardBody}>
-                                <div className={s.fieldGroup}>
-                                    <label className={s.fieldLabel}>Diagnosis Mode</label>
-                                    <div className={s.modeGrid}>
-                                        {([
-                                            { v: 'image', icon: <Upload size={13} />,      label: 'Image Only'  },
-                                            { v: 'lab',   icon: <FlaskConical size={13} />, label: 'Lab Only'    },
-                                            { v: 'both',  icon: <Zap size={13} />,          label: 'Both (Best)' },
-                                        ] as const).map(m => (
-                                            <button key={m.v}
-                                                    className={`${s.typeBtn} ${inputMode === m.v ? s.typeBtnActive : ''}`}
-                                                    style={inputMode === m.v ? (
-                                                        m.v === 'both'  ? { background: '#EEF2FF', borderColor: '#C7D2FE', color: '#4F46E5' } :
-                                                            m.v === 'image' ? { background: '#F0F9FF', borderColor: '#BAE6FD', color: '#0891B2' } :
-                                                                { background: '#F0FDFA', borderColor: '#99F6E4', color: '#0D9488' }
-                                                    ) : {}}
-                                                    onClick={() => setInputMode(m.v)}
-                                            >
-                                                {inputMode === m.v && <Check size={11} />}
-                                                {m.icon}{m.label}
-                                            </button>
-                                        ))}
+                                <div className={s.fieldGroup} style={{ marginBottom: 0 }}>
+                                    <label className={s.fieldLabel}>
+                                        Medical Scan <span className={s.fieldOptional}>(Ultrasound / CT)</span>
+                                    </label>
+                                    <div
+                                        className={`${s.uploadZone} ${dragOver ? s.dragOver : ''}`}
+                                        style={imagePreview ? { padding: '12px' } : {}}
+                                        onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                                        onDragLeave={() => setDragOver(false)}
+                                        onDrop={handleDrop}
+                                        onClick={() => fileRef.current?.click()}
+                                    >
+                                        <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
+                                               onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+                                        {imagePreview ? (
+                                            <>
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img src={imagePreview} className={s.previewThumb} alt="Scan preview" />
+                                                <div className={s.fileName}>{imageFile?.name}</div>
+                                                {imageFile && <div className={s.fileSize}>{fmtSize(imageFile.size)}</div>}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className={s.uploadIconWrap}><Upload size={22} /></div>
+                                                <div className={s.uploadTitle}>Drop thyroid scan here</div>
+                                                <div className={s.uploadSub}>PNG, JPG, DICOM — max 20 MB</div>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
-
-                                {(inputMode === 'image' || inputMode === 'both') && (
-                                    <div className={s.fieldGroup}>
-                                        <label className={s.fieldLabel}>
-                                            Medical Scan <span className={s.fieldOptional}>(Ultrasound / CT)</span>
-                                        </label>
-                                        <div
-                                            className={`${s.uploadZone} ${dragOver ? s.dragOver : ''}`}
-                                            style={imagePreview ? { padding: '12px' } : {}}
-                                            onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-                                            onDragLeave={() => setDragOver(false)}
-                                            onDrop={handleDrop}
-                                            onClick={() => fileRef.current?.click()}
-                                        >
-                                            <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
-                                                   onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
-                                            {imagePreview ? (
-                                                <>
-                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                    <img src={imagePreview} className={s.previewThumb} alt="Scan preview" />
-                                                    <div className={s.fileName}>{imageFile?.name}</div>
-                                                    {imageFile && <div className={s.fileSize}>{fmtSize(imageFile.size)}</div>}
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <div className={s.uploadIconWrap}><Upload size={22} /></div>
-                                                    <div className={s.uploadTitle}>Drop thyroid scan here</div>
-                                                    <div className={s.uploadSub}>PNG, JPG, DICOM — max 20 MB</div>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {(inputMode === 'lab' || inputMode === 'both') && (
-                                    <div className={s.fieldGroup} style={{ marginBottom: 0 }}>
-                                        <label className={s.fieldLabel}>Lab Results</label>
-                                        <div className={s.labGrid}>
-                                            {([
-                                                { k: 'tsh', label: 'TSH', unit: 'mIU/L', normal: '0.4–4.0' },
-                                                { k: 't3',  label: 'T3',  unit: 'nmol/L',normal: '1.2–2.8' },
-                                                { k: 'tt4', label: 'TT4', unit: 'nmol/L',normal: '60–150'  },
-                                                { k: 't4u', label: 'T4U', unit: 'ratio', normal: '0.8–1.1' },
-                                                { k: 'fti', label: 'FTI', unit: 'index', normal: '55–160'  },
-                                                { k: 'age', label: 'Age', unit: 'yrs',   normal: ''        },
-                                            ] as const).map(({ k, label, unit, normal }) => (
-                                                <div key={k} className={s.labCell}>
-                                                    <div className={s.labCellHeader}>
-                                                        <span className={s.labCellLabel}>{label}</span>
-                                                        {normal && <span className={s.labCellNormal}>{normal}</span>}
-                                                    </div>
-                                                    <div className={s.labCellInputWrap}>
-                                                        <input
-                                                            type="number" placeholder="—"
-                                                            value={lab[k]}
-                                                            onChange={e => setLab(prev => ({ ...prev, [k]: e.target.value }))}
-                                                            className={s.labCellInput}
-                                                        />
-                                                        <span className={s.labCellUnit}>{unit}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <div className={s.sexRow}>
-                                            <span className={s.fieldLabel} style={{ margin: 0 }}>Sex</span>
-                                            <div className={s.sexBtns}>
-                                                {(['female', 'male'] as const).map(sx => (
-                                                    <button key={sx}
-                                                            className={`${s.typeBtn} ${lab.sex === sx ? s.typeBtnActive : ''}`}
-                                                            style={lab.sex === sx
-                                                                ? { background: '#F0FDFA', borderColor: '#99F6E4', color: '#0D9488' }
-                                                                : {}}
-                                                            onClick={() => setLab(p => ({ ...p, sex: sx }))}
-                                                    >
-                                                        {lab.sex === sx && <Check size={11} />}
-                                                        {sx === 'female' ? '♀ Female' : '♂ Male'}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
 

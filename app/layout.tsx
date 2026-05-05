@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <html lang="en">
         <body style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", margin: 0 }}>
-        {children}
+        <div className="pageEnter">{children}</div>
         </body>
         </html>
     );

@@ -291,7 +291,7 @@ export default function HomePage() {
                                 <span className="line2"><span className="grad-text">Thyroid</span></span>
                                 Diagnosis.
                             </h1>
-                            <p className="hero-sub">Web platform combining AI image enhancement, diagnostic intelligence, and clinical workflows into one unified system.</p>
+                            <p className="hero-sub">AI-powered thyroid cancer diagnostic platform combining three deep learning models with majority voting for ultrasound image analysis.</p>
                             <div className="btns">
                                 <Link href="/role" className="btn-p">Get Started <ArrowRight size={16}/></Link>
                                 <Link href="/contact" className="btn-g">Contact Us</Link>
@@ -355,7 +355,7 @@ export default function HomePage() {
                                 </div>
                                 <div className="fbadge fb1">
                                     <div className="fbi" style={{background:'#F0FDFA',border:'1px solid #99F6E4'}}><Activity size={17} color="#0D9488"/></div>
-                                    <div><div className="fblbl">Accuracy</div><div className="fbval" style={{color:'#0D9488'}}>98.7%</div></div>
+                                    <div><div className="fblbl">DenseNet-121</div><div className="fbval" style={{color:'#0D9488'}}>97.6%</div></div>
                                 </div>
                                 <div className="fbadge fb2">
                                     <div className="fbi" style={{background:'#F5F3FF',border:'1px solid #DDD6FE'}}><Zap size={17} color="#7C3AED"/></div>
@@ -379,9 +379,9 @@ export default function HomePage() {
                 <div className="stats">
                     <div className="stats-grid">
                         {[
-                            {icon:<Activity size={22}/>, val:'98.7%', lbl:'Diagnostic Accuracy'},
-                            {icon:<Zap size={22}/>, val:'< 2s', lbl:'Real-Time Analysis'},
-                            {icon:<Shield size={22}/>, val:'HIPAA', lbl:'Compliant & Secure'},
+                            {icon:<Activity size={22}/>, val:'97.6%', lbl:'DenseNet-121 Accuracy'},
+                            {icon:<Brain size={22}/>, val:'96.9%', lbl:'Swin Transformer Accuracy'},
+                            {icon:<Layers size={22}/>, val:'3 Models', lbl:'Majority Voting Ensemble'},
                         ].map((s,i)=>(
                             <div className="stat-card" key={i}>
                                 <div className="stat-ic">{s.icon}</div>

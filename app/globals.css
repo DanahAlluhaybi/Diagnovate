@@ -21,12 +21,14 @@
   --surface2:  #F8FAFC;
 
   /* Brand colours */
-  --teal:      #0D9488;
-  --teal-mid:  #14B8A6;
+  --navy:      #1B3A6B;
+  --light-blue:#4A6FA5;
+  --teal:      #2EC4B6;
+  --teal-mid:  #2EC4B6;
   --teal-light:#F0FDFA;
   --teal-ring: #99F6E4;
   --teal-muted:#CCFBF1;
-  --teal-dark: #0F766E;
+  --teal-dark: #0D9488;
   --sky:       #0891B2;
   --purple:    #7C3AED;
   --amber:     #F59E0B;
@@ -137,6 +139,15 @@ a           { color: inherit; }
   background: var(--grad-brand);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* ─── Page transition ────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pageEnter {
+  animation: fadeIn 0.3s ease forwards;
 }
 
 /* ─── Layout helpers ─────────────────────────────────────── */
