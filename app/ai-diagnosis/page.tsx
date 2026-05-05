@@ -224,6 +224,7 @@ export default function AIDiagnosisPage() {
             if (inputMode === 'image') {
                 const formData = new FormData();
                 formData.append('image', imageFile!);
+                formData.append('model', selectedModel === 'majority' ? 'majority' : selectedModel);
 
                 const res  = await fetch(`${BASE}/api/diagnosis/predict-image`, {
                     method: 'POST',
