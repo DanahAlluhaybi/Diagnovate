@@ -299,28 +299,28 @@ export default function AIDiagnosisPage() {
                 const topModels: ModelResult[] = [
                     {
                         name: 'XGBoost',
-                        result: data.models?.['XGBoost']?.result ?? data.models?.XGBoost?.result ?? data.diagnosis,
-                        confidence: Math.round(data.models?.['XGBoost']?.confidence ?? data.models?.XGBoost?.confidence ?? 0),
-                        available: true,
+                        result: data.models?.['XGBoost']?.result ?? data.diagnosis,
+                        confidence: Math.round(data.models?.['XGBoost']?.confidence ?? 0),
+                        available: !!data.models?.['XGBoost'],
                     },
                     {
                         name: 'CatBoost',
-                        result: data.models?.['CatBoost']?.result ?? data.models?.CatBoost?.result ?? data.diagnosis,
-                        confidence: Math.round(data.models?.['CatBoost']?.confidence ?? data.models?.CatBoost?.confidence ?? 0),
-                        available: true,
+                        result: data.models?.['CatBoost']?.result ?? data.diagnosis,
+                        confidence: Math.round(data.models?.['CatBoost']?.confidence ?? 0),
+                        available: !!data.models?.['CatBoost'],
                     },
                     {
                         name: 'Random Forest',
                         result: data.models?.['Random Forest']?.result ?? data.diagnosis,
                         confidence: Math.round(data.models?.['Random Forest']?.confidence ?? 0),
-                        available: true,
+                        available: !!data.models?.['Random Forest'],
                     },
                 ];
                 const votingResult     = data.majority_result ?? data.diagnosis;
                 const votingConfidence = Math.round(data.confidence);
 
                 diagResult = {
-                    malignancyScore : votingConfidence,
+                    malignancyScore : votingResult === 'Malignant' ? votingConfidence : Math.round(100 - votingConfidence),
                     severity        : severityMap[data.severity] ?? 'Moderate',
                     recommendation  : `Diagnosis: ${votingResult}. Please consult a specialist.`,
                     confidence      : votingConfidence,
