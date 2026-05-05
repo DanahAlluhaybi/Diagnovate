@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-    ArrowLeft, Brain, Upload,
+    ArrowLeft, Brain, Upload, FlaskConical,
     AlertTriangle, CheckCircle2,
     Info, User, Check, Zap, FileText, Activity
 } from 'lucide-react';
@@ -14,8 +14,14 @@ import { BASE } from '@/lib/api';
 import { saveDiagnosis } from '@/lib/diagnosisStorage';
 import type { DiagnosisRecord } from '@/lib/diagnosisStorage';
 
+type InputMode  = 'image' | 'lab';
 type DiagStage  = 'idle' | 'uploading' | 'analyzing' | 'done';
 type Severity   = 'Low' | 'Moderate' | 'High';
+
+interface LabValues {
+    tsh: string; t3: string; tt4: string;
+    t4u: string; fti: string; age: string; sex: 'female' | 'male';
+}
 
 interface ModelResult {
     name      : string;
@@ -38,6 +44,17 @@ interface DiagResult {
 }
 
 // ── Typed API responses ──
+interface LabApiResponse {
+    success      : boolean;
+    diagnosis    : string;
+    majority_result?: string;
+    confidence   : number;
+    severity     : string;
+    probabilities: Record<string, number>;
+    models?      : Record<string, { result: string; confidence: number }>;
+    error?       : string;
+}
+
 interface UltrasoundApiResponse {
     success      : boolean;
     diagnosis    : 'Malignant' | 'Benign';
@@ -69,9 +86,27 @@ const fmtSize = (b: number) =>
 
 const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
 
+function buildLabPayload(lab: LabValues) {
+    return {
+        age:               lab.age  ? Number(lab.age)  : null,
+        sex:               lab.sex === 'female' ? 'F' : 'M',
+        TSH_measured:      lab.tsh  ? 't' : 'f', TSH:  lab.tsh  ? Number(lab.tsh)  : null,
+        T3_measured:       lab.t3   ? 't' : 'f', T3:   lab.t3   ? Number(lab.t3)   : null,
+        TT4_measured:      lab.tt4  ? 't' : 'f', TT4:  lab.tt4  ? Number(lab.tt4)  : null,
+        T4U_measured:      lab.t4u  ? 't' : 'f', T4U:  lab.t4u  ? Number(lab.t4u)  : null,
+        FTI_measured:      lab.fti  ? 't' : 'f', FTI:  lab.fti  ? Number(lab.fti)  : null,
+        TBG_measured: 'f', TBG: null,
+        on_thyroxine: 'f', query_on_thyroxine: 'f', on_antithyroid_meds: 'f',
+        sick: 'f', pregnant: 'f', thyroid_surgery: 'f', I131_treatment: 'f',
+        query_hypothyroid: 'f', query_hyperthyroid: 'f', lithium: 'f',
+        goitre: 'f', tumor: 'f', hypopituitary: 'f', psych: 'f',
+    };
+}
+
 export default function AIDiagnosisPage() {
     const router = useRouter();
 
+    const [inputMode,    setInputMode]    = useState<InputMode>('image');
     const [stage,        setStage]        = useState<DiagStage>('idle');
     const [progress,     setProgress]     = useState(0);
     const [result,       setResult]       = useState<DiagResult | null>(null);
@@ -87,6 +122,10 @@ export default function AIDiagnosisPage() {
     const [allPatients,     setAllPatients]     = useState<{ id: string; mrn: string; name: string }[]>([]);
     const [showSuggest,     setShowSuggest]     = useState(false);
     const [savedOk,         setSavedOk]         = useState(false);
+
+    const [lab, setLab] = useState<LabValues>({
+        tsh: '', t3: '', tt4: '', t4u: '', fti: '', age: '', sex: 'female',
+    });
 
     const timerIds = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -133,7 +172,9 @@ export default function AIDiagnosisPage() {
             .forEach(({ t, d }) => { timerIds.current.push(setTimeout(() => setProgress(t), d)); });
     };
 
-    const hasInput = !!imageFile;
+    const hasInput =
+        inputMode === 'image' ? !!imageFile :
+        !!(lab.tsh || lab.t3 || lab.tt4);
 
     const runDiagnosis = async () => {
         if (!hasInput) return;
@@ -145,66 +186,126 @@ export default function AIDiagnosisPage() {
             await delay(400);
             setStage('analyzing');
 
-            const formData = new FormData();
-            formData.append('image', imageFile!);
+            let diagResult: DiagResult;
 
-            const res  = await fetch(`${BASE}/api/diagnosis/predict-image`, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${token}` },
-                body: formData,
-            });
-            const data = await res.json() as UltrasoundApiResponse;
-            if (!res.ok || !data.success) throw new Error(data.error ?? 'Ultrasound analysis failed');
+            // ── IMAGE ONLY ──
+            if (inputMode === 'image') {
+                const formData = new FormData();
+                formData.append('image', imageFile!);
 
-            console.log('IMAGE RESPONSE:', JSON.stringify(data));
+                const res  = await fetch(`${BASE}/api/diagnosis/predict-image`, {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${token}` },
+                    body: formData,
+                });
+                const data = await res.json() as UltrasoundApiResponse;
+                if (!res.ok || !data.success) throw new Error(data.error ?? 'Ultrasound analysis failed');
 
-            const models      = data.models || (data as any).models_detail || [];
-            const effResult   = models[0];
-            const swinResult  = models[1];
-            const denseResult = models[2];
+                console.log('IMAGE RESPONSE:', JSON.stringify(data));
 
-            const topModels: ModelResult[] = [
-                {
-                    name: 'EfficientNet+YOLO',
-                    result: effResult ? (effResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
-                    confidence: effResult?.confidence ? Math.round(effResult.confidence * 100) : 0,
-                    available: !!(effResult),
-                },
-                {
-                    name: 'Swin Transformer',
-                    result: swinResult ? (swinResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
-                    confidence: swinResult?.confidence ? Math.round(swinResult.confidence * 100) : 0,
-                    available: !!(swinResult),
-                },
-                {
-                    name: 'DenseNet-121',
-                    result: denseResult ? (denseResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
-                    confidence: denseResult?.confidence ? Math.round(denseResult.confidence * 100) : 0,
-                    available: !!(denseResult),
-                },
-            ];
-            const votingResult     = data.diagnosis;
-            const votingConfidence = Math.round(data.confidence);
-            const malignancyScore  = data.diagnosis === 'Malignant'
-                ? Math.round(data.confidence)
-                : Math.round(100 - data.confidence);
-            const severity: Severity = data.severity === 'high' ? 'High' : 'Low';
+                const models      = data.models || (data as any).models_detail || [];
+                const effResult   = models[0];
+                const swinResult  = models[1];
+                const denseResult = models[2];
 
-            const diagResult: DiagResult = {
-                malignancyScore,
-                severity,
-                recommendation  : data.recommendation,
-                confidence      : Math.round(data.confidence),
-                findings: [
-                    `Final Diagnosis: ${data.diagnosis}`,
-                    `Vote Summary: ${data.vote_summary}`,
-                    `Unanimous: ${data.unanimous ? 'Yes' : 'No'}`,
-                    `Confidence: ${data.confidence}%`,
-                ],
-                topModels,
-                votingResult,
-                votingConfidence,
-            };
+                const topModels: ModelResult[] = [
+                    {
+                        name: 'EfficientNet+YOLO',
+                        result: effResult ? (effResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
+                        confidence: effResult?.confidence ? Math.round(effResult.confidence * 100) : 0,
+                        available: !!(effResult),
+                    },
+                    {
+                        name: 'Swin Transformer',
+                        result: swinResult ? (swinResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
+                        confidence: swinResult?.confidence ? Math.round(swinResult.confidence * 100) : 0,
+                        available: !!(swinResult),
+                    },
+                    {
+                        name: 'DenseNet-121',
+                        result: denseResult ? (denseResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
+                        confidence: denseResult?.confidence ? Math.round(denseResult.confidence * 100) : 0,
+                        available: !!(denseResult),
+                    },
+                ];
+                const votingResult     = data.diagnosis;
+                const votingConfidence = Math.round(data.confidence);
+                const malignancyScore  = data.diagnosis === 'Malignant'
+                    ? Math.round(data.confidence)
+                    : Math.round(100 - data.confidence);
+                const severity: Severity = data.severity === 'high' ? 'High' : 'Low';
+
+                diagResult = {
+                    malignancyScore,
+                    severity,
+                    recommendation  : data.recommendation,
+                    confidence      : Math.round(data.confidence),
+                    findings: [
+                        `Final Diagnosis: ${data.diagnosis}`,
+                        `Vote Summary: ${data.vote_summary}`,
+                        `Unanimous: ${data.unanimous ? 'Yes' : 'No'}`,
+                        `Confidence: ${data.confidence}%`,
+                    ],
+                    topModels,
+                    votingResult,
+                    votingConfidence,
+                };
+
+            // ── LAB ONLY ──
+            } else {
+                const res  = await fetch(`${BASE}/api/diagnosis/predict`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify(buildLabPayload(lab)),
+                });
+                const data = await res.json() as LabApiResponse;
+                if (!res.ok || !data.success) throw new Error(data.error ?? 'Lab prediction failed');
+
+                console.log('LAB RESPONSE:', JSON.stringify(data));
+
+                const severityMap: Record<string, Severity> = { high: 'High', medium: 'Moderate', low: 'Low' };
+                const topModels: ModelResult[] = [
+                    {
+                        name: 'XGBoost',
+                        result: data.models?.XGBoost?.result ?? data.diagnosis,
+                        confidence: Math.round(data.models?.XGBoost?.confidence ?? data.confidence),
+                        available: true,
+                    },
+                    {
+                        name: 'CatBoost',
+                        result: data.models?.CatBoost?.result ?? data.diagnosis,
+                        confidence: Math.round(data.models?.CatBoost?.confidence ?? data.confidence),
+                        available: true,
+                    },
+                    {
+                        name: 'Random Forest',
+                        result: data.models?.['Random Forest']?.result ?? data.diagnosis,
+                        confidence: Math.round(data.models?.['Random Forest']?.confidence ?? data.confidence),
+                        available: true,
+                    },
+                ];
+                const votingResult     = data.majority_result ?? data.diagnosis;
+                const votingConfidence = Math.round(data.confidence);
+
+                diagResult = {
+                    malignancyScore : votingConfidence,
+                    severity        : severityMap[data.severity] ?? 'Moderate',
+                    recommendation  : `Diagnosis: ${votingResult}. Please consult a specialist.`,
+                    confidence      : votingConfidence,
+                    findings: [
+                        `Primary Diagnosis: ${votingResult}`,
+                        ...(lab.tsh  ? [`TSH: ${lab.tsh} mIU/L`]  : []),
+                        ...(lab.t3   ? [`T3: ${lab.t3} nmol/L`]   : []),
+                        ...(lab.tt4  ? [`TT4: ${lab.tt4} nmol/L`] : []),
+                        ...(lab.t4u  ? [`T4U: ${lab.t4u} ratio`]  : []),
+                        ...(lab.fti  ? [`FTI: ${lab.fti} index`]  : []),
+                        ...Object.entries(data.probabilities || {}).map(([k, v]) => `${k}: ${v}% probability`),
+                    ],
+                    topModels,
+                    votingResult,
+                    votingConfidence,
+                };
+            }
 
             clearTimers(); setProgress(100);
             await delay(300);
@@ -336,7 +437,46 @@ export default function AIDiagnosisPage() {
                             </div>
                         </div>
 
-                        {/* Scan Upload */}
+                        {/* Mode Selector */}
+                        <div className={s.card} style={{ marginBottom: 16 }}>
+                            <div className={s.cardHead}>
+                                <div className={s.cardIcon} style={{ background: 'linear-gradient(135deg,#0d9488,#0891b2)' }}>
+                                    <Brain size={18} color="white" />
+                                </div>
+                                <span className={s.cardTitle}>Diagnosis Mode</span>
+                            </div>
+                            <div className={s.cardBody}>
+                                <div style={{ display: 'flex', gap: 10 }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setInputMode('image'); setError(''); }}
+                                        style={{
+                                            flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all .15s',
+                                            background: inputMode === 'image' ? 'linear-gradient(135deg,#0d9488,#0891b2)' : '#f8fafc',
+                                            color: inputMode === 'image' ? '#fff' : '#64748b',
+                                            border: inputMode === 'image' ? '1.5px solid #0d9488' : '1.5px solid #e2e8f0',
+                                        }}
+                                    >
+                                        Image Only
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setInputMode('lab'); setError(''); }}
+                                        style={{
+                                            flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all .15s',
+                                            background: inputMode === 'lab' ? 'linear-gradient(135deg,#0d9488,#0891b2)' : '#f8fafc',
+                                            color: inputMode === 'lab' ? '#fff' : '#64748b',
+                                            border: inputMode === 'lab' ? '1.5px solid #0d9488' : '1.5px solid #e2e8f0',
+                                        }}
+                                    >
+                                        Lab Only
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Scan Upload — image mode */}
+                        {inputMode === 'image' && (
                         <div className={s.card} style={{ marginBottom: 16 }}>
                             <div className={s.cardHead}>
                                 <div className={s.cardIcon}>
@@ -344,7 +484,7 @@ export default function AIDiagnosisPage() {
                                 </div>
                                 <span className={s.cardTitle}>Thyroid Scan</span>
                                 <span className={s.scanTypePill} style={{ background: '#F0F9FF', color: '#0891B2', borderColor: '#BAE6FD' }}>
-                                    Image Only
+                                    Ultrasound / CT
                                 </span>
                             </div>
                             <div className={s.cardBody}>
@@ -380,6 +520,68 @@ export default function AIDiagnosisPage() {
                                 </div>
                             </div>
                         </div>
+                        )}
+
+                        {/* Lab Values — lab mode */}
+                        {inputMode === 'lab' && (
+                        <div className={s.card} style={{ marginBottom: 16 }}>
+                            <div className={s.cardHead}>
+                                <div className={s.cardIcon} style={{ background: 'linear-gradient(135deg,#7c3aed,#6d28d9)' }}>
+                                    <FlaskConical size={18} color="white" />
+                                </div>
+                                <span className={s.cardTitle}>Lab Values</span>
+                                <span className={s.scanTypePill} style={{ background: '#F5F3FF', color: '#7C3AED', borderColor: '#DDD6FE' }}>
+                                    Thyroid Panel
+                                </span>
+                            </div>
+                            <div className={s.cardBody}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                                    {([
+                                        { key: 'tsh',  label: 'TSH',  unit: 'mIU/L'  },
+                                        { key: 't3',   label: 'T3',   unit: 'nmol/L' },
+                                        { key: 'tt4',  label: 'TT4',  unit: 'nmol/L' },
+                                        { key: 't4u',  label: 'T4U',  unit: 'ratio'  },
+                                        { key: 'fti',  label: 'FTI',  unit: 'index'  },
+                                        { key: 'age',  label: 'Age',  unit: 'years'  },
+                                    ] as const).map(({ key, label, unit }) => (
+                                        <div key={key} className={s.fieldGroup} style={{ marginBottom: 0 }}>
+                                            <label className={s.fieldLabel}>
+                                                {label} <span className={s.fieldOptional}>({unit})</span>
+                                            </label>
+                                            <input
+                                                className={s.fieldInput}
+                                                type="number"
+                                                placeholder={`Enter ${label}...`}
+                                                value={lab[key]}
+                                                onChange={e => setLab(prev => ({ ...prev, [key]: e.target.value }))}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className={s.fieldGroup} style={{ marginTop: 12, marginBottom: 0 }}>
+                                    <label className={s.fieldLabel}>Sex</label>
+                                    <div style={{ display: 'flex', gap: 10 }}>
+                                        {(['female', 'male'] as const).map(sex => (
+                                            <button
+                                                key={sex}
+                                                type="button"
+                                                onClick={() => setLab(prev => ({ ...prev, sex }))}
+                                                style={{
+                                                    flex: 1, padding: '8px 0', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                                                    background: lab.sex === sex ? '#7c3aed' : '#f8fafc',
+                                                    color: lab.sex === sex ? '#fff' : '#64748b',
+                                                    border: lab.sex === sex ? '1.5px solid #7c3aed' : '1.5px solid #e2e8f0',
+                                                    textTransform: 'capitalize',
+                                                }}
+                                            >
+                                                {sex}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        )}
 
                         {/* Run button */}
                         <button
