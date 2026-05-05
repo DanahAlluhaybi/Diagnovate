@@ -64,7 +64,7 @@ interface UltrasoundApiResponse {
     vote_summary : string;
     unanimous    : boolean;
     recommendation: string;
-    models_detail: Array<{ model: string; vote: 0 | 1; confidence?: number }>;
+    models: Array<{ model: string; vote: 0 | 1; confidence?: number }>;
     disclaimer?  : string;
     error?       : string;
 }
@@ -241,9 +241,9 @@ export default function AIDiagnosisPage() {
                 const data = await res.json() as UltrasoundApiResponse;
                 if (!res.ok || !data.success) throw new Error(data.error ?? 'Ultrasound analysis failed');
 
-                const effResult   = data.models_detail[0];
-                const swinResult  = data.models_detail[1];
-                const denseResult = data.models_detail[2];
+                const effResult   = data.models[0];
+                const swinResult  = data.models[1];
+                const denseResult = data.models[2];
 
                 const topModels: ModelResult[] = [
                     {
@@ -363,18 +363,18 @@ export default function AIDiagnosisPage() {
                 const labSeverity   = severityMap[labData.severity] ?? 'Moderate';
                 const labConfidence = Math.round(labData.confidence);
 
-                const imgOk = !!(imgData?.success && imgData?.models_detail);
+                const imgOk = !!(imgData?.success && imgData?.models);
 
                 const topModels: ModelResult[] = [
                     { name: 'XGBoost (Lab)', result: labData.diagnosis, confidence: labConfidence, available: true },
                     imgOk
-                        ? { name: 'EfficientNet+YOLO (Image)', result: imgData!.models_detail[0].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round(imgData!.confidence), available: true }
+                        ? { name: 'EfficientNet+YOLO (Image)', result: imgData!.models[0].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round(imgData!.confidence), available: true }
                         : { name: 'EfficientNet+YOLO (Image)', result: '—', confidence: 0, available: false },
                     imgOk
-                        ? { name: 'Swin Transformer (Image)', result: imgData!.models_detail[1].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round(imgData!.models_detail[1].confidence ?? 0), available: true }
+                        ? { name: 'Swin Transformer (Image)', result: imgData!.models[1].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round(imgData!.models[1].confidence ?? 0), available: true }
                         : { name: 'Swin Transformer (Image)', result: '—', confidence: 0, available: false },
                     imgOk
-                        ? { name: 'DenseNet-121 (Image)', result: imgData!.models_detail[2].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round(imgData!.models_detail[2].confidence ?? 0), available: true }
+                        ? { name: 'DenseNet-121 (Image)', result: imgData!.models[2].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round(imgData!.models[2].confidence ?? 0), available: true }
                         : { name: 'DenseNet-121 (Image)', result: '—', confidence: 0, available: false },
                 ];
 
