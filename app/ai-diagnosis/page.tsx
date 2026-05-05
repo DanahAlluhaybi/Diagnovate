@@ -738,100 +738,110 @@ export default function AIDiagnosisPage() {
 
                         {/* ════ RESULTS ════ */}
                         {result && sev && (
-                            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            <div style={{ marginTop: 20 }}>
 
-                                <div className={s.resultCard} style={{ borderColor: sev.border }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', background: sev.bg, borderBottom: `1px solid ${sev.border}` }}>
+                                {/* Score */}
+                                <div className={s.resultCard}>
+                                    <div className={s.resultStrip} style={{ borderBottom: `1px solid ${sev.border}`, background: sev.bg }}>
                                         <div>
-                                            <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.6px', textTransform: 'uppercase', color: sev.color, marginBottom: 6 }}>Malignancy Score</p>
-                                            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                                                <span style={{ fontSize: 48, fontWeight: 800, color: sev.color, lineHeight: 1 }}>{result.malignancyScore}</span>
-                                                <span style={{ fontSize: 16, color: '#94a3b8', fontWeight: 500 }}>/100</span>
+                                            <p className={s.resultStripLabel} style={{ color: sev.color }}>Malignancy Score</p>
+                                            <div className={s.resultScoreRow}>
+                                                <span className={s.resultScore} style={{ color: sev.color }}>{result.malignancyScore}</span>
+                                                <span className={s.resultScoreMax}>/100</span>
                                             </div>
+                                            <p className={s.resultConfRow}>Confidence: <span className={s.resultConfVal} style={{ color: sev.color }}>{result.confidence}%</span></p>
                                         </div>
                                         <div style={{ textAlign: 'right' }}>
-                                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 20, border: `1px solid ${sev.border}`, background: sev.color + '18', color: sev.color, fontSize: 13, fontWeight: 800, marginBottom: 8 }}>
-                                                {sev.icon} {result.severity} Risk
+                                            <div className={s.resultBadge} style={{ color: sev.color, borderColor: sev.border, background: sev.color + '14' }}>
+                                                {result.severity} Risk
                                             </div>
-                                            <p style={{ fontSize: 13, color: '#64748b' }}>Confidence: <strong style={{ color: sev.color }}>{result.confidence}%</strong></p>
                                         </div>
                                     </div>
-                                    <div style={{ padding: '12px 24px' }}>
-                                        <div style={{ height: 8, background: '#e2e8f0', borderRadius: 99, overflow: 'hidden' }}>
-                                            <div style={{ height: '100%', width: `${result.malignancyScore}%`, background: sev.color, borderRadius: 99, transition: 'width .8s cubic-bezier(.16,1,.3,1)' }} />
+                                    <div className={s.resultBar}>
+                                        <div className={s.resultBarTrack}>
+                                            <div className={s.resultBarFill} style={{ width: `${result.malignancyScore}%`, background: sev.color }} />
                                         </div>
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                                    <div className={s.infoCard}>
-                                        <div className={s.infoCardHead}>
-                                            <div className={s.infoCardIcon}><Activity size={14} /></div>
-                                            <span className={s.infoCardTitle}>Top Models</span>
+                                {/* Models + Voting */}
+                                <div className={s.resultGrid}>
+                                    <div className={s.modelsCard}>
+                                        <div className={s.modelsCardHead}>
+                                            <div className={s.infoCardIcon} style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                                                <Activity size={13} color="var(--teal)" />
+                                            </div>
+                                            <span className={s.modelsCardTitle}>Model Results</span>
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                            {result.topModels.map((m: any, i: number) => (
-                                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 18px', borderBottom: i < result.topModels.length - 1 ? '1px solid #f1f5f9' : 'none', opacity: m.available ? 1 : 0.4 }}>
-                                                    <div>
-                                                        <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>Model {i + 1}: {m.name}</div>
-                                                        <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{m.available ? `Result: ${m.result}` : 'Not available yet'}</div>
-                                                    </div>
-                                                    <div style={{ textAlign: 'right' }}>
-                                                        {m.available ? (
-                                                            <>
-                                                                <div style={{ fontSize: 15, fontWeight: 800, color: sev.color }}>{m.confidence}%</div>
-                                                                <div style={{ fontSize: 11, color: '#94a3b8' }}>confidence</div>
-                                                            </>
-                                                        ) : (
-                                                            <span style={{ fontSize: 18, color: '#cbd5e1' }}>—</span>
-                                                        )}
-                                                    </div>
+                                        {result.topModels.map((m: any, i: number) => (
+                                            <div key={i} className={s.modelRow} style={{ opacity: m.available ? 1 : 0.35 }}>
+                                                <div>
+                                                    <div className={s.modelRowName}>{m.name}</div>
+                                                    <div className={s.modelRowSub}>{m.available ? m.result : 'Not run'}</div>
                                                 </div>
-                                            ))}
-                                        </div>
+                                                <div style={{ textAlign: 'right' }}>
+                                                    <div className={s.modelRowConf} style={{ color: m.available ? sev.color : 'var(--muted)' }}>
+                                                        {m.available ? `${m.confidence}%` : '—'}
+                                                    </div>
+                                                    {m.available && <div className={s.modelRowLabel}>confidence</div>}
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
 
-                                    <div className={s.infoCard} style={{ borderColor: sev.border }}>
-                                        <div className={s.infoCardHead} style={{ background: sev.bg, borderBottom: `1px solid ${sev.border}` }}>
-                                            <div className={s.infoCardIcon} style={{ background: sev.color + '18', border: `1px solid ${sev.border}` }}><CheckCircle2 size={14} color={sev.color} /></div>
-                                            <span className={s.infoCardTitle} style={{ color: sev.color }}>Majority Voting</span>
+                                    <div className={s.votingCard} style={{ background: sev.bg, border: `1px solid ${sev.border}` }}>
+                                        <div className={s.votingCardHead} style={{ background: sev.color + '12', borderColor: sev.border }}>
+                                            <CheckCircle2 size={13} color={sev.color} />
+                                            <span className={s.votingCardTitle} style={{ color: sev.color }}>Final Result</span>
                                         </div>
-                                        <div style={{ padding: '24px 18px', background: sev.bg, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 16 }}>
+                                        <div className={s.votingCardBody}>
                                             <div>
-                                                <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: sev.color, marginBottom: 6 }}>Result</p>
-                                                <p style={{ fontSize: 28, fontWeight: 800, color: sev.color, fontFamily: 'var(--font-display)' }}>{result.votingResult}</p>
+                                                <p className={s.votingLabel} style={{ color: sev.color }}>Diagnosis</p>
+                                                <p className={s.votingValue} style={{ color: sev.color }}>{result.votingResult}</p>
                                             </div>
                                             <div>
-                                                <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: sev.color, marginBottom: 6 }}>Confidence</p>
-                                                <p style={{ fontSize: 28, fontWeight: 800, color: sev.color, fontFamily: 'var(--font-display)' }}>{result.votingConfidence}%</p>
+                                                <p className={s.votingLabel} style={{ color: sev.color }}>Confidence</p>
+                                                <p className={s.votingValue} style={{ color: sev.color }}>{result.votingConfidence}%</p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className={s.infoCard}>
-                                    <div className={s.infoCardHead}>
-                                        <div className={s.infoCardIcon}><FileText size={14} /></div>
-                                        <span className={s.infoCardTitle}>Key Findings</span>
+                                {/* Findings */}
+                                <div className={s.findingsCard}>
+                                    <div className={s.findingsHead}>
+                                        <div className={s.infoCardIcon} style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                                            <FileText size={13} color="var(--teal)" />
+                                        </div>
+                                        <span className={s.findingsTitle}>Key Findings</span>
                                     </div>
-                                    <div style={{ padding: '4px 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
+                                    <div className={s.findingsGrid}>
                                         {result.findings.map((f: string, i: number) => (
-                                            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 18px', borderBottom: i < result.findings.length - 2 ? '1px solid #f1f5f9' : 'none' }}>
-                                                <div style={{ width: 7, height: 7, borderRadius: '50%', background: sev.color, flexShrink: 0, marginTop: 5 }} />
-                                                <span style={{ fontSize: 13, color: '#334155', lineHeight: 1.5 }}>{f}</span>
+                                            <div key={i} className={s.findingItem}>
+                                                <div className={s.findingDot} style={{ background: sev.color }} />
+                                                <span className={s.findingText}>{f}</span>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
 
-                                <div className={s.infoCard} style={{ borderColor: sev.border }}>
-                                    <div className={s.infoCardHead} style={{ background: sev.bg, borderBottom: `1px solid ${sev.border}` }}>
-                                        <div className={s.infoCardIcon} style={{ background: sev.color + '18', border: `1px solid ${sev.border}` }}><CheckCircle2 size={14} color={sev.color} /></div>
-                                        <span className={s.infoCardTitle} style={{ color: sev.color }}>Recommendation</span>
+                                {/* Recommendation */}
+                                <div className={s.recCard} style={{ background: sev.bg, border: `1px solid ${sev.border}` }}>
+                                    <div className={s.recHead} style={{ borderColor: sev.border, background: sev.color + '10' }}>
+                                        <CheckCircle2 size={13} color={sev.color} />
+                                        <span className={s.recTitle} style={{ color: sev.color }}>Recommendation</span>
                                     </div>
-                                    <div style={{ padding: '16px 18px' }}>
-                                        <p style={{ fontSize: 14, color: '#334155', lineHeight: 1.7, fontWeight: 500 }}>{result.recommendation}</p>
+                                    <div className={s.recBody}>
+                                        <p className={s.recText} style={{ color: sev.color === '#059669' ? '#065F46' : '#7F1D1D' }}>{result.recommendation}</p>
                                     </div>
+                                </div>
+
+                                {/* Disclaimer */}
+                                <div className={s.disclaimerStrip}>
+                                    <Info size={15} className={s.disclaimerIcon} color="#D97706" style={{ flexShrink: 0, marginTop: 1 }} />
+                                    <p className={s.disclaimerText}>
+                                        <strong>Clinical Decision Support Only.</strong> This AI result is intended to assist qualified medical professionals and must be interpreted by a licensed clinician. It does not replace histological confirmation or specialist judgment.
+                                    </p>
                                 </div>
 
                             </div>
