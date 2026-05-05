@@ -268,7 +268,7 @@ export default function AIDiagnosisPage() {
                 const severity: Severity = data.severity === 'high' ? 'High' : 'Low';
 
                 const filteredImgModels = isSingleImgModel
-                    ? topModels.map(m => ({ ...m, available: m.name === selectedModel }))
+                    ? topModels.filter(m => m.name === selectedModel)
                     : topModels;
 
                 diagResult = {
@@ -301,7 +301,7 @@ export default function AIDiagnosisPage() {
                 console.log('LAB DATA:', JSON.stringify(data));
 
                 const severityMap: Record<string, Severity> = { high: 'High', medium: 'Moderate', low: 'Low' };
-                const topModels: ModelResult[] = [
+                const allLabModels: ModelResult[] = [
                     {
                         name: 'XGBoost',
                         result: data.models?.['XGBoost']?.result ?? data.diagnosis,
@@ -321,6 +321,7 @@ export default function AIDiagnosisPage() {
                         available: !!data.models?.['Random Forest'],
                     },
                 ];
+                const topModels = allLabModels.filter(m => m.available);
                 const votingResult     = data.majority_result ?? data.diagnosis;
                 const votingConfidence = Math.round(data.confidence);
 
