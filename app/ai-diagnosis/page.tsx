@@ -249,8 +249,8 @@ export default function AIDiagnosisPage() {
                     {
                         name: 'EfficientNet+YOLO',
                         result: effResult ? (effResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
-                        confidence: 0,
-                        available: false,
+                        confidence: effResult?.confidence ? Math.round(effResult.confidence * 100) : 0,
+                        available: !!(effResult),
                     },
                     {
                         name: 'Swin Transformer',
