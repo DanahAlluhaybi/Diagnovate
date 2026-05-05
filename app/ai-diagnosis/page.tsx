@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-    ArrowLeft, Brain, Upload, FlaskConical,
+    ArrowLeft, Brain, Upload, FlaskConical, Layers,
     AlertTriangle, CheckCircle2,
     Info, User, Check, Zap, FileText, Activity
 } from 'lucide-react';
@@ -14,9 +14,10 @@ import { BASE } from '@/lib/api';
 import { saveDiagnosis } from '@/lib/diagnosisStorage';
 import type { DiagnosisRecord } from '@/lib/diagnosisStorage';
 
-type InputMode  = 'image' | 'lab';
+type InputMode  = 'image' | 'lab' | 'both';
 type DiagStage  = 'idle' | 'uploading' | 'analyzing' | 'done';
 type Severity   = 'Low' | 'Moderate' | 'High';
+type RiskLevel  = 'low' | 'intermediate' | 'high';
 
 interface LabValues {
     tsh: string; t3: string; tt4: string;
@@ -85,6 +86,23 @@ const fmtSize = (b: number) =>
     b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
 
 const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+function majorityVote(models: ModelResult[]): { result: string; confidence: number } {
+    const available = models.filter(m => m.available);
+    if (available.length === 0) return { result: 'Inconclusive', confidence: 0 };
+    const votes: Record<string, number[]> = {};
+    for (const m of available) {
+        if (!votes[m.result]) votes[m.result] = [];
+        votes[m.result].push(m.confidence);
+    }
+    let winner = '', maxScore = -1;
+    for (const [res, confs] of Object.entries(votes)) {
+        const score = confs.length * 1000 + confs.reduce((a, b) => a + b, 0) / confs.length;
+        if (score > maxScore) { maxScore = score; winner = res; }
+    }
+    const avgConf = votes[winner].reduce((a, b) => a + b, 0) / votes[winner].length;
+    return { result: winner, confidence: Math.round(avgConf) };
+}
 
 function buildLabPayload(lab: LabValues) {
     return {
@@ -174,7 +192,8 @@ export default function AIDiagnosisPage() {
 
     const hasInput =
         inputMode === 'image' ? !!imageFile :
-        !!(lab.tsh || lab.t3 || lab.tt4);
+            inputMode === 'lab'   ? !!(lab.tsh || lab.t3 || lab.tt4) :
+                /* both */              !!imageFile || !!(lab.tsh || lab.t3 || lab.tt4);
 
     const runDiagnosis = async () => {
         if (!hasInput) return;
@@ -252,7 +271,7 @@ export default function AIDiagnosisPage() {
                 };
 
             // ── LAB ONLY ──
-            } else {
+            } else if (inputMode === 'lab') {
                 const res  = await fetch(`${BASE}/api/diagnosis/predict`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -305,6 +324,67 @@ export default function AIDiagnosisPage() {
                     votingResult,
                     votingConfidence,
                 };
+
+            // ── BOTH ──
+            } else {
+                const fetchLab = async (): Promise<LabApiResponse> => {
+                    const r = await fetch(`${BASE}/api/diagnosis/predict`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify(buildLabPayload(lab)),
+                    });
+                    return r.json() as Promise<LabApiResponse>;
+                };
+                const fetchImg = async (): Promise<UltrasoundApiResponse | null> => {
+                    if (!imageFile) return null;
+                    const fd = new FormData();
+                    fd.append('image', imageFile);
+                    const r = await fetch(`${BASE}/api/diagnosis/predict-image`, {
+                        method: 'POST',
+                        headers: { Authorization: `Bearer ${token}` },
+                        body: fd,
+                    });
+                    return r.json() as Promise<UltrasoundApiResponse>;
+                };
+
+                const [labData, imgData] = await Promise.all([fetchLab(), fetchImg()]);
+                if (!labData.success) throw new Error(labData.error ?? 'Lab prediction failed');
+
+                const severityMap: Record<string, Severity> = { high: 'High', medium: 'Moderate', low: 'Low' };
+                const labConfidence = Math.round(labData.confidence);
+                const imgOk = !!(imgData?.success && imgData?.models);
+
+                const topModels: ModelResult[] = [
+                    { name: 'XGBoost (Lab)',              result: labData.models?.XGBoost?.result ?? labData.diagnosis,        confidence: Math.round(labData.models?.XGBoost?.confidence ?? labData.confidence), available: true },
+                    imgOk
+                        ? { name: 'EfficientNet+YOLO (Image)', result: imgData!.models[0].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round((imgData!.models[0].confidence ?? 0) * 100), available: true }
+                        : { name: 'EfficientNet+YOLO (Image)', result: '—', confidence: 0, available: false },
+                    imgOk
+                        ? { name: 'Swin Transformer (Image)',   result: imgData!.models[1].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round((imgData!.models[1].confidence ?? 0) * 100), available: true }
+                        : { name: 'Swin Transformer (Image)',   result: '—', confidence: 0, available: false },
+                    imgOk
+                        ? { name: 'DenseNet-121 (Image)',       result: imgData!.models[2].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round((imgData!.models[2].confidence ?? 0) * 100), available: true }
+                        : { name: 'DenseNet-121 (Image)',       result: '—', confidence: 0, available: false },
+                ];
+
+                const { result: votingResult, confidence: votingConf } = majorityVote(topModels);
+
+                diagResult = {
+                    malignancyScore : labConfidence,
+                    severity        : severityMap[labData.severity] ?? 'Moderate',
+                    recommendation  : `Lab Diagnosis: ${labData.majority_result ?? labData.diagnosis}. ${imgData?.recommendation ?? ''} Please consult a specialist.`.trim(),
+                    confidence      : labConfidence,
+                    findings: [
+                        `Primary Diagnosis: ${labData.majority_result ?? labData.diagnosis}`,
+                        ...(lab.tsh  ? [`TSH: ${lab.tsh} mIU/L`]  : []),
+                        ...(lab.t3   ? [`T3: ${lab.t3} nmol/L`]   : []),
+                        ...(lab.tt4  ? [`TT4: ${lab.tt4} nmol/L`] : []),
+                        ...(imgOk    ? [`Image Diagnosis: ${imgData!.diagnosis}`, `Vote Summary: ${imgData!.vote_summary}`] : []),
+                    ],
+                    topModels,
+                    votingResult,
+                    votingConfidence: votingConf,
+                };
             }
 
             clearTimers(); setProgress(100);
@@ -317,7 +397,7 @@ export default function AIDiagnosisPage() {
                 const record: DiagnosisRecord = {
                     id             : `dx-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
                     date           : new Date().toISOString(),
-                    mode           : 'image',
+                    mode           : inputMode,
                     modelName      : diagResult.topModels.find(m => m.available)?.name ?? 'Unknown',
                     votingResult   : diagResult.votingResult,
                     confidence     : diagResult.confidence,
@@ -345,6 +425,7 @@ export default function AIDiagnosisPage() {
     const reset = () => {
         setStage('idle'); setResult(null); setError('');
         setImageFile(null); setImagePreview(''); setProgress(0); setSavedOk(false);
+        setLab({ tsh: '', t3: '', tt4: '', t4u: '', fti: '', age: '', sex: 'female' });
     };
 
     const isRunning = stage === 'uploading' || stage === 'analyzing';
@@ -437,151 +518,129 @@ export default function AIDiagnosisPage() {
                             </div>
                         </div>
 
-                        {/* Mode Selector */}
-                        <div className={s.card} style={{ marginBottom: 16 }}>
-                            <div className={s.cardHead}>
-                                <div className={s.cardIcon} style={{ background: 'linear-gradient(135deg,#0d9488,#0891b2)' }}>
-                                    <Brain size={18} color="white" />
-                                </div>
-                                <span className={s.cardTitle}>Diagnosis Mode</span>
-                            </div>
-                            <div className={s.cardBody}>
-                                <div style={{ display: 'flex', gap: 10 }}>
-                                    <button
-                                        type="button"
-                                        onClick={() => { setInputMode('image'); setError(''); }}
-                                        style={{
-                                            flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all .15s',
-                                            background: inputMode === 'image' ? 'linear-gradient(135deg,#0d9488,#0891b2)' : '#f8fafc',
-                                            color: inputMode === 'image' ? '#fff' : '#64748b',
-                                            border: inputMode === 'image' ? '1.5px solid #0d9488' : '1.5px solid #e2e8f0',
-                                        }}
-                                    >
-                                        Image Only
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => { setInputMode('lab'); setError(''); }}
-                                        style={{
-                                            flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all .15s',
-                                            background: inputMode === 'lab' ? 'linear-gradient(135deg,#0d9488,#0891b2)' : '#f8fafc',
-                                            color: inputMode === 'lab' ? '#fff' : '#64748b',
-                                            border: inputMode === 'lab' ? '1.5px solid #0d9488' : '1.5px solid #e2e8f0',
-                                        }}
-                                    >
-                                        Lab Only
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Scan Upload — image mode */}
-                        {inputMode === 'image' && (
+                        {/* Input Data */}
                         <div className={s.card} style={{ marginBottom: 16 }}>
                             <div className={s.cardHead}>
                                 <div className={s.cardIcon}>
-                                    <Upload size={18} color="white" />
+                                    <Layers size={18} color="white" />
                                 </div>
-                                <span className={s.cardTitle}>Thyroid Scan</span>
-                                <span className={s.scanTypePill} style={{ background: '#F0F9FF', color: '#0891B2', borderColor: '#BAE6FD' }}>
-                                    Ultrasound / CT
+                                <span className={s.cardTitle}>Input Data</span>
+                                <span className={s.scanTypePill} style={
+                                    inputMode === 'both'  ? { background: '#EEF2FF', color: '#4F46E5', borderColor: '#C7D2FE' } :
+                                    inputMode === 'image' ? { background: '#F0F9FF', color: '#0891B2', borderColor: '#BAE6FD' } :
+                                                            { background: '#F0FDFA', color: '#0D9488', borderColor: '#99F6E4' }
+                                }>
+                                    {inputMode === 'both' ? 'Multi-Modal' : inputMode === 'image' ? 'Image Only' : 'Lab Only'}
                                 </span>
                             </div>
                             <div className={s.cardBody}>
-                                <div className={s.fieldGroup} style={{ marginBottom: 0 }}>
-                                    <label className={s.fieldLabel}>
-                                        Medical Scan <span className={s.fieldOptional}>(Ultrasound / CT)</span>
-                                    </label>
-                                    <div
-                                        className={`${s.uploadZone} ${dragOver ? s.dragOver : ''}`}
-                                        style={imagePreview ? { padding: '12px' } : {}}
-                                        onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-                                        onDragLeave={() => setDragOver(false)}
-                                        onDrop={handleDrop}
-                                        onClick={() => fileRef.current?.click()}
-                                    >
-                                        <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
-                                               onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
-                                        {imagePreview ? (
-                                            <>
-                                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                <img src={imagePreview} className={s.previewThumb} alt="Scan preview" />
-                                                <div className={s.fileName}>{imageFile?.name}</div>
-                                                {imageFile && <div className={s.fileSize}>{fmtSize(imageFile.size)}</div>}
-                                            </>
-                                        ) : (
-                                            <>
-                                                <div className={s.uploadIconWrap}><Upload size={22} /></div>
-                                                <div className={s.uploadTitle}>Drop thyroid scan here</div>
-                                                <div className={s.uploadSub}>PNG, JPG, DICOM — max 20 MB</div>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        )}
-
-                        {/* Lab Values — lab mode */}
-                        {inputMode === 'lab' && (
-                        <div className={s.card} style={{ marginBottom: 16 }}>
-                            <div className={s.cardHead}>
-                                <div className={s.cardIcon} style={{ background: 'linear-gradient(135deg,#7c3aed,#6d28d9)' }}>
-                                    <FlaskConical size={18} color="white" />
-                                </div>
-                                <span className={s.cardTitle}>Lab Values</span>
-                                <span className={s.scanTypePill} style={{ background: '#F5F3FF', color: '#7C3AED', borderColor: '#DDD6FE' }}>
-                                    Thyroid Panel
-                                </span>
-                            </div>
-                            <div className={s.cardBody}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                                    {([
-                                        { key: 'tsh',  label: 'TSH',  unit: 'mIU/L'  },
-                                        { key: 't3',   label: 'T3',   unit: 'nmol/L' },
-                                        { key: 'tt4',  label: 'TT4',  unit: 'nmol/L' },
-                                        { key: 't4u',  label: 'T4U',  unit: 'ratio'  },
-                                        { key: 'fti',  label: 'FTI',  unit: 'index'  },
-                                        { key: 'age',  label: 'Age',  unit: 'years'  },
-                                    ] as const).map(({ key, label, unit }) => (
-                                        <div key={key} className={s.fieldGroup} style={{ marginBottom: 0 }}>
-                                            <label className={s.fieldLabel}>
-                                                {label} <span className={s.fieldOptional}>({unit})</span>
-                                            </label>
-                                            <input
-                                                className={s.fieldInput}
-                                                type="number"
-                                                placeholder={`Enter ${label}...`}
-                                                value={lab[key]}
-                                                onChange={e => setLab(prev => ({ ...prev, [key]: e.target.value }))}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className={s.fieldGroup} style={{ marginTop: 12, marginBottom: 0 }}>
-                                    <label className={s.fieldLabel}>Sex</label>
-                                    <div style={{ display: 'flex', gap: 10 }}>
-                                        {(['female', 'male'] as const).map(sex => (
-                                            <button
-                                                key={sex}
-                                                type="button"
-                                                onClick={() => setLab(prev => ({ ...prev, sex }))}
-                                                style={{
-                                                    flex: 1, padding: '8px 0', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                                                    background: lab.sex === sex ? '#7c3aed' : '#f8fafc',
-                                                    color: lab.sex === sex ? '#fff' : '#64748b',
-                                                    border: lab.sex === sex ? '1.5px solid #7c3aed' : '1.5px solid #e2e8f0',
-                                                    textTransform: 'capitalize',
-                                                }}
+                                <div className={s.fieldGroup}>
+                                    <label className={s.fieldLabel}>Diagnosis Mode</label>
+                                    <div className={s.modeGrid}>
+                                        {([
+                                            { v: 'image', icon: <Upload size={13} />,      label: 'Image Only'  },
+                                            { v: 'lab',   icon: <FlaskConical size={13} />, label: 'Lab Only'    },
+                                            { v: 'both',  icon: <Zap size={13} />,          label: 'Both (Best)' },
+                                        ] as const).map(m => (
+                                            <button key={m.v}
+                                                    className={`${s.typeBtn} ${inputMode === m.v ? s.typeBtnActive : ''}`}
+                                                    style={inputMode === m.v ? (
+                                                        m.v === 'both'  ? { background: '#EEF2FF', borderColor: '#C7D2FE', color: '#4F46E5' } :
+                                                        m.v === 'image' ? { background: '#F0F9FF', borderColor: '#BAE6FD', color: '#0891B2' } :
+                                                                          { background: '#F0FDFA', borderColor: '#99F6E4', color: '#0D9488' }
+                                                    ) : {}}
+                                                    onClick={() => setInputMode(m.v)}
                                             >
-                                                {sex}
+                                                {inputMode === m.v && <Check size={11} />}
+                                                {m.icon}{m.label}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
+
+                                {(inputMode === 'image' || inputMode === 'both') && (
+                                    <div className={s.fieldGroup}>
+                                        <label className={s.fieldLabel}>
+                                            Medical Scan <span className={s.fieldOptional}>(Ultrasound / CT)</span>
+                                        </label>
+                                        <div
+                                            className={`${s.uploadZone} ${dragOver ? s.dragOver : ''}`}
+                                            style={imagePreview ? { padding: '12px' } : {}}
+                                            onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                                            onDragLeave={() => setDragOver(false)}
+                                            onDrop={handleDrop}
+                                            onClick={() => fileRef.current?.click()}
+                                        >
+                                            <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
+                                                   onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+                                            {imagePreview ? (
+                                                <>
+                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                    <img src={imagePreview} className={s.previewThumb} alt="Scan preview" />
+                                                    <div className={s.fileName}>{imageFile?.name}</div>
+                                                    {imageFile && <div className={s.fileSize}>{fmtSize(imageFile.size)}</div>}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className={s.uploadIconWrap}><Upload size={22} /></div>
+                                                    <div className={s.uploadTitle}>Drop thyroid scan here</div>
+                                                    <div className={s.uploadSub}>PNG, JPG, DICOM — max 20 MB</div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {(inputMode === 'lab' || inputMode === 'both') && (
+                                    <div className={s.fieldGroup} style={{ marginBottom: 0 }}>
+                                        <label className={s.fieldLabel}>Lab Results</label>
+                                        <div className={s.labGrid}>
+                                            {([
+                                                { k: 'tsh', label: 'TSH', unit: 'mIU/L',  normal: '0.4–4.0' },
+                                                { k: 't3',  label: 'T3',  unit: 'nmol/L', normal: '1.2–2.8' },
+                                                { k: 'tt4', label: 'TT4', unit: 'nmol/L', normal: '60–150'  },
+                                                { k: 't4u', label: 'T4U', unit: 'ratio',  normal: '0.8–1.1' },
+                                                { k: 'fti', label: 'FTI', unit: 'index',  normal: '55–160'  },
+                                                { k: 'age', label: 'Age', unit: 'yrs',    normal: ''        },
+                                            ] as const).map(({ k, label, unit, normal }) => (
+                                                <div key={k} className={s.labCell}>
+                                                    <div className={s.labCellHeader}>
+                                                        <span className={s.labCellLabel}>{label}</span>
+                                                        {normal && <span className={s.labCellNormal}>{normal}</span>}
+                                                    </div>
+                                                    <div className={s.labCellInputWrap}>
+                                                        <input
+                                                            type="number" placeholder="—"
+                                                            value={lab[k]}
+                                                            onChange={e => setLab(prev => ({ ...prev, [k]: e.target.value }))}
+                                                            className={s.labCellInput}
+                                                        />
+                                                        <span className={s.labCellUnit}>{unit}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className={s.sexRow}>
+                                            <span className={s.fieldLabel} style={{ margin: 0 }}>Sex</span>
+                                            <div className={s.sexBtns}>
+                                                {(['female', 'male'] as const).map(sx => (
+                                                    <button key={sx}
+                                                            className={`${s.typeBtn} ${lab.sex === sx ? s.typeBtnActive : ''}`}
+                                                            style={lab.sex === sx
+                                                                ? { background: '#F0FDFA', borderColor: '#99F6E4', color: '#0D9488' }
+                                                                : {}}
+                                                            onClick={() => setLab(p => ({ ...p, sex: sx }))}
+                                                    >
+                                                        {lab.sex === sx && <Check size={11} />}
+                                                        {sx === 'female' ? '♀ Female' : '♂ Male'}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
-                        )}
 
                         {/* Run button */}
                         <button
