@@ -145,6 +145,8 @@ export default function AIDiagnosisPage() {
         tsh: '', t3: '', tt4: '', t4u: '', fti: '', age: '', sex: 'female',
     });
 
+    const [selectedModel, setSelectedModel] = useState<string>('majority');
+
     const timerIds = useRef<ReturnType<typeof setTimeout>[]>([]);
 
     // Fetch patients list + auth guard
@@ -189,6 +191,13 @@ export default function AIDiagnosisPage() {
         [{ t: 15, d: 400 }, { t: 50, d: 1200 }, { t: 85, d: 2500 }]
             .forEach(({ t, d }) => { timerIds.current.push(setTimeout(() => setProgress(t), d)); });
     };
+
+    const modelOptions: { value: string; label: string }[] =
+        inputMode === 'image'
+            ? [{ value: 'EfficientNet+YOLO', label: 'EfficientNet' }, { value: 'Swin Transformer', label: 'Swin' }, { value: 'DenseNet-121', label: 'DenseNet' }]
+            : inputMode === 'lab'
+            ? [{ value: 'XGBoost', label: 'XGBoost' }, { value: 'CatBoost', label: 'CatBoost' }, { value: 'Random Forest', label: 'Rand Forest' }]
+            : [];
 
     const hasInput =
         inputMode === 'image' ? !!imageFile :
@@ -247,11 +256,10 @@ export default function AIDiagnosisPage() {
                         available: !!(denseResult),
                     },
                 ];
-                const votingResult     = data.diagnosis;
-                const votingConfidence = Math.round(data.confidence);
-                const malignancyScore  = data.diagnosis === 'Malignant'
-                    ? Math.round(data.confidence)
-                    : Math.round(100 - data.confidence);
+                const chosenImgModel   = selectedModel !== 'majority' ? topModels.find(m => m.name === selectedModel) : null;
+                const votingResult     = chosenImgModel?.result ?? data.diagnosis;
+                const votingConfidence = chosenImgModel?.confidence ?? Math.round(data.confidence);
+                const malignancyScore  = votingResult === 'Malignant' ? votingConfidence : Math.round(100 - votingConfidence);
                 const severity: Severity = data.severity === 'high' ? 'High' : 'Low';
 
                 diagResult = {
@@ -281,30 +289,32 @@ export default function AIDiagnosisPage() {
                 if (!res.ok || !data.success) throw new Error(data.error ?? 'Lab prediction failed');
 
                 console.log('LAB RESPONSE:', JSON.stringify(data));
+                console.log('LAB DATA:', JSON.stringify(data));
 
                 const severityMap: Record<string, Severity> = { high: 'High', medium: 'Moderate', low: 'Low' };
                 const topModels: ModelResult[] = [
                     {
                         name: 'XGBoost',
-                        result: data.models?.XGBoost?.result ?? data.diagnosis,
-                        confidence: Math.round(data.models?.XGBoost?.confidence ?? data.confidence),
+                        result: data.models?.['XGBoost']?.result ?? data.models?.XGBoost?.result ?? data.diagnosis,
+                        confidence: Math.round(data.models?.['XGBoost']?.confidence ?? data.models?.XGBoost?.confidence ?? 0),
                         available: true,
                     },
                     {
                         name: 'CatBoost',
-                        result: data.models?.CatBoost?.result ?? data.diagnosis,
-                        confidence: Math.round(data.models?.CatBoost?.confidence ?? data.confidence),
+                        result: data.models?.['CatBoost']?.result ?? data.models?.CatBoost?.result ?? data.diagnosis,
+                        confidence: Math.round(data.models?.['CatBoost']?.confidence ?? data.models?.CatBoost?.confidence ?? 0),
                         available: true,
                     },
                     {
                         name: 'Random Forest',
                         result: data.models?.['Random Forest']?.result ?? data.diagnosis,
-                        confidence: Math.round(data.models?.['Random Forest']?.confidence ?? data.confidence),
+                        confidence: Math.round(data.models?.['Random Forest']?.confidence ?? 0),
                         available: true,
                     },
                 ];
-                const votingResult     = data.majority_result ?? data.diagnosis;
-                const votingConfidence = Math.round(data.confidence);
+                const chosenLabModel   = selectedModel !== 'majority' ? topModels.find(m => m.name === selectedModel) : null;
+                const votingResult     = chosenLabModel?.result ?? (data.majority_result ?? data.diagnosis);
+                const votingConfidence = chosenLabModel?.confidence ?? Math.round(data.confidence);
 
                 diagResult = {
                     malignancyScore : votingConfidence,
@@ -426,6 +436,7 @@ export default function AIDiagnosisPage() {
         setStage('idle'); setResult(null); setError('');
         setImageFile(null); setImagePreview(''); setProgress(0); setSavedOk(false);
         setLab({ tsh: '', t3: '', tt4: '', t4u: '', fti: '', age: '', sex: 'female' });
+        setSelectedModel('majority');
     };
 
     const isRunning = stage === 'uploading' || stage === 'analyzing';
@@ -549,7 +560,7 @@ export default function AIDiagnosisPage() {
                                                         m.v === 'image' ? { background: '#F0F9FF', borderColor: '#BAE6FD', color: '#0891B2' } :
                                                                           { background: '#F0FDFA', borderColor: '#99F6E4', color: '#0D9488' }
                                                     ) : {}}
-                                                    onClick={() => setInputMode(m.v)}
+                                                    onClick={() => { setInputMode(m.v); setSelectedModel('majority'); }}
                                             >
                                                 {inputMode === m.v && <Check size={11} />}
                                                 {m.icon}{m.label}
@@ -557,6 +568,32 @@ export default function AIDiagnosisPage() {
                                         ))}
                                     </div>
                                 </div>
+
+                                {inputMode !== 'both' && (
+                                    <div className={s.fieldGroup}>
+                                        <label className={s.fieldLabel}>Model Selection</label>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                                            <button
+                                                className={`${s.typeBtn} ${selectedModel === 'majority' ? s.typeBtnActive : ''}`}
+                                                style={selectedModel === 'majority' ? { background: '#EEF2FF', borderColor: '#C7D2FE', color: '#4F46E5' } : {}}
+                                                onClick={() => setSelectedModel('majority')}
+                                            >
+                                                {selectedModel === 'majority' && <Check size={11} />}
+                                                <Zap size={12} />Majority Voting
+                                            </button>
+                                            {modelOptions.map(opt => (
+                                                <button key={opt.value}
+                                                    className={`${s.typeBtn} ${selectedModel === opt.value ? s.typeBtnActive : ''}`}
+                                                    style={selectedModel === opt.value ? { background: '#F0FDFA', borderColor: '#99F6E4', color: '#0D9488' } : {}}
+                                                    onClick={() => setSelectedModel(opt.value)}
+                                                >
+                                                    {selectedModel === opt.value && <Check size={11} />}
+                                                    {opt.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {(inputMode === 'image' || inputMode === 'both') && (
                                     <div className={s.fieldGroup}>
