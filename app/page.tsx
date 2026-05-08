@@ -51,36 +51,47 @@ const IconUpload = () => (
         <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
     </svg>
 );
+const IconFileText = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+    </svg>
+);
 
 const features = [
-    { icon: <IconLayers />, title: 'Ensemble Architecture', desc: 'Three models vote on every prediction — Swin Transformer, DenseNet-121, and EfficientNet+YOLO reach consensus before returning a result' },
-    { icon: <IconZap />, title: 'Real-Time Inference', desc: 'Sub-2-second analysis pipeline from scan upload to majority-voted diagnosis, optimized for clinical workflow' },
-    { icon: <IconImage />, title: 'Image Enhancement', desc: 'CLAHE preprocessing sharpens and normalizes ultrasound scans before feeding them into the inference pipeline' },
-    { icon: <IconBarChart />, title: 'Lab-Based Diagnosis', desc: '16 thyroid biomarkers (TSH, T3, TT4, T4U, FTI and more) power gradient-boosted ensemble classifiers' },
+    { icon: <IconLayers />, title: 'Ensemble Architecture', desc: 'Three vision models and three lab models vote independently — reaching consensus before returning any result to the clinician.' },
+    { icon: <IconZap />, title: 'Real-Time Inference', desc: 'Sub-second analysis pipeline from scan upload to majority-voted diagnosis, fully optimized for clinical workflow speed.' },
+    { icon: <IconImage />, title: 'Image Enhancement', desc: 'CLAHE preprocessing sharpens and normalizes thyroid ultrasound scans before feeding them into the vision inference pipeline.' },
+    { icon: <IconBarChart />, title: 'Lab-Based Diagnosis', desc: '16 thyroid biomarkers — TSH, T3, TT4, T4U, FTI and more — power an XGBoost + CatBoost + Random Forest ensemble.' },
+    { icon: <IconFileText />, title: 'Report Generation', desc: 'Structured clinical reports with confidence scores, majority-vote breakdown, and annotated findings — ready for physician review.' },
 ];
 
 const models = [
-    {
-        name: 'Swin Transformer',
-        dark: false,
-        badge: null,
-        desc: 'Vision transformer capturing long-range spatial dependencies in ultrasound images',
-        detail: 'Attention-based architecture with shifted window partitioning for hierarchical feature extraction.',
-    },
-    {
-        name: 'DenseNet-121',
-        dark: true,
-        badge: 'FEATURED',
-        desc: 'Dense skip connections preserve fine-grained diagnostic features across 121 layers',
-        detail: 'Achieves 97.4% validation accuracy on thyroid nodule classification benchmarks.',
-    },
-    {
-        name: 'EfficientNet + YOLO',
-        dark: false,
-        badge: null,
-        desc: 'Dual-purpose detection and classification pipeline with nodule localization',
-        detail: 'Simultaneously localizes and classifies thyroid nodules in a single forward pass.',
-    },
+    /* IMAGE PIPELINE */
+    { name: 'Swin Transformer', category: 'Image', dark: false, badge: null,
+      acc: '96.85%', auc: '0.9939',
+      desc: 'Vision transformer capturing long-range spatial dependencies in thyroid ultrasound images via shifted window attention.',
+      detail: 'swin_base_patch4_window7_224 — weights from HuggingFace (iimvbii/diagnovate-models)' },
+    { name: 'DenseNet-121', category: 'Image', dark: true, badge: 'HIGHEST ACCURACY',
+      acc: '97.64%', auc: '0.9979',
+      desc: 'Dense skip connections preserve fine-grained diagnostic features across 121 layers for superior nodule classification.',
+      detail: 'densenet121_thyroid_v2_BEST.pth — 97.64% accuracy, AUC 0.9979' },
+    { name: 'EfficientNet-B4', category: 'Image', dark: false, badge: null,
+      acc: '96.85%', auc: '0.993',
+      desc: 'Compound-scaled efficient architecture for accurate thyroid image classification with minimal computational overhead.',
+      detail: 'efficientnet_b4 via timm — CPU-optimized for reliable production inference' },
+    /* LAB PIPELINE */
+    { name: 'XGBoost', category: 'Lab', dark: false, badge: 'PRIMARY',
+      desc: 'Gradient-boosted trees trained on 16 thyroid biomarkers — primary classifier in the lab ensemble.',
+      detail: 'Handles TSH, T3, TT4, T4U, FTI and 11 additional biomarkers with feature importance ranking.' },
+    { name: 'CatBoost', category: 'Lab', dark: false, badge: null,
+      desc: 'Categorical boosting algorithm providing robust predictions across diverse thyroid lab panels.',
+      detail: 'Gradient boosting with ordered boosting and oblivious trees for stable lab predictions.' },
+    { name: 'Random Forest', category: 'Lab', dark: false, badge: null,
+      desc: 'Ensemble of decision trees delivering reliable majority-voted predictions from thyroid biomarker data.',
+      detail: 'Handles missing biomarker values gracefully with probabilistic soft voting.' },
 ];
 
 const steps = [
@@ -145,7 +156,7 @@ export default function HomePage() {
                 .pub-features-inner { max-width: 1200px; margin: 0 auto; }
                 .pub-sec-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: #1D9E75; text-align: center; margin-bottom: 12px; }
                 .pub-sec-h2 { font-family: var(--font-dm-serif, serif); font-size: clamp(32px, 3.5vw, 46px); font-weight: 400; text-align: center; color: #0D1B17; letter-spacing: -0.5px; margin-bottom: 56px; }
-                .pub-feat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+                .pub-feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
                 .pub-feat-card { background: #fff; border: 1px solid #E1F5EE; border-top: 3px solid transparent; border-radius: 16px; padding: 28px; transition: all 0.22s; cursor: default; }
                 .pub-feat-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(29,158,117,0.1); border-top-color: #1D9E75; border-color: #C5D6D0; }
                 .pub-feat-icon { width: 48px; height: 48px; border-radius: 12px; background: #E1F5EE; display: flex; align-items: center; justify-content: center; color: #1D9E75; margin-bottom: 18px; }
@@ -159,8 +170,8 @@ export default function HomePage() {
                 .pub-model-card { border-radius: 20px; padding: 32px; position: relative; transition: all 0.22s; }
                 .pub-model-card-light { background: #fff; border: 1px solid #C5D6D0; }
                 .pub-model-card-light:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(29,158,117,0.1); }
-                .pub-model-card-dark { background: #0D1B17; border: 1px solid rgba(29,158,117,0.4); box-shadow: 0 0 0 1px rgba(29,158,117,0.15), 0 24px 64px rgba(13,27,23,0.4); }
-                .pub-model-badge { position: absolute; top: 20px; right: 20px; background: #1D9E75; color: #fff; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; padding: 4px 10px; border-radius: 6px; }
+                .pub-model-card-dark { background: linear-gradient(135deg, #0F6E56 0%, #085041 60%, #0D1B17 100%); border: 1.5px solid rgba(93,202,165,0.35); box-shadow: 0 0 0 1px rgba(29,158,117,0.1), 0 24px 64px rgba(13,27,23,0.3), inset 0 1px 0 rgba(93,202,165,0.15); overflow: hidden; }
+                .pub-model-badge { display: inline-block; background: rgba(93,202,165,0.15); border: 1px solid rgba(93,202,165,0.4); color: #5DCAA5; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; padding: 5px 12px; border-radius: 100px; margin-bottom: 14px; }
                 .pub-model-name-light { font-family: var(--font-dm-serif, serif); font-size: 22px; color: #0D1B17; margin-bottom: 12px; }
                 .pub-model-name-dark { font-family: var(--font-dm-serif, serif); font-size: 22px; color: #fff; margin-bottom: 12px; }
                 .pub-model-desc-light { font-size: 14px; color: #8A9E97; line-height: 1.65; margin-bottom: 16px; }
@@ -235,15 +246,33 @@ export default function HomePage() {
                     <div>
                         <div className="pub-hero-badge">
                             <span className="pub-hero-dot" />
-                            AI-POWERED DIAGNOSTICS
+                            CLINICAL DECISION SUPPORT · AI
                         </div>
-                        <h1 className="pub-hero-h1">{'Precision Diagnosis.\nPowered by Deep Learning.'}</h1>
+                        <h1 className="pub-hero-h1">
+                          Where Clinical Precision<br/>
+                          <em style={{ color: '#1D9E75', fontStyle: 'italic' }}>Meets Artificial Intelligence.</em>
+                        </h1>
                         <p className="pub-hero-p">
-                            Diagnovate combines ensemble deep learning with clinical-grade thyroid scan analysis — delivering majority-voted predictions in under 2 seconds.
+                            Diagnovate harnesses ensemble deep learning to analyze thyroid ultrasound scans — delivering majority-voted, clinician-ready diagnoses that support and empower physician decision-making.
                         </p>
                         <div className="pub-hero-btns">
                             <Link href="/contact" className="pub-btn-solid">Request Access</Link>
                             <Link href="/about" className="pub-btn-ghost-white">Learn More</Link>
+                        </div>
+                        <div style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          marginTop: 32, padding: '14px 20px',
+                          background: 'rgba(29,158,117,0.08)',
+                          border: '1px solid rgba(29,158,117,0.2)',
+                          borderRadius: 12, maxWidth: 420
+                        }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                          </svg>
+                          <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                            <strong style={{ color: '#5DCAA5', fontWeight: 600 }}>Designed to assist, not replace.</strong>{' '}
+                            Diagnovate supports clinical judgment — every result is a second opinion, not a final verdict.
+                          </span>
                         </div>
                     </div>
 
@@ -331,10 +360,10 @@ export default function HomePage() {
             <div className="pub-stats-bar">
                 <div className="pub-stats-inner">
                     {[
-                        { num: '4', lbl: 'Core Capabilities' },
+                        { num: '5', lbl: 'Core Capabilities' },
                         { num: '9', lbl: 'AI Models' },
-                        { num: '97%+', lbl: 'Accuracy Rate' },
-                        { num: '<2s', lbl: 'Inference Time' },
+                        { num: '97.6%', lbl: 'Peak Accuracy' },
+                        { num: '16', lbl: 'Thyroid Biomarkers' },
                     ].map(s => (
                         <div key={s.lbl} className="pub-stat">
                             <div className="pub-stat-num">{s.num}</div>
@@ -348,7 +377,7 @@ export default function HomePage() {
             <section className="pub-features">
                 <div className="pub-features-inner">
                     <div className="pub-sec-eyebrow">Capabilities</div>
-                    <h2 className="pub-sec-h2">Built for Clinical Precision</h2>
+                    <h2 className="pub-sec-h2">Everything You Need for Thyroid Diagnostics</h2>
                     <div className="pub-feat-grid">
                         {features.map(f => (
                             <div key={f.title} className="pub-feat-card">
@@ -363,23 +392,103 @@ export default function HomePage() {
 
             {/* ── AI MODELS ─────────────────────────────────────────────── */}
             <section className="pub-models">
-                <div className="pub-models-inner">
-                    <div className="pub-sec-eyebrow">Ensemble Intelligence</div>
-                    <h2 className="pub-sec-h2">Three Models. One Verdict.</h2>
-                    <div className="pub-models-grid">
-                        {models.map(m => (
-                            <div
-                                key={m.name}
-                                className={`pub-model-card ${m.dark ? 'pub-model-card-dark' : 'pub-model-card-light'}`}
-                            >
-                                {m.badge && <span className="pub-model-badge">{m.badge}</span>}
-                                <div className={m.dark ? 'pub-model-name-dark' : 'pub-model-name-light'}>{m.name}</div>
-                                <div className={m.dark ? 'pub-model-desc-dark' : 'pub-model-desc-light'}>{m.desc}</div>
-                                <div className={m.dark ? 'pub-model-detail-dark' : 'pub-model-detail-light'}>{m.detail}</div>
+              <div className="pub-models-inner">
+                <div className="pub-sec-eyebrow">Ensemble Intelligence</div>
+                <h2 className="pub-sec-h2">Nine Models. Two Pipelines. One Verdict.</h2>
+
+                {/* IMAGE PIPELINE */}
+                <div style={{ marginTop: 48 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#1D9E75', flexShrink: 0 }} />
+                    <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', color: '#1D9E75' }}>
+                      Ultrasound Image Pipeline
+                    </span>
+                    <div style={{ flex: 1, height: 1, background: 'rgba(29,158,117,0.2)' }} />
+                    <span style={{ fontSize: 11, color: '#8A9E97', whiteSpace: 'nowrap' }}>3 Vision Models</span>
+                  </div>
+                  <div className="pub-models-grid">
+                    {models.filter(m => m.category === 'Image').map(m => (
+                      <div key={m.name} className={`pub-model-card ${m.dark ? 'pub-model-card-dark' : 'pub-model-card-light'}`}
+                        style={m.dark ? { position: 'relative', overflow: 'hidden' } : {}}>
+                        {m.dark && (
+                          <div style={{ position: 'absolute', width: 200, height: 200, borderRadius: '50%',
+                            background: 'radial-gradient(circle, rgba(29,158,117,0.25) 0%, transparent 70%)',
+                            top: -60, right: -60, pointerEvents: 'none', zIndex: 0 }} />
+                        )}
+                        {m.badge && <span className="pub-model-badge">{m.badge}</span>}
+                        <div style={{ position: 'relative', zIndex: 1 }}>
+                          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase',
+                            color: m.dark ? 'rgba(93,202,165,0.7)' : '#8A9E97', marginBottom: 8 }}>Vision Model</div>
+                          <div className={m.dark ? 'pub-model-name-dark' : 'pub-model-name-light'}>{m.name}</div>
+                          <div className={m.dark ? 'pub-model-desc-dark' : 'pub-model-desc-light'}>{m.desc}</div>
+                          {m.acc && (
+                            <div style={{ display: 'flex', gap: 16, margin: '14px 0',
+                              padding: '10px 14px', borderRadius: 8,
+                              background: m.dark ? 'rgba(29,158,117,0.12)' : '#F4F9F7' }}>
+                              <div>
+                                <div style={{ fontSize: 18, fontFamily: 'var(--font-dm-serif, serif)',
+                                  color: m.dark ? '#5DCAA5' : '#1D9E75' }}>{m.acc}</div>
+                                <div style={{ fontSize: 10, color: m.dark ? 'rgba(255,255,255,0.4)' : '#8A9E97', letterSpacing: 0.5 }}>Accuracy</div>
+                              </div>
+                              <div style={{ width: 1, background: m.dark ? 'rgba(255,255,255,0.1)' : '#E1F5EE' }} />
+                              <div>
+                                <div style={{ fontSize: 18, fontFamily: 'var(--font-dm-serif, serif)',
+                                  color: m.dark ? '#5DCAA5' : '#1D9E75' }}>{m.auc}</div>
+                                <div style={{ fontSize: 10, color: m.dark ? 'rgba(255,255,255,0.4)' : '#8A9E97', letterSpacing: 0.5 }}>AUC Score</div>
+                              </div>
                             </div>
-                        ))}
-                    </div>
+                          )}
+                          <div className={m.dark ? 'pub-model-detail-dark' : 'pub-model-detail-light'}>{m.detail}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
+                {/* LAB PIPELINE */}
+                <div style={{ marginTop: 48 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#1D9E75', flexShrink: 0 }} />
+                    <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', color: '#1D9E75' }}>
+                      Lab Results Pipeline
+                    </span>
+                    <div style={{ flex: 1, height: 1, background: 'rgba(29,158,117,0.2)' }} />
+                    <span style={{ fontSize: 11, color: '#8A9E97', whiteSpace: 'nowrap' }}>3 ML Models</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+                    {models.filter(m => m.category === 'Lab').map(m => (
+                      <div key={m.name} className="pub-model-card pub-model-card-light">
+                        {m.badge && <span className="pub-model-badge" style={{
+                          background: 'rgba(29,158,117,0.1)', border: '1px solid rgba(29,158,117,0.3)',
+                          color: '#0F6E56', borderRadius: 100 }}>{m.badge}</span>}
+                        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5,
+                          textTransform: 'uppercase', color: '#8A9E97', marginBottom: 8,
+                          marginTop: m.badge ? 8 : 0 }}>Lab Model</div>
+                        <div className="pub-model-name-light">{m.name}</div>
+                        <div className="pub-model-desc-light">{m.desc}</div>
+                        <div className="pub-model-detail-light">{m.detail}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ADDITIONAL MODELS NOTE */}
+                <div style={{ marginTop: 32, padding: '16px 24px', background: '#fff',
+                  border: '1px solid #E1F5EE', borderRadius: 12,
+                  display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {['Enhancement', 'Auto-Select', 'Report'].map(tag => (
+                      <span key={tag} style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1,
+                        textTransform: 'uppercase', padding: '4px 12px', borderRadius: 100,
+                        background: '#E1F5EE', color: '#0F6E56' }}>{tag}</span>
+                    ))}
+                  </div>
+                  <div style={{ width: 1, height: 28, background: '#E1F5EE' }} />
+                  <span style={{ fontSize: 13, color: '#8A9E97', lineHeight: 1.5 }}>
+                    Plus dedicated models for image enhancement, automatic pipeline selection, and structured report generation.
+                  </span>
+                </div>
+              </div>
             </section>
 
             {/* ── HOW IT WORKS ──────────────────────────────────────────── */}
@@ -441,7 +550,7 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* ── FOOTER ────────────────────────────────────────────────── */}
+             {/* ── FOOTER ────────────────────────────────────────────────── */}
             <footer className="pub-footer">
                 <div className="pub-footer-inner">
                     {/* Col 1: Brand */}
