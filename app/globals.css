@@ -219,13 +219,7 @@ a           { color: inherit; }
 .dv-btn-danger:hover { background: var(--red); color: white; border-color: var(--red); }
 
 /* ─── Input ──────────────────────────────────────────────── */
-.dv-input {
-  width: 100%; height: 46px;
-  background: var(--surface2); border: 1.5px solid var(--border);
-  border-radius: var(--r-md); padding: 0 14px;
-  font-family: var(--font-body); font-size: 14px; color: var(--text);
-  outline: none; transition: all 0.2s;
-}
+.dv-input { width: 100%; height: 50px; background: white; border: 1.5px solid #D1E5DC; border-radius: 13px; padding: 0 44px 0 42px; font-family: var(--font-body); font-size: 14.5px; color: #0F172A; outline: none; transition: all 0.2s; appearance: none; box-shadow: 0 1px 4px rgba(15,23,42,0.04); }
 .dv-input::placeholder { color: var(--subtle); }
 .dv-input:focus {
   border-color: var(--teal); background: white;
@@ -741,7 +735,7 @@ a           { color: inherit; }
   padding: 16px 52px 48px;
   position: relative; z-index: 1;
 }
-.auth-form-inner { width: 100%; max-width: 400px; }
+.auth-form-inner { background: white; border-radius: 20px; padding: 48px; border: 1px solid rgba(29,158,117,0.1); box-shadow: 0 8px 48px rgba(13,27,23,0.08), 0 2px 8px rgba(13,27,23,0.04); width: 100%; max-width: 440px; animation: fadeUp 0.5s ease both; }
 
 /* slide-in animation when switching steps */
 .auth-slide-in { animation: slideIn .32s cubic-bezier(.16,1,.3,1) both; }
@@ -783,11 +777,7 @@ a           { color: inherit; }
   color: var(--subtle); pointer-events: none; display: flex; z-index: 1;
 }
 /* base input overrides for auth (adds left padding for icon) */
-.auth-iw .dv-input {
-  height: 50px; padding-left: 42px;
-  border-radius: 13px; font-size: 14.5px;
-  box-shadow: 0 1px 4px rgba(15,23,42,.04);
-}
+.auth-iw .dv-input { width: 100%; height: 50px; background: white; border: 1.5px solid #D1E5DC; border-radius: 13px; padding: 0 44px 0 42px; font-family: var(--font-body); font-size: 14.5px; color: #0F172A; outline: none; transition: all 0.2s; appearance: none; box-shadow: 0 1px 4px rgba(15,23,42,0.04); }
 .auth-iw .dv-input--pw { padding-right: 46px; }
 
 /* eye toggle */
@@ -923,7 +913,7 @@ a           { color: inherit; }
 ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 960px) {
   .auth-page { grid-template-columns: 1fr; }
-  .auth-left { display: none; }
+  
   .auth-right::before { width: 100%; }
   .auth-form-area    { padding: 16px 32px 44px; }
   .auth-right__nav   { padding: 16px 32px; }
@@ -1291,3 +1281,6 @@ a           { color: inherit; }
   .verify-code-row  { gap: 7px; }
   .acard-path__line { max-width: 28px; }
 }
+
+
+
