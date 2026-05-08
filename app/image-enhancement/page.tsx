@@ -194,7 +194,7 @@ export default function ImageEnhancementPage() {
                         {/* Patient & Scan Info */}
                         <div className={s.card} style={{ marginBottom: 16 }}>
                             <div className={s.cardHead}>
-                                <div className={s.cardIcon} style={{ background: 'linear-gradient(135deg,#334155,#475569)' }}>
+                                <div className={s.cardIcon} style={{ background: 'linear-gradient(135deg,#0F766E,#0D9488)' }}>
                                     <User size={18} color="white" />
                                 </div>
                                 <span className={s.cardTitle}>Patient & Scan Info</span>
@@ -256,7 +256,7 @@ export default function ImageEnhancementPage() {
                                         {SCAN_TYPES.map(t => (
                                             <button key={t.value}
                                                     className={`${s.typeBtn} ${scanType === t.value ? s.typeBtnActive : ''}`}
-                                                    style={scanType === t.value ? { background: t.bg, borderColor: t.border, color: t.color } : {}}
+                                                    style={scanType === t.value ? { background: 'white', borderColor: '#0D9488', color: '#0D9488', borderWidth: '2px' } : {}}
                                                     onClick={() => setScanType(t.value)}>
                                                 {scanType === t.value && <Check size={12} />}
                                                 {t.value}

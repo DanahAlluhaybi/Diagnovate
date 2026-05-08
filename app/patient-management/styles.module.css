@@ -98,9 +98,9 @@
     flex-direction: column;
     align-items: center;
     gap: 3px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
     padding: 10px 16px;
     min-width: 72px;
     transition: all .2s;
@@ -109,8 +109,8 @@
     border-color: var(--teal-ring);
     background: var(--teal-light);
 }
-.metaLabel { font-size: 10px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--subtle); }
-.metaVal   { font-size: 15px; font-weight: 800; color: var(--text); font-family: var(--font-display); }
+.metaLabel { font-size: 11.2px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: #94A3B8; }
+.metaVal   { font-size: 15px; font-weight: 700; color: #0F172A; }
 
 /* ══════════════════════════════════════════
    TAB BAR
@@ -268,7 +268,7 @@
     cursor: pointer;
     transition: background .15s;
 }
-.tableRow:hover { background: #f0fdfa; }
+.tableRow:hover { background: #F8FAFC; }
 .tableRow td { padding: 14px 16px; font-size: 13.5px; }
 
 .patientCell { display: flex; align-items: center; gap: 11px; }

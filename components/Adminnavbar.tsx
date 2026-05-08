@@ -62,8 +62,11 @@ export default function AdminNavbar({ pendingCount = 0 }: { pendingCount?: numbe
                             borderRadius:16, display:'flex', alignItems:'center', justifyContent:'center',
                             boxShadow:'0 8px 24px rgba(13,148,136,.3)', marginBottom:24
                         }}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white"/>
+                            <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+                                <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5"/>
+                                    <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                                    <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                                    <circle cx="20" cy="20" r="3.5" fill="white"/>
                             </svg>
                         </div>
                         <div style={{ width:36, height:36, border:'3px solid #F0FDFA', borderTop:'3px solid #0D9488', borderRadius:'50%', animation:'spin 0.75s linear infinite', marginBottom:20 }}/>
@@ -96,8 +99,11 @@ export default function AdminNavbar({ pendingCount = 0 }: { pendingCount?: numbe
                                 display:'flex', alignItems:'center', justifyContent:'center',
                                 boxShadow:'0 6px 18px rgba(13,148,136,0.35), inset 0 1px 0 rgba(255,255,255,0.2)'
                             }}>
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                                    <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white"/>
+                                <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
+                                    <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5"/>
+                                    <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                                    <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                                    <circle cx="20" cy="20" r="3.5" fill="white"/>
                                 </svg>
                             </div>
                             <span style={{
@@ -202,7 +208,7 @@ export default function AdminNavbar({ pendingCount = 0 }: { pendingCount?: numbe
                                     background:'linear-gradient(135deg,#0D9488,#7C3AED)',
                                     display:'flex', alignItems:'center', justifyContent:'center'
                                 }}>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <svg width="16" height="16" viewBox="0 0 40 40" fill="none">
                                         <circle cx="12" cy="8" r="4" fill="white"/>
                                         <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
                                     </svg>
@@ -229,7 +235,7 @@ export default function AdminNavbar({ pendingCount = 0 }: { pendingCount?: numbe
                                                 background:'linear-gradient(135deg,#0D9488,#7C3AED)',
                                                 display:'flex', alignItems:'center', justifyContent:'center'
                                             }}>
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                                <svg width="18" height="18" viewBox="0 0 40 40" fill="none">
                                                     <circle cx="12" cy="8" r="4" fill="white"/>
                                                     <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
                                                 </svg>

@@ -27,8 +27,8 @@ const team = [
 ];
 
 function StackIcon({ name }: { name: string }) {
-    const teal = '#1D9E75';
-    const ink  = '#0D1B17';
+    const teal = '#0D9488';
+    const ink  = '#0F172A';
     switch (name) {
         case 'Flask':
             return (
@@ -124,67 +124,67 @@ export default function AboutPage() {
                 .ab-hero { background: #fff; padding: 120px 48px 80px; }
                 .ab-hero-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
 
-                .ab-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: #1D9E75; margin-bottom: 16px; }
-                .ab-h1 { font-family: var(--font-dm-serif, 'DM Serif Display', serif); font-size: clamp(34px, 3.5vw, 44px); font-weight: 400; line-height: 1.12; letter-spacing: -0.5px; color: #0D1B17; margin-bottom: 20px; animation: fadeUp 0.7s cubic-bezier(.16,1,.3,1) both; }
-                .ab-desc { font-size: 16px; color: #8A9E97; line-height: 1.75; margin-bottom: 28px; animation: fadeUp 0.7s 0.1s cubic-bezier(.16,1,.3,1) both; }
-                .ab-accent-line { width: 64px; height: 3px; background: #1D9E75; border-radius: 2px; }
+                .ab-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: #0D9488; margin-bottom: 16px; }
+                .ab-h1 { font-family: var(--font-dm-serif, 'DM Serif Display', serif); font-size: clamp(34px, 3.5vw, 44px); font-weight: 400; line-height: 1.12; letter-spacing: -0.5px; color: #0F172A; margin-bottom: 20px; animation: fadeUp 0.7s cubic-bezier(.16,1,.3,1) both; }
+                .ab-desc { font-size: 16px; color: #64748B; line-height: 1.75; margin-bottom: 28px; animation: fadeUp 0.7s 0.1s cubic-bezier(.16,1,.3,1) both; }
+                .ab-accent-line { width: 64px; height: 3px; background: #0D9488; border-radius: 2px; }
 
                 /* Timeline */
                 .ab-timeline { position: relative; padding-left: 24px; animation: fadeUp 0.7s 0.15s cubic-bezier(.16,1,.3,1) both; }
-                .ab-timeline::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 2px; background: linear-gradient(to bottom, #1D9E75, #C5D6D0); border-radius: 1px; }
+                .ab-timeline::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 2px; background: linear-gradient(to bottom, #0D9488, #C5D6D0); border-radius: 1px; }
                 .ab-milestone { position: relative; margin-bottom: 28px; }
-                .ab-milestone::before { content: ''; position: absolute; left: -28px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: #1D9E75; border: 2.5px solid #fff; box-shadow: 0 0 0 3px rgba(29,158,117,0.25); }
-                .ab-milestone-period { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: #1D9E75; text-transform: uppercase; margin-bottom: 4px; }
-                .ab-milestone-event { font-size: 14.5px; color: #2F4A40; font-weight: 500; line-height: 1.5; }
+                .ab-milestone::before { content: ''; position: absolute; left: -28px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: #0D9488; border: 2.5px solid #fff; box-shadow: 0 0 0 3px rgba(13,148,136,0.25); }
+                .ab-milestone-period { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: #0D9488; text-transform: uppercase; margin-bottom: 4px; }
+                .ab-milestone-event { font-size: 14.5px; color: #334155; font-weight: 500; line-height: 1.5; }
 
                 /* Mission section */
-                .ab-mission { background: #F4F9F7; padding: 96px 48px; }
+                .ab-mission { background: #F8FAFC; padding: 96px 48px; }
                 .ab-mission-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: start; }
-                .ab-mission-h2 { font-family: var(--font-dm-serif, serif); font-size: clamp(28px, 3vw, 38px); color: #0D1B17; letter-spacing: -0.5px; margin-bottom: 20px; }
-                .ab-mission-p { font-size: 15px; color: #8A9E97; line-height: 1.75; }
+                .ab-mission-h2 { font-family: var(--font-dm-serif, serif); font-size: clamp(28px, 3vw, 38px); color: #0F172A; letter-spacing: -0.5px; margin-bottom: 20px; }
+                .ab-mission-p { font-size: 15px; color: #64748B; line-height: 1.75; }
                 .ab-values-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
                 .ab-value-card { background: #fff; border: 1px solid #C5D6D0; border-radius: 14px; padding: 22px; transition: all 0.22s; }
-                .ab-value-card:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(29,158,117,0.1); border-color: #5DCAA5; }
-                .ab-value-title { font-family: var(--font-dm-serif, serif); font-size: 16px; color: #0D1B17; margin-bottom: 6px; }
-                .ab-value-desc { font-size: 13px; color: #8A9E97; line-height: 1.6; }
-                .ab-value-dot { width: 8px; height: 8px; border-radius: 50%; background: #1D9E75; margin-bottom: 12px; }
+                .ab-value-card:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(13,148,136,0.1); border-color: #5DCAA5; }
+                .ab-value-title { font-family: var(--font-dm-serif, serif); font-size: 16px; color: #0F172A; margin-bottom: 6px; }
+                .ab-value-desc { font-size: 13px; color: #64748B; line-height: 1.6; }
+                .ab-value-dot { width: 8px; height: 8px; border-radius: 50%; background: #0D9488; margin-bottom: 12px; }
 
                 /* Tech Stack */
                 .ab-stack { background: #fff; padding: 96px 48px; }
                 .ab-stack-inner { max-width: 1200px; margin: 0 auto; }
-                .ab-sec-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: #1D9E75; text-align: center; margin-bottom: 12px; }
-                .ab-sec-h2 { font-family: var(--font-dm-serif, serif); font-size: clamp(28px, 3vw, 40px); font-weight: 400; text-align: center; color: #0D1B17; letter-spacing: -0.5px; margin-bottom: 52px; }
+                .ab-sec-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: #0D9488; text-align: center; margin-bottom: 12px; }
+                .ab-sec-h2 { font-family: var(--font-dm-serif, serif); font-size: clamp(28px, 3vw, 40px); font-weight: 400; text-align: center; color: #0F172A; letter-spacing: -0.5px; margin-bottom: 52px; }
                 .ab-stack-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-                .ab-stack-card { background: #fff; border: 1px solid rgba(29,158,117,0.12); border-radius: 16px; padding: 24px 20px; text-align: center; transition: all 0.22s cubic-bezier(.16,1,.3,1); cursor: default; }
-                .ab-stack-card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(29,158,117,0.1); border-color: #1D9E75; }
-                .ab-stack-icon-wrap { width: 56px; height: 56px; border-radius: 14px; background: #E1F5EE; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
-                .ab-stack-name { font-family: var(--font-dm-serif, serif); font-size: 15px; color: #0D1B17; margin-bottom: 5px; }
-                .ab-stack-desc { font-size: 12px; color: #8A9E97; line-height: 1.5; }
+                .ab-stack-card { background: #fff; border: 1px solid rgba(13,148,136,0.12); border-radius: 16px; padding: 24px 20px; text-align: center; transition: all 0.22s cubic-bezier(.16,1,.3,1); cursor: default; }
+                .ab-stack-card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(13,148,136,0.1); border-color: #0D9488; }
+                .ab-stack-icon-wrap { width: 56px; height: 56px; border-radius: 14px; background: #F0FDFA; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+                .ab-stack-name { font-family: var(--font-dm-serif, serif); font-size: 15px; color: #0F172A; margin-bottom: 5px; }
+                .ab-stack-desc { font-size: 12px; color: #64748B; line-height: 1.5; }
 
                 /* Team */
-                .ab-team { background: #F4F9F7; padding: 96px 48px; }
+                .ab-team { background: #F8FAFC; padding: 96px 48px; }
                 .ab-team-inner { max-width: 1200px; margin: 0 auto; }
                 .ab-team-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 0; }
-                .ab-team-card { background: #fff; border: 1px solid #D1E5DC; border-radius: 20px; padding: 32px 20px 24px; text-align: center; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); cursor: default; }
-                .ab-team-card:hover { transform: translateY(-6px); border-color: #1D9E75; box-shadow: 0 16px 48px rgba(29,158,117,0.12); }
-                .ab-team-avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #1D9E75, #085041); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 8px 24px rgba(29,158,117,0.25); }
+                .ab-team-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 20px; padding: 32px 20px 24px; text-align: center; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); cursor: default; }
+                .ab-team-card:hover { transform: translateY(-6px); border-color: #0D9488; box-shadow: 0 16px 48px rgba(13,148,136,0.12); }
+                .ab-team-avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #0D9488, #085041); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 8px 24px rgba(13,148,136,0.25); }
                 .ab-team-initials { font-family: var(--font-dm-serif, serif); font-size: 22px; color: #fff; letter-spacing: -0.5px; }
-                .ab-team-name { font-family: var(--font-dm-serif, serif); font-size: 17px; color: #0D1B17; margin-bottom: 6px; line-height: 1.2; }
-                .ab-team-role { font-size: 12.5px; color: #8A9E97; font-style: italic; line-height: 1.5; margin-bottom: 14px; }
-                .ab-team-email { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: #1D9E75; text-decoration: none; font-weight: 600; transition: opacity 0.15s; }
+                .ab-team-name { font-family: var(--font-dm-serif, serif); font-size: 17px; color: #0F172A; margin-bottom: 6px; line-height: 1.2; }
+                .ab-team-role { font-size: 12.5px; color: #64748B; font-style: italic; line-height: 1.5; margin-bottom: 14px; }
+                .ab-team-email { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: #0D9488; text-decoration: none; font-weight: 600; transition: opacity 0.15s; }
                 .ab-team-email:hover { opacity: 0.7; }
 
                 /* Vision closing */
-                .ab-vision { background: #0D1B17; padding: 96px 48px; text-align: center; }
+                .ab-vision { background: #0F172A; padding: 96px 48px; text-align: center; }
                 .ab-vision-inner { max-width: 720px; margin: 0 auto; }
                 .ab-quote { font-family: var(--font-dm-serif, serif); font-size: clamp(22px, 2.5vw, 32px); font-style: italic; color: #fff; line-height: 1.4; letter-spacing: -0.3px; margin-bottom: 24px; }
-                .ab-quote-mark { color: #1D9E75; }
+                .ab-quote-mark { color: #0D9488; }
                 .ab-vision-desc { font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.75; margin-bottom: 36px; }
-                .ab-vision-btn { display: inline-flex; align-items: center; gap: 8px; background: #1D9E75; color: #fff; font-family: var(--font-dm-sans, sans-serif); font-size: 15px; font-weight: 700; padding: 13px 28px; border-radius: 12px; text-decoration: none; transition: all 0.22s; }
-                .ab-vision-btn:hover { background: #0F6E56; transform: translateY(-2px); box-shadow: 0 12px 32px rgba(29,158,117,0.4); }
+                .ab-vision-btn { display: inline-flex; align-items: center; gap: 8px; background: #0D9488; color: #fff; font-family: var(--font-dm-sans, sans-serif); font-size: 15px; font-weight: 700; padding: 13px 28px; border-radius: 12px; text-decoration: none; transition: all 0.22s; }
+                .ab-vision-btn:hover { background: #0F6E56; transform: translateY(-2px); box-shadow: 0 12px 32px rgba(13,148,136,0.4); }
 
                 /* Footer strip */
-                .ab-footer { background: #0D1B17; border-top: 1px solid rgba(255,255,255,0.08); padding: 24px 48px; display: flex; align-items: center; justify-content: space-between; }
+                .ab-footer { background: #0F172A; border-top: 1px solid rgba(255,255,255,0.08); padding: 24px 48px; display: flex; align-items: center; justify-content: space-between; }
                 .ab-footer-copy { font-size: 13px; color: rgba(255,255,255,0.25); }
 
                 @media (max-width: 1024px) {
@@ -225,7 +225,7 @@ export default function AboutPage() {
 
                     {/* Right: Timeline */}
                     <div>
-                        <div style={{ marginBottom: 20, fontSize: 11, fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase', color: '#1D9E75' }}>Milestones</div>
+                        <div style={{ marginBottom: 20, fontSize: 11, fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase', color: '#0D9488' }}>Milestones</div>
                         <div className="ab-timeline">
                             {milestones.map(m => (
                                 <div key={m.period} className="ab-milestone">
@@ -243,7 +243,7 @@ export default function AboutPage() {
                 <div className="ab-mission-inner">
                     {/* Left */}
                     <div>
-                        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#1D9E75', marginBottom: 14 }}>Mission</div>
+                        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#0D9488', marginBottom: 14 }}>Mission</div>
                         <h2 className="ab-mission-h2">Our Mission</h2>
                         <p className="ab-mission-p">
                             We exist to democratize access to clinical-grade thyroid cancer diagnostics. By combining three deep learning models into a single majority-voted prediction engine, Diagnovate gives every clinician — regardless of institution — the confidence of a specialist consensus in under two seconds.
@@ -255,7 +255,7 @@ export default function AboutPage() {
 
                     {/* Right: Values grid */}
                     <div>
-                        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#1D9E75', marginBottom: 20 }}>Core Values</div>
+                        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#0D9488', marginBottom: 20 }}>Core Values</div>
                         <div className="ab-values-grid">
                             {values.map(v => (
                                 <div key={v.title} className="ab-value-card">
@@ -317,7 +317,7 @@ export default function AboutPage() {
             {/* ── VISION ────────────────────────────────────────────────── */}
             <section className="ab-vision">
                 <div className="ab-vision-inner">
-                    <div style={{ fontSize: 40, color: '#1D9E75', marginBottom: 16, fontFamily: 'var(--font-dm-serif, serif)' }}>"</div>
+                    <div style={{ fontSize: 40, color: '#0D9488', marginBottom: 16, fontFamily: 'var(--font-dm-serif, serif)' }}>"</div>
                     <div className="ab-quote">
                         We believe AI should augment the clinician, not replace them.
                     </div>
@@ -332,11 +332,11 @@ export default function AboutPage() {
             <div className="ab-footer">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
-                        <polygon points="18,2 32,9.5 32,26.5 18,34 4,26.5 4,9.5" fill="#1D9E75" opacity="0.2" stroke="#1D9E75" strokeWidth="1.5"/>
-                        <circle cx="18" cy="18" r="4" fill="#1D9E75"/>
+                        <polygon points="18,2 32,9.5 32,26.5 18,34 4,26.5 4,9.5" fill="#0D9488" opacity="0.2" stroke="#0D9488" strokeWidth="1.5"/>
+                        <circle cx="18" cy="18" r="4" fill="#0D9488"/>
                     </svg>
                     <span style={{ fontFamily: 'var(--font-dm-serif, serif)', fontSize: 16, color: '#fff' }}>
-                        Diagn<em style={{ fontStyle: 'italic', color: '#1D9E75' }}>ovate</em>
+                        Diagn<em style={{ fontStyle: 'italic', color: '#0D9488' }}>ovate</em>
                     </span>
                 </div>
                 <div className="ab-footer-copy">© 2026 Diagnovate. Advanced AI for thyroid cancer diagnostics.</div>

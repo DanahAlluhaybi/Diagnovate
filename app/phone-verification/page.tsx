@@ -93,8 +93,11 @@ export default function PhoneVerificationPage() {
             <nav className="acard-nav">
                 <Link href="/" className="acard-nav__logo">
                     <div className="acard-nav__mark">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white" />
+                        <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
+                            <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5"/>
+                            <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                            <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                            <circle cx="20" cy="20" r="3.5" fill="white"/>
                         </svg>
                         <span className="acard-nav__mark-ring" />
                     </div>
@@ -115,16 +118,16 @@ export default function PhoneVerificationPage() {
                         <div style={{ position: 'relative' }}>
                             <svg width="56" height="64" viewBox="0 0 96 108" fill="none"
                                  style={{ animation: 'hexPulse 2.5s ease-in-out infinite' }}>
-                                <polygon points="48,4 90,26 90,80 48,104 6,80 6,26" fill="rgba(29,158,117,0.08)" stroke="#1D9E75" strokeWidth="1.5"/>
-                                <polygon points="48,16 78,32 78,72 48,88 18,72 18,32" fill="rgba(29,158,117,0.05)" stroke="#1D9E75" strokeWidth="1" strokeDasharray="4 3" opacity="0.6"/>
+                                <polygon points="48,4 90,26 90,80 48,104 6,80 6,26" fill="rgba(13,148,136,0.08)" stroke="#0D9488" strokeWidth="1.5"/>
+                                <polygon points="48,16 78,32 78,72 48,88 18,72 18,32" fill="rgba(13,148,136,0.05)" stroke="#0D9488" strokeWidth="1" strokeDasharray="4 3" opacity="0.6"/>
                             </svg>
                             <svg width="56" height="64" viewBox="0 0 96 108" fill="none"
                                  style={{ position: 'absolute', top: 0, left: 0, animation: 'hexRotate 3s linear infinite', transformOrigin: '28px 32px' }}>
-                                <circle cx="48" cy="4" r="3.5" fill="#1D9E75" opacity="0.7"/>
-                                <circle cx="90" cy="26" r="3.5" fill="#1D9E75" opacity="0.5"/>
-                                <circle cx="90" cy="80" r="3.5" fill="#1D9E75" opacity="0.3"/>
+                                <circle cx="48" cy="4" r="3.5" fill="#0D9488" opacity="0.7"/>
+                                <circle cx="90" cy="26" r="3.5" fill="#0D9488" opacity="0.5"/>
+                                <circle cx="90" cy="80" r="3.5" fill="#0D9488" opacity="0.3"/>
                             </svg>
-                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg, #1D9E75, #0F6E56)', boxShadow: '0 4px 12px rgba(29,158,117,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg, #0D9488, #0F6E56)', boxShadow: '0 4px 12px rgba(13,148,136,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
                                     <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white"/>
                                 </svg>

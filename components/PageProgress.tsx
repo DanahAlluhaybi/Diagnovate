@@ -22,9 +22,9 @@ export default function PageProgress() {
             <style>{`
                 .pg-bar {
                     position: fixed; top: 0; left: 0; height: 3px; z-index: 10000;
-                    background: #1D9E75;
+                    background: linear-gradient(90deg, #0D9488, #0891B2);
                     border-radius: 0 2px 2px 0;
-                    box-shadow: 0 0 10px rgba(29,158,117,0.55);
+                    box-shadow: 0 0 10px rgba(13,148,136,0.55);
                     pointer-events: none;
                     transition: width 0.38s ease-out;
                 }

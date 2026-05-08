@@ -25,7 +25,7 @@ const IconCalendar = () => (
     </svg>
 );
 const IconCheck = () => (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="20 6 9 17 4 12"/>
     </svg>
 );
@@ -54,30 +54,30 @@ export default function ContactPage() {
         width: '100%',
         height: 48,
         padding: '0 14px',
-        background: '#F4F9F7',
-        border: `1.5px solid ${focusedField === name ? '#1D9E75' : '#C5D6D0'}`,
+        background: '#F8FAFC',
+        border: `1.5px solid ${focusedField === name ? '#0D9488' : '#C5D6D0'}`,
         borderRadius: 10,
         fontFamily: 'var(--font-dm-sans, sans-serif)',
         fontSize: 14,
-        color: '#0D1B17',
+        color: '#0F172A',
         outline: 'none',
         transition: 'border-color 0.2s, box-shadow 0.2s',
-        boxShadow: focusedField === name ? '0 0 0 3px rgba(29,158,117,0.12)' : 'none',
+        boxShadow: focusedField === name ? '0 0 0 3px rgba(13,148,136,0.12)' : 'none',
     });
 
     const textareaStyle: React.CSSProperties = {
         width: '100%',
         padding: '12px 14px',
-        background: '#F4F9F7',
-        border: `1.5px solid ${focusedField === 'message' ? '#1D9E75' : '#C5D6D0'}`,
+        background: '#F8FAFC',
+        border: `1.5px solid ${focusedField === 'message' ? '#0D9488' : '#C5D6D0'}`,
         borderRadius: 10,
         fontFamily: 'var(--font-dm-sans, sans-serif)',
         fontSize: 14,
-        color: '#0D1B17',
+        color: '#0F172A',
         outline: 'none',
         resize: 'vertical',
         transition: 'border-color 0.2s, box-shadow 0.2s',
-        boxShadow: focusedField === 'message' ? '0 0 0 3px rgba(29,158,117,0.12)' : 'none',
+        boxShadow: focusedField === 'message' ? '0 0 0 3px rgba(13,148,136,0.12)' : 'none',
         lineHeight: 1.6,
     };
 
@@ -87,7 +87,7 @@ export default function ContactPage() {
         fontWeight: 700,
         letterSpacing: '0.5px',
         textTransform: 'uppercase' as const,
-        color: '#2F4A40',
+        color: '#334155',
         marginBottom: 6,
         fontFamily: 'var(--font-dm-sans, sans-serif)',
     };
@@ -103,31 +103,31 @@ export default function ContactPage() {
                 .ct-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; align-items: start; }
 
                 /* Info panel */
-                .ct-info { background: #F4F9F7; border-radius: 20px; padding: 40px; }
-                .ct-info-h2 { font-family: var(--font-dm-serif, 'DM Serif Display', serif); font-size: 32px; color: #0D1B17; letter-spacing: -0.3px; margin-bottom: 14px; }
-                .ct-info-p { font-size: 15px; color: #8A9E97; line-height: 1.75; margin-bottom: 32px; }
+                .ct-info { background: #F8FAFC; border-radius: 20px; padding: 40px; }
+                .ct-info-h2 { font-family: var(--font-dm-serif, 'DM Serif Display', serif); font-size: 32px; color: #0F172A; letter-spacing: -0.3px; margin-bottom: 14px; }
+                .ct-info-p { font-size: 15px; color: #64748B; line-height: 1.75; margin-bottom: 32px; }
                 .ct-info-cards { display: flex; flex-direction: column; gap: 14px; margin-bottom: 32px; }
                 .ct-info-card { display: flex; align-items: center; gap: 16px; background: #fff; border: 1px solid #C5D6D0; border-radius: 14px; padding: 18px; transition: all 0.2s; }
-                .ct-info-card:hover { border-color: #5DCAA5; box-shadow: 0 6px 20px rgba(29,158,117,0.1); }
-                .ct-info-icon { width: 44px; height: 44px; border-radius: 11px; background: #E1F5EE; border: 1px solid #C5D6D0; display: flex; align-items: center; justify-content: center; color: #1D9E75; flex-shrink: 0; }
-                .ct-info-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #8A9E97; margin-bottom: 3px; }
-                .ct-info-value { font-size: 14px; font-weight: 600; color: #0D1B17; }
-                .ct-info-note { font-size: 13px; color: #8A9E97; line-height: 1.65; border-top: 1px solid #C5D6D0; padding-top: 20px; }
+                .ct-info-card:hover { border-color: #5DCAA5; box-shadow: 0 6px 20px rgba(13,148,136,0.1); }
+                .ct-info-icon { width: 44px; height: 44px; border-radius: 11px; background: #F0FDFA; border: 1px solid #C5D6D0; display: flex; align-items: center; justify-content: center; color: #0D9488; flex-shrink: 0; }
+                .ct-info-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #64748B; margin-bottom: 3px; }
+                .ct-info-value { font-size: 14px; font-weight: 600; color: #0F172A; }
+                .ct-info-note { font-size: 13px; color: #64748B; line-height: 1.65; border-top: 1px solid #C5D6D0; padding-top: 20px; }
 
                 /* Form card */
-                .ct-form-card { background: #fff; border: 1px solid #C5D6D0; border-radius: 20px; padding: 40px; box-shadow: 0 8px 40px rgba(13,27,23,0.06); }
-                .ct-form-h2 { font-family: var(--font-dm-serif, serif); font-size: 26px; color: #0D1B17; margin-bottom: 28px; }
+                .ct-form-card { background: #fff; border: 1px solid #C5D6D0; border-radius: 20px; padding: 40px; box-shadow: 0 8px 40px rgba(15,23,42,0.06); }
+                .ct-form-h2 { font-family: var(--font-dm-serif, serif); font-size: 26px; color: #0F172A; margin-bottom: 28px; }
                 .ct-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
                 .ct-form-field { margin-bottom: 16px; }
 
                 /* Success */
                 .ct-success { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 48px 24px; }
-                .ct-success-ring { width: 80px; height: 80px; border-radius: 50%; background: #E1F5EE; border: 2px solid #5DCAA5; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
-                .ct-success-h3 { font-family: var(--font-dm-serif, serif); font-size: 26px; color: #0D1B17; margin-bottom: 10px; }
-                .ct-success-p { font-size: 14px; color: #8A9E97; line-height: 1.65; max-width: 320px; }
+                .ct-success-ring { width: 80px; height: 80px; border-radius: 50%; background: #F0FDFA; border: 2px solid #5DCAA5; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+                .ct-success-h3 { font-family: var(--font-dm-serif, serif); font-size: 26px; color: #0F172A; margin-bottom: 10px; }
+                .ct-success-p { font-size: 14px; color: #64748B; line-height: 1.65; max-width: 320px; }
 
                 /* Footer strip */
-                .ct-footer { background: #0D1B17; border-top: 1px solid rgba(255,255,255,0.08); padding: 24px 48px; display: flex; align-items: center; justify-content: space-between; }
+                .ct-footer { background: #0F172A; border-top: 1px solid rgba(255,255,255,0.08); padding: 24px 48px; display: flex; align-items: center; justify-content: space-between; }
                 .ct-footer-copy { font-size: 13px; color: rgba(255,255,255,0.25); }
 
                 @media (max-width: 1024px) {
@@ -297,7 +297,7 @@ export default function ContactPage() {
                                         style={{
                                             width: '100%',
                                             height: 50,
-                                            background: '#1D9E75',
+                                            background: '#0D9488',
                                             color: '#fff',
                                             fontFamily: 'var(--font-dm-sans, sans-serif)',
                                             fontSize: 15,
@@ -311,10 +311,10 @@ export default function ContactPage() {
                                         onMouseEnter={e => {
                                             (e.currentTarget as HTMLButtonElement).style.background = '#0F6E56';
                                             (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
-                                            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 24px rgba(29,158,117,0.35)';
+                                            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 24px rgba(13,148,136,0.35)';
                                         }}
                                         onMouseLeave={e => {
-                                            (e.currentTarget as HTMLButtonElement).style.background = '#1D9E75';
+                                            (e.currentTarget as HTMLButtonElement).style.background = '#0D9488';
                                             (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
                                             (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
                                         }}
@@ -332,11 +332,11 @@ export default function ContactPage() {
             <div className="ct-footer">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
-                        <polygon points="18,2 32,9.5 32,26.5 18,34 4,26.5 4,9.5" fill="#1D9E75" opacity="0.2" stroke="#1D9E75" strokeWidth="1.5"/>
-                        <circle cx="18" cy="18" r="4" fill="#1D9E75"/>
+                        <polygon points="18,2 32,9.5 32,26.5 18,34 4,26.5 4,9.5" fill="#0D9488" opacity="0.2" stroke="#0D9488" strokeWidth="1.5"/>
+                        <circle cx="18" cy="18" r="4" fill="#0D9488"/>
                     </svg>
                     <span style={{ fontFamily: 'var(--font-dm-serif, serif)', fontSize: 16, color: '#fff' }}>
-                        Diagn<em style={{ fontStyle: 'italic', color: '#1D9E75' }}>ovate</em>
+                        Diagn<em style={{ fontStyle: 'italic', color: '#0D9488' }}>ovate</em>
                     </span>
                 </div>
                 <div className="ct-footer-copy">© 2026 Diagnovate. Advanced AI for thyroid cancer diagnostics.</div>

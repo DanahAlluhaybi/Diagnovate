@@ -25,8 +25,8 @@ export default function PublicNavbar() {
         fontSize: 14,
         fontWeight: 500,
         fontFamily: 'var(--font-dm-sans, sans-serif)',
-        color: isActive(href) ? '#0F6E56' : '#8A9E97',
-        background: isActive(href) ? '#E1F5EE' : 'transparent',
+        color: isActive(href) ? '#0F6E56' : '#64748B',
+        background: isActive(href) ? '#F0FDFA' : 'transparent',
         borderRadius: isActive(href) ? 8 : 8,
         padding: '6px 14px',
         transition: 'all 0.18s',
@@ -47,8 +47,8 @@ export default function PublicNavbar() {
         background: 'rgba(244,249,247,0.88)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(29,158,117,0.12)',
-        boxShadow: scrolled ? '0 4px 32px rgba(13,27,23,0.08)' : 'none',
+        borderBottom: '1px solid rgba(13,148,136,0.12)',
+        boxShadow: scrolled ? '0 4px 32px rgba(15,23,42,0.08)' : 'none',
         transition: 'box-shadow 0.25s',
     };
 
@@ -61,7 +61,7 @@ export default function PublicNavbar() {
         fontWeight: 700,
         fontFamily: 'var(--font-dm-sans, sans-serif)',
         color: '#fff',
-        background: '#1D9E75',
+        background: '#0D9488',
         borderRadius: 10,
         padding: '8px 20px',
         transition: 'all 0.2s',
@@ -77,9 +77,9 @@ export default function PublicNavbar() {
                 <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
                     <div style={{
                         width: 44, height: 44, borderRadius: 13,
-                        background: 'linear-gradient(145deg,#1D9E75,#0D9488)',
+                        background: 'linear-gradient(145deg,#0D9488,#0D9488)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 6px 20px rgba(29,158,117,0.4)',
+                        boxShadow: '0 6px 20px rgba(13,148,136,0.4)',
                         flexShrink: 0,
                     }}>
                         <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
@@ -93,9 +93,9 @@ export default function PublicNavbar() {
                         fontFamily: 'var(--font-dm-serif, "DM Serif Display", serif)',
                         fontSize: 20,
                         letterSpacing: '-0.3px',
-                        color: '#0D1B17',
+                        color: '#0F172A',
                     }}>
-                        Diagn<em style={{ fontStyle: 'italic', color: '#1D9E75' }}>ovate</em>
+                        Diagn<em style={{ fontStyle: 'italic', color: '#0D9488' }}>ovate</em>
                     </span>
                 </Link>
 
@@ -113,10 +113,10 @@ export default function PublicNavbar() {
                             fontSize: 14,
                             fontWeight: 600,
                             fontFamily: 'var(--font-dm-sans, sans-serif)',
-                            color: isActive('/role') ? '#0F6E56' : '#1D9E75',
-                            background: isActive('/role') ? '#E1F5EE' : 'transparent',
+                            color: isActive('/role') ? '#0F6E56' : '#0D9488',
+                            background: isActive('/role') ? '#F0FDFA' : 'transparent',
                             border: '1.5px solid',
-                            borderColor: isActive('/role') ? '#1D9E75' : 'rgba(29,158,117,0.35)',
+                            borderColor: isActive('/role') ? '#0D9488' : 'rgba(13,148,136,0.35)',
                             borderRadius: 9,
                             padding: '6px 16px',
                             transition: 'all 0.18s',
@@ -124,28 +124,28 @@ export default function PublicNavbar() {
                         }}
                         onMouseEnter={e => {
                             const el = e.currentTarget as HTMLAnchorElement;
-                            el.style.background = '#E1F5EE';
-                            el.style.borderColor = '#1D9E75';
+                            el.style.background = '#F0FDFA';
+                            el.style.borderColor = '#0D9488';
                         }}
                         onMouseLeave={e => {
                             const el = e.currentTarget as HTMLAnchorElement;
-                            el.style.background = isActive('/role') ? '#E1F5EE' : 'transparent';
-                            el.style.borderColor = isActive('/role') ? '#1D9E75' : 'rgba(29,158,117,0.35)';
+                            el.style.background = isActive('/role') ? '#F0FDFA' : 'transparent';
+                            el.style.borderColor = isActive('/role') ? '#0D9488' : 'rgba(13,148,136,0.35)';
                         }}
                     >
                         Log In
                     </Link>
-                    <div style={{ width: 1, height: 20, background: 'rgba(29,158,117,0.2)', margin: '0 4px' }} />
+                    <div style={{ width: 1, height: 20, background: 'rgba(13,148,136,0.2)', margin: '0 4px' }} />
                     <Link
                         href="/contact"
                         style={ctaStyle}
                         onMouseEnter={e => {
                             (e.currentTarget as HTMLAnchorElement).style.background = '#0F6E56';
                             (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-1px)';
-                            (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 6px 20px rgba(29,158,117,0.35)';
+                            (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 6px 20px rgba(13,148,136,0.35)';
                         }}
                         onMouseLeave={e => {
-                            (e.currentTarget as HTMLAnchorElement).style.background = '#1D9E75';
+                            (e.currentTarget as HTMLAnchorElement).style.background = '#0D9488';
                             (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(0)';
                             (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'none';
                         }}
@@ -160,11 +160,11 @@ export default function PublicNavbar() {
                         style={{
                             display: 'none',
                             background: 'none',
-                            border: '1px solid rgba(29,158,117,0.25)',
+                            border: '1px solid rgba(13,148,136,0.25)',
                             borderRadius: 8,
                             padding: '6px 10px',
                             cursor: 'pointer',
-                            color: '#1D9E75',
+                            color: '#0D9488',
                             marginLeft: 8,
                         }}
                         aria-label="Toggle menu"
@@ -172,14 +172,14 @@ export default function PublicNavbar() {
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                             {menuOpen ? (
                                 <>
-                                    <line x1="4" y1="4" x2="16" y2="16" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round"/>
-                                    <line x1="16" y1="4" x2="4" y2="16" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round"/>
+                                    <line x1="4" y1="4" x2="16" y2="16" stroke="#0D9488" strokeWidth="2" strokeLinecap="round"/>
+                                    <line x1="16" y1="4" x2="4" y2="16" stroke="#0D9488" strokeWidth="2" strokeLinecap="round"/>
                                 </>
                             ) : (
                                 <>
-                                    <line x1="3" y1="6" x2="17" y2="6" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round"/>
-                                    <line x1="3" y1="10" x2="17" y2="10" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round"/>
-                                    <line x1="3" y1="14" x2="17" y2="14" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round"/>
+                                    <line x1="3" y1="6" x2="17" y2="6" stroke="#0D9488" strokeWidth="2" strokeLinecap="round"/>
+                                    <line x1="3" y1="10" x2="17" y2="10" stroke="#0D9488" strokeWidth="2" strokeLinecap="round"/>
+                                    <line x1="3" y1="14" x2="17" y2="14" stroke="#0D9488" strokeWidth="2" strokeLinecap="round"/>
                                 </>
                             )}
                         </svg>
@@ -197,12 +197,12 @@ export default function PublicNavbar() {
                     zIndex: 199,
                     background: 'rgba(244,249,247,0.97)',
                     backdropFilter: 'blur(20px)',
-                    borderBottom: '1px solid rgba(29,158,117,0.15)',
+                    borderBottom: '1px solid rgba(13,148,136,0.15)',
                     padding: '16px 24px 20px',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 8,
-                    boxShadow: '0 8px 32px rgba(13,27,23,0.1)',
+                    boxShadow: '0 8px 32px rgba(15,23,42,0.1)',
                 }}>
                     {[
                         { href: '/', label: 'Home' },
@@ -222,8 +222,8 @@ export default function PublicNavbar() {
                                 fontFamily: 'var(--font-dm-sans, sans-serif)',
                                 fontSize: 15,
                                 fontWeight: isActive(href) ? 700 : 500,
-                                color: isActive(href) ? '#0F6E56' : '#0D1B17',
-                                background: isActive(href) ? '#E1F5EE' : 'transparent',
+                                color: isActive(href) ? '#0F6E56' : '#0F172A',
+                                background: isActive(href) ? '#F0FDFA' : 'transparent',
                             }}
                         >
                             {label}
@@ -242,7 +242,7 @@ export default function PublicNavbar() {
                             fontSize: 15,
                             fontWeight: 700,
                             color: '#fff',
-                            background: '#1D9E75',
+                            background: '#0D9488',
                             marginTop: 4,
                         }}
                     >

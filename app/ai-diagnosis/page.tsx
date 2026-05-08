@@ -491,7 +491,7 @@ export default function AIDiagnosisPage() {
                         {/* Patient */}
                         <div className={s.card} style={{ marginBottom: 16 }}>
                             <div className={s.cardHead}>
-                                <div className={s.cardIcon} style={{ background: 'linear-gradient(135deg,#334155,#475569)' }}>
+                                <div className={s.cardIcon} style={{ background: 'linear-gradient(135deg,#0F766E,#0D9488)' }}>
                                     <User size={18} color="white" />
                                 </div>
                                 <span className={s.cardTitle}>Patient</span>
@@ -565,11 +565,7 @@ export default function AIDiagnosisPage() {
                                         ] as const).map(m => (
                                             <button key={m.v}
                                                     className={`${s.typeBtn} ${inputMode === m.v ? s.typeBtnActive : ''}`}
-                                                    style={inputMode === m.v ? (
-                                                        m.v === 'both'  ? { background: '#EEF2FF', borderColor: '#C7D2FE', color: '#4F46E5' } :
-                                                        m.v === 'image' ? { background: '#F0F9FF', borderColor: '#BAE6FD', color: '#0891B2' } :
-                                                                          { background: '#F0FDFA', borderColor: '#99F6E4', color: '#0D9488' }
-                                                    ) : {}}
+                                                    style={inputMode === m.v ? { background: 'white', borderColor: '#0D9488', color: '#0D9488', borderWidth: '2px' } : {}}
                                                     onClick={() => { setInputMode(m.v); setSelectedModel('majority'); }}
                                             >
                                                 {inputMode === m.v && <Check size={11} />}
@@ -585,7 +581,7 @@ export default function AIDiagnosisPage() {
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                                             <button
                                                 className={`${s.typeBtn} ${selectedModel === 'majority' ? s.typeBtnActive : ''}`}
-                                                style={selectedModel === 'majority' ? { background: '#EEF2FF', borderColor: '#C7D2FE', color: '#4F46E5' } : {}}
+                                                style={selectedModel === 'majority' ? { background: 'rgba(13,148,136,0.1)', borderColor: '#0D9488', color: '#0D9488' } : {}}
                                                 onClick={() => setSelectedModel('majority')}
                                             >
                                                 {selectedModel === 'majority' && <Check size={11} />}
@@ -594,7 +590,7 @@ export default function AIDiagnosisPage() {
                                             {modelOptions.map(opt => (
                                                 <button key={opt.value}
                                                     className={`${s.typeBtn} ${selectedModel === opt.value ? s.typeBtnActive : ''}`}
-                                                    style={selectedModel === opt.value ? { background: '#F0FDFA', borderColor: '#99F6E4', color: '#0D9488' } : {}}
+                                                    style={selectedModel === opt.value ? { background: 'rgba(13,148,136,0.1)', borderColor: '#0D9488', color: '#0D9488' } : {}}
                                                     onClick={() => setSelectedModel(opt.value)}
                                                 >
                                                     {selectedModel === opt.value && <Check size={11} />}
@@ -838,7 +834,7 @@ export default function AIDiagnosisPage() {
 
                                 {/* Disclaimer */}
                                 <div className={s.disclaimerStrip}>
-                                    <Info size={15} className={s.disclaimerIcon} color="#D97706" style={{ flexShrink: 0, marginTop: 1 }} />
+                                    <Info size={15} className={s.disclaimerIcon} color="#F59E0B" style={{ flexShrink: 0, marginTop: 1 }} />
                                     <p className={s.disclaimerText}>
                                         <strong>Clinical Decision Support Only.</strong> This AI result is intended to assist qualified medical professionals and must be interpreted by a licensed clinician. It does not replace histological confirmation or specialist judgment.
                                     </p>

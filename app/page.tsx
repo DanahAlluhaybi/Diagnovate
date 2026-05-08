@@ -113,95 +113,95 @@ export default function HomePage() {
                 html { scroll-behavior: smooth; }
                 body { overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
-                .pub-home-hero { min-height: 100vh; background: #0D1B17; padding: 96px 48px 80px; display: flex; align-items: center; position: relative; overflow: hidden; }
-                .pub-home-hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(29,158,117,0.06) 1px, transparent 1px); background-size: 32px 32px; pointer-events: none; }
+                .pub-home-hero { min-height: 100vh; background: #0F172A; padding: 96px 48px 80px; display: flex; align-items: center; position: relative; overflow: hidden; }
+                .pub-home-hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(13,148,136,0.06) 1px, transparent 1px); background-size: 32px 32px; pointer-events: none; }
 
                 .pub-hero-inner { max-width: 1200px; margin: 0 auto; width: 100%; display: grid; grid-template-columns: 55% 45%; gap: 64px; align-items: center; position: relative; z-index: 1; }
 
-                .pub-hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(29,158,117,0.12); border: 1px solid rgba(29,158,117,0.35); color: #5DCAA5; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 6px 14px; border-radius: 100px; margin-bottom: 24px; width: fit-content; animation: fadeUp 0.7s cubic-bezier(.16,1,.3,1) both; }
-                .pub-hero-dot { width: 7px; height: 7px; border-radius: 50%; background: #1D9E75; animation: dotBlink 1.4s ease-in-out infinite; box-shadow: 0 0 0 3px rgba(29,158,117,0.2); }
+                .pub-hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(13,148,136,0.12); border: 1px solid rgba(13,148,136,0.35); color: #5DCAA5; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 6px 14px; border-radius: 100px; margin-bottom: 24px; width: fit-content; animation: fadeUp 0.7s cubic-bezier(.16,1,.3,1) both; }
+                .pub-hero-dot { width: 7px; height: 7px; border-radius: 50%; background: #0D9488; animation: dotBlink 1.4s ease-in-out infinite; box-shadow: 0 0 0 3px rgba(13,148,136,0.2); }
 
                 .pub-hero-h1 { font-family: var(--font-dm-serif, 'DM Serif Display', serif); font-size: clamp(40px, 4.5vw, 56px); font-weight: 400; line-height: 1.1; letter-spacing: -1px; color: #fff; margin-bottom: 20px; white-space: pre-line; animation: fadeUp 0.7s 0.1s cubic-bezier(.16,1,.3,1) both; }
 
-                .pub-hero-p { font-size: 17px; line-height: 1.75; color: #8A9E97; margin-bottom: 40px; max-width: 480px; animation: fadeUp 0.7s 0.2s cubic-bezier(.16,1,.3,1) both; }
+                .pub-hero-p { font-size: 17px; line-height: 1.75; color: #64748B; margin-bottom: 40px; max-width: 480px; animation: fadeUp 0.7s 0.2s cubic-bezier(.16,1,.3,1) both; }
 
                 .pub-hero-btns { display: flex; gap: 14px; animation: fadeUp 0.7s 0.3s cubic-bezier(.16,1,.3,1) both; flex-wrap: wrap; }
-                .pub-btn-solid { display: inline-flex; align-items: center; gap: 8px; background: #1D9E75; color: #fff; font-family: var(--font-dm-sans, sans-serif); font-size: 15px; font-weight: 700; padding: 13px 26px; border-radius: 12px; text-decoration: none; border: none; cursor: pointer; transition: all 0.22s; box-shadow: 0 6px 20px rgba(29,158,117,0.3); }
-                .pub-btn-solid:hover { background: #0F6E56; transform: translateY(-2px); box-shadow: 0 12px 32px rgba(29,158,117,0.4); }
+                .pub-btn-solid { display: inline-flex; align-items: center; gap: 8px; background: #0D9488; color: #fff; font-family: var(--font-dm-sans, sans-serif); font-size: 15px; font-weight: 700; padding: 13px 26px; border-radius: 12px; text-decoration: none; border: none; cursor: pointer; transition: all 0.22s; box-shadow: 0 6px 20px rgba(13,148,136,0.3); }
+                .pub-btn-solid:hover { background: #0F6E56; transform: translateY(-2px); box-shadow: 0 12px 32px rgba(13,148,136,0.4); }
                 .pub-btn-ghost-white { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: #fff; font-family: var(--font-dm-sans, sans-serif); font-size: 15px; font-weight: 500; padding: 13px 26px; border-radius: 12px; text-decoration: none; border: 1.5px solid rgba(255,255,255,0.25); cursor: pointer; transition: all 0.22s; }
                 .pub-btn-ghost-white:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.45); transform: translateY(-2px); }
 
                 /* Hex visual */
                 .pub-hex-visual { position: relative; display: flex; align-items: center; justify-content: center; animation: fadeUp 0.7s 0.15s cubic-bezier(.16,1,.3,1) both; }
                 .pub-hex-outer { position: relative; width: 300px; height: 340px; }
-                .pub-hex-scan-line { position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #1D9E75, transparent); animation: scanLine 2.8s ease-in-out infinite; top: 0; }
+                .pub-hex-scan-line { position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #0D9488, transparent); animation: scanLine 2.8s ease-in-out infinite; top: 0; }
                 .pub-float-card { position: absolute; background: #fff; border-radius: 14px; padding: 14px 18px; box-shadow: 0 12px 40px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 12px; z-index: 10; }
                 .pub-fc-1 { top: 0px; right: -60px; animation: float 3s ease-in-out infinite; }
                 .pub-fc-2 { bottom: 60px; right: -70px; animation: float 3s 1s ease-in-out infinite; }
                 .pub-fc-3 { bottom: 10px; left: -60px; animation: float 3s 0.5s ease-in-out infinite; }
-                .pub-fc-num { font-family: var(--font-dm-serif, serif); font-size: 26px; font-weight: 400; color: #0D1B17; line-height: 1; }
-                .pub-fc-lbl { font-size: 11px; color: #8A9E97; font-weight: 500; }
-                .pub-fc-dot { width: 10px; height: 10px; border-radius: 50%; background: #1D9E75; animation: dotBlink 1.4s ease-in-out infinite; }
+                .pub-fc-num { font-family: var(--font-dm-serif, serif); font-size: 26px; font-weight: 400; color: #0F172A; line-height: 1; }
+                .pub-fc-lbl { font-size: 11px; color: #64748B; font-weight: 500; }
+                .pub-fc-dot { width: 10px; height: 10px; border-radius: 50%; background: #0D9488; animation: dotBlink 1.4s ease-in-out infinite; }
 
                 /* Stats bar */
-                .pub-stats-bar { background: #fff; border-top: 3px solid #1D9E75; padding: 40px 48px; }
+                .pub-stats-bar { background: #fff; border-top: 3px solid #0D9488; padding: 40px 48px; }
                 .pub-stats-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
                 .pub-stat { text-align: center; padding: 0 24px; position: relative; }
-                .pub-stat + .pub-stat::before { content: ''; position: absolute; left: 0; top: 10%; height: 80%; width: 1px; background: #E1F5EE; }
-                .pub-stat-num { font-family: var(--font-dm-serif, serif); font-size: 44px; font-weight: 400; color: #1D9E75; line-height: 1; letter-spacing: -2px; margin-bottom: 6px; }
-                .pub-stat-lbl { font-size: 13px; color: #8A9E97; font-weight: 500; }
+                .pub-stat + .pub-stat::before { content: ''; position: absolute; left: 0; top: 10%; height: 80%; width: 1px; background: #F0FDFA; }
+                .pub-stat-num { font-family: var(--font-dm-serif, serif); font-size: 44px; font-weight: 400; color: #0D9488; line-height: 1; letter-spacing: -2px; margin-bottom: 6px; }
+                .pub-stat-lbl { font-size: 13px; color: #64748B; font-weight: 500; }
 
                 /* Features */
                 .pub-features { background: #fff; padding: 96px 48px; }
                 .pub-features-inner { max-width: 1200px; margin: 0 auto; }
-                .pub-sec-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: #1D9E75; text-align: center; margin-bottom: 12px; }
-                .pub-sec-h2 { font-family: var(--font-dm-serif, serif); font-size: clamp(32px, 3.5vw, 46px); font-weight: 400; text-align: center; color: #0D1B17; letter-spacing: -0.5px; margin-bottom: 56px; }
+                .pub-sec-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: #0D9488; text-align: center; margin-bottom: 12px; }
+                .pub-sec-h2 { font-family: var(--font-dm-serif, serif); font-size: clamp(32px, 3.5vw, 46px); font-weight: 400; text-align: center; color: #0F172A; letter-spacing: -0.5px; margin-bottom: 56px; }
                 .pub-feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-                .pub-feat-card { background: #fff; border: 1px solid #E1F5EE; border-top: 3px solid transparent; border-radius: 16px; padding: 28px; transition: all 0.22s; cursor: default; }
-                .pub-feat-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(29,158,117,0.1); border-top-color: #1D9E75; border-color: #C5D6D0; }
-                .pub-feat-icon { width: 48px; height: 48px; border-radius: 12px; background: #E1F5EE; display: flex; align-items: center; justify-content: center; color: #1D9E75; margin-bottom: 18px; }
-                .pub-feat-title { font-family: var(--font-dm-serif, serif); font-size: 18px; font-weight: 400; color: #0D1B17; margin-bottom: 8px; }
-                .pub-feat-desc { font-size: 14px; color: #8A9E97; line-height: 1.65; }
+                .pub-feat-card { background: #fff; border: 1px solid #F0FDFA; border-top: 3px solid transparent; border-radius: 16px; padding: 28px; transition: all 0.22s; cursor: default; }
+                .pub-feat-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(13,148,136,0.1); border-top-color: #0D9488; border-color: #C5D6D0; }
+                .pub-feat-icon { width: 48px; height: 48px; border-radius: 12px; background: #F0FDFA; display: flex; align-items: center; justify-content: center; color: #0D9488; margin-bottom: 18px; }
+                .pub-feat-title { font-family: var(--font-dm-serif, serif); font-size: 18px; font-weight: 400; color: #0F172A; margin-bottom: 8px; }
+                .pub-feat-desc { font-size: 14px; color: #64748B; line-height: 1.65; }
 
                 /* AI Models */
-                .pub-models { background: #F4F9F7; padding: 96px 48px; }
+                .pub-models { background: #F8FAFC; padding: 96px 48px; }
                 .pub-models-inner { max-width: 1200px; margin: 0 auto; }
                 .pub-models-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; }
                 .pub-model-card { border-radius: 20px; padding: 32px; position: relative; transition: all 0.22s; }
                 .pub-model-card-light { background: #fff; border: 1px solid #C5D6D0; }
-                .pub-model-card-light:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(29,158,117,0.1); }
-                .pub-model-card-dark { background: linear-gradient(135deg, #0F6E56 0%, #085041 60%, #0D1B17 100%); border: 1.5px solid rgba(93,202,165,0.35); box-shadow: 0 0 0 1px rgba(29,158,117,0.1), 0 24px 64px rgba(13,27,23,0.3), inset 0 1px 0 rgba(93,202,165,0.15); overflow: hidden; }
+                .pub-model-card-light:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(13,148,136,0.1); }
+                .pub-model-card-dark { background: linear-gradient(135deg, #0F6E56 0%, #085041 60%, #0F172A 100%); border: 1.5px solid rgba(93,202,165,0.35); box-shadow: 0 0 0 1px rgba(13,148,136,0.1), 0 24px 64px rgba(15,23,42,0.3), inset 0 1px 0 rgba(93,202,165,0.15); overflow: hidden; }
                 .pub-model-badge { display: inline-block; background: rgba(93,202,165,0.15); border: 1px solid rgba(93,202,165,0.4); color: #5DCAA5; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; padding: 5px 12px; border-radius: 100px; margin-bottom: 14px; }
-                .pub-model-name-light { font-family: var(--font-dm-serif, serif); font-size: 22px; color: #0D1B17; margin-bottom: 12px; }
+                .pub-model-name-light { font-family: var(--font-dm-serif, serif); font-size: 22px; color: #0F172A; margin-bottom: 12px; }
                 .pub-model-name-dark { font-family: var(--font-dm-serif, serif); font-size: 22px; color: #fff; margin-bottom: 12px; }
-                .pub-model-desc-light { font-size: 14px; color: #8A9E97; line-height: 1.65; margin-bottom: 16px; }
+                .pub-model-desc-light { font-size: 14px; color: #64748B; line-height: 1.65; margin-bottom: 16px; }
                 .pub-model-desc-dark { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.65; margin-bottom: 16px; }
-                .pub-model-detail-light { font-size: 12.5px; color: #C5D6D0; border-top: 1px solid #E1F5EE; padding-top: 14px; }
-                .pub-model-detail-dark { font-size: 12.5px; color: rgba(29,158,117,0.8); border-top: 1px solid rgba(29,158,117,0.2); padding-top: 14px; }
+                .pub-model-detail-light { font-size: 12.5px; color: #C5D6D0; border-top: 1px solid #F0FDFA; padding-top: 14px; }
+                .pub-model-detail-dark { font-size: 12.5px; color: rgba(13,148,136,0.8); border-top: 1px solid rgba(13,148,136,0.2); padding-top: 14px; }
 
                 /* How It Works */
                 .pub-how { background: #fff; padding: 96px 48px; }
                 .pub-how-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
-                .pub-how-h2 { font-family: var(--font-dm-serif, serif); font-size: clamp(28px, 3vw, 42px); font-weight: 400; color: #0D1B17; letter-spacing: -0.5px; margin-bottom: 40px; }
+                .pub-how-h2 { font-family: var(--font-dm-serif, serif); font-size: clamp(28px, 3vw, 42px); font-weight: 400; color: #0F172A; letter-spacing: -0.5px; margin-bottom: 40px; }
                 .pub-step { display: flex; gap: 20px; margin-bottom: 28px; }
-                .pub-step-num { font-family: var(--font-dm-serif, serif); font-size: 13px; font-weight: 400; color: #1D9E75; background: #E1F5EE; border-radius: 8px; padding: 6px 10px; height: fit-content; flex-shrink: 0; margin-top: 2px; letter-spacing: 1px; }
-                .pub-step-title { font-family: var(--font-dm-serif, serif); font-size: 17px; color: #0D1B17; margin-bottom: 4px; }
-                .pub-step-desc { font-size: 14px; color: #8A9E97; line-height: 1.65; }
+                .pub-step-num { font-family: var(--font-dm-serif, serif); font-size: 13px; font-weight: 400; color: #0D9488; background: #F0FDFA; border-radius: 8px; padding: 6px 10px; height: fit-content; flex-shrink: 0; margin-top: 2px; letter-spacing: 1px; }
+                .pub-step-title { font-family: var(--font-dm-serif, serif); font-size: 17px; color: #0F172A; margin-bottom: 4px; }
+                .pub-step-desc { font-size: 14px; color: #64748B; line-height: 1.65; }
 
                 /* Pipeline visual */
                 .pub-pipeline { display: flex; flex-direction: column; align-items: center; gap: 0; }
-                .pub-pipe-node { width: 56px; height: 56px; border-radius: 50%; background: #E1F5EE; border: 2px solid #1D9E75; display: flex; align-items: center; justify-content: center; color: #1D9E75; position: relative; z-index: 2; }
-                .pub-pipe-node-active { background: #1D9E75; border-color: #0F6E56; color: #fff; }
-                .pub-pipe-connector { width: 2px; height: 40px; background: linear-gradient(to bottom, #1D9E75, #C5D6D0); position: relative; }
-                .pub-pipe-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #1D9E75; left: 50%; transform: translateX(-50%); animation: float 2s ease-in-out infinite; }
+                .pub-pipe-node { width: 56px; height: 56px; border-radius: 50%; background: #F0FDFA; border: 2px solid #0D9488; display: flex; align-items: center; justify-content: center; color: #0D9488; position: relative; z-index: 2; }
+                .pub-pipe-node-active { background: #0D9488; border-color: #0F6E56; color: #fff; }
+                .pub-pipe-connector { width: 2px; height: 40px; background: linear-gradient(to bottom, #0D9488, #C5D6D0); position: relative; }
+                .pub-pipe-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #0D9488; left: 50%; transform: translateX(-50%); animation: float 2s ease-in-out infinite; }
                 .pub-pipe-row { display: flex; align-items: center; gap: 20px; }
-                .pub-pipe-label { font-family: var(--font-dm-sans, sans-serif); font-size: 13px; font-weight: 600; color: #2F4A40; }
+                .pub-pipe-label { font-family: var(--font-dm-sans, sans-serif); font-size: 13px; font-weight: 600; color: #334155; }
 
                 /* Footer */
-                .pub-footer { background: #0D1B17; padding: 72px 48px 0; }
+                .pub-footer { background: #0F172A; padding: 72px 48px 0; }
                 .pub-footer-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 48px; padding-bottom: 56px; }
                 .pub-footer-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; text-decoration: none; }
-                .pub-footer-tagline { font-size: 12px; color: rgba(29,158,117,0.7); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+                .pub-footer-tagline { font-size: 12px; color: rgba(13,148,136,0.7); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
                 .pub-footer-desc { font-size: 13.5px; color: rgba(255,255,255,0.4); line-height: 1.65; max-width: 260px; }
                 .pub-footer-col-title { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 18px; }
                 .pub-footer-link { display: block; font-size: 14px; color: rgba(255,255,255,0.55); text-decoration: none; margin-bottom: 10px; transition: color 0.15s; }
@@ -238,7 +238,7 @@ export default function HomePage() {
             {/* ── HERO ─────────────────────────────────────────────────── */}
             <section className="pub-home-hero">
                 {/* Background glow */}
-                <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(29,158,117,0.12) 0%, transparent 65%)', top: -200, right: -100, pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(13,148,136,0.12) 0%, transparent 65%)', top: -200, right: -100, pointerEvents: 'none' }} />
                 <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(8,80,65,0.1) 0%, transparent 65%)', bottom: -100, left: -80, pointerEvents: 'none' }} />
 
                 <div className="pub-hero-inner">
@@ -250,7 +250,7 @@ export default function HomePage() {
                         </div>
                         <h1 className="pub-hero-h1">
                           Where Clinical Precision<br/>
-                          <em style={{ color: '#1D9E75', fontStyle: 'italic' }}>Meets Artificial Intelligence.</em>
+                          <em style={{ color: '#0D9488', fontStyle: 'italic' }}>Meets Artificial Intelligence.</em>
                         </h1>
                         <p className="pub-hero-p">
                             Diagnovate harnesses ensemble deep learning to analyze thyroid ultrasound scans — delivering majority-voted, clinician-ready diagnoses that support and empower physician decision-making.
@@ -262,11 +262,11 @@ export default function HomePage() {
                         <div style={{
                           display: 'flex', alignItems: 'center', gap: 10,
                           marginTop: 32, padding: '14px 20px',
-                          background: 'rgba(29,158,117,0.08)',
-                          border: '1px solid rgba(29,158,117,0.2)',
+                          background: 'rgba(13,148,136,0.08)',
+                          border: '1px solid rgba(13,148,136,0.2)',
                           borderRadius: 12, maxWidth: 420
                         }}>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                           </svg>
                           <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
@@ -284,45 +284,45 @@ export default function HomePage() {
                                 {/* Outer hex */}
                                 <polygon
                                     points="150,10 280,80 280,260 150,330 20,260 20,80"
-                                    fill="rgba(29,158,117,0.04)"
-                                    stroke="#1D9E75"
+                                    fill="rgba(13,148,136,0.04)"
+                                    stroke="#0D9488"
                                     strokeWidth="1.5"
                                     style={{ animation: 'hexPulse 2.5s ease-in-out infinite' }}
                                 />
                                 {/* Inner hex */}
                                 <polygon
                                     points="150,50 245,102 245,238 150,290 55,238 55,102"
-                                    fill="rgba(29,158,117,0.06)"
-                                    stroke="#1D9E75"
+                                    fill="rgba(13,148,136,0.06)"
+                                    stroke="#0D9488"
                                     strokeWidth="1"
                                     strokeDasharray="6 4"
                                     opacity="0.6"
                                 />
                                 {/* Scan area */}
-                                <rect x="80" y="120" width="140" height="100" rx="8" fill="rgba(29,158,117,0.05)" stroke="rgba(29,158,117,0.3)" strokeWidth="1" />
+                                <rect x="80" y="120" width="140" height="100" rx="8" fill="rgba(13,148,136,0.05)" stroke="rgba(13,148,136,0.3)" strokeWidth="1" />
                                 {/* Grid lines */}
                                 {[100, 120, 140, 160, 180, 200].map(x => (
                                     <line key={x} x1={x} y1="120" x2={x} y2="220"
-                                        stroke="rgba(29,158,117,0.15)" strokeWidth="0.5" />
+                                        stroke="rgba(13,148,136,0.15)" strokeWidth="0.5" />
                                 ))}
                                 {[140, 160, 180, 200].map(y => (
                                     <line key={y} x1="80" y1={y} x2="220" y2={y}
-                                        stroke="rgba(29,158,117,0.15)" strokeWidth="0.5" />
+                                        stroke="rgba(13,148,136,0.15)" strokeWidth="0.5" />
                                 ))}
                                 {/* Nodule simulation */}
-                                <circle cx="140" cy="170" r="22" fill="rgba(29,158,117,0.15)" stroke="#1D9E75" strokeWidth="1.5" />
-                                <circle cx="140" cy="170" r="10" fill="rgba(29,158,117,0.35)" />
+                                <circle cx="140" cy="170" r="22" fill="rgba(13,148,136,0.15)" stroke="#0D9488" strokeWidth="1.5" />
+                                <circle cx="140" cy="170" r="10" fill="rgba(13,148,136,0.35)" />
                                 {/* Crosshair */}
-                                <line x1="118" y1="170" x2="162" y2="170" stroke="#1D9E75" strokeWidth="1" strokeDasharray="3 2" />
-                                <line x1="140" y1="148" x2="140" y2="192" stroke="#1D9E75" strokeWidth="1" strokeDasharray="3 2" />
+                                <line x1="118" y1="170" x2="162" y2="170" stroke="#0D9488" strokeWidth="1" strokeDasharray="3 2" />
+                                <line x1="140" y1="148" x2="140" y2="192" stroke="#0D9488" strokeWidth="1" strokeDasharray="3 2" />
                                 {/* AI label */}
-                                <rect x="155" y="155" width="58" height="18" rx="4" fill="rgba(29,158,117,0.15)" />
+                                <rect x="155" y="155" width="58" height="18" rx="4" fill="rgba(13,148,136,0.15)" />
                                 <text x="184" y="168" textAnchor="middle" fill="#5DCAA5" fontSize="9" fontFamily="monospace" fontWeight="700">THYROID AI</text>
                                 {/* Corner marks */}
-                                <path d="M80,120 L96,120 M80,120 L80,136" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round" />
-                                <path d="M220,120 L204,120 M220,120 L220,136" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round" />
-                                <path d="M80,220 L96,220 M80,220 L80,204" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round" />
-                                <path d="M220,220 L204,220 M220,220 L220,204" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round" />
+                                <path d="M80,120 L96,120 M80,120 L80,136" stroke="#0D9488" strokeWidth="2" strokeLinecap="round" />
+                                <path d="M220,120 L204,120 M220,120 L220,136" stroke="#0D9488" strokeWidth="2" strokeLinecap="round" />
+                                <path d="M80,220 L96,220 M80,220 L80,204" stroke="#0D9488" strokeWidth="2" strokeLinecap="round" />
+                                <path d="M220,220 L204,220 M220,220 L220,204" stroke="#0D9488" strokeWidth="2" strokeLinecap="round" />
                             </svg>
 
                             {/* Scan line animation */}
@@ -333,10 +333,10 @@ export default function HomePage() {
                             {/* Floating cards */}
                             <div className="pub-float-card pub-fc-1">
                                 <div>
-                                    <div className="pub-fc-num" style={{ color: '#1D9E75' }}>97.4%</div>
+                                    <div className="pub-fc-num" style={{ color: '#0D9488' }}>97.4%</div>
                                     <div className="pub-fc-lbl">Confidence Score</div>
                                 </div>
-                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#1D9E75', flexShrink: 0 }} />
+                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#0D9488', flexShrink: 0 }} />
                             </div>
                             <div className="pub-float-card pub-fc-2">
                                 <div>
@@ -347,7 +347,7 @@ export default function HomePage() {
                             <div className="pub-float-card pub-fc-3">
                                 <span className="pub-fc-dot" />
                                 <div>
-                                    <div style={{ fontSize: 12, fontWeight: 700, color: '#0D1B17' }}>Models Online</div>
+                                    <div style={{ fontSize: 12, fontWeight: 700, color: '#0F172A' }}>Models Online</div>
                                     <div className="pub-fc-lbl">3 / 3 Active</div>
                                 </div>
                             </div>
@@ -399,12 +399,12 @@ export default function HomePage() {
                 {/* IMAGE PIPELINE */}
                 <div style={{ marginTop: 48 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#1D9E75', flexShrink: 0 }} />
-                    <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', color: '#1D9E75' }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#0D9488', flexShrink: 0 }} />
+                    <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', color: '#0D9488' }}>
                       Ultrasound Image Pipeline
                     </span>
-                    <div style={{ flex: 1, height: 1, background: 'rgba(29,158,117,0.2)' }} />
-                    <span style={{ fontSize: 11, color: '#8A9E97', whiteSpace: 'nowrap' }}>3 Vision Models</span>
+                    <div style={{ flex: 1, height: 1, background: 'rgba(13,148,136,0.2)' }} />
+                    <span style={{ fontSize: 11, color: '#64748B', whiteSpace: 'nowrap' }}>3 Vision Models</span>
                   </div>
                   <div className="pub-models-grid">
                     {models.filter(m => m.category === 'Image').map(m => (
@@ -412,29 +412,29 @@ export default function HomePage() {
                         style={m.dark ? { position: 'relative', overflow: 'hidden' } : {}}>
                         {m.dark && (
                           <div style={{ position: 'absolute', width: 200, height: 200, borderRadius: '50%',
-                            background: 'radial-gradient(circle, rgba(29,158,117,0.25) 0%, transparent 70%)',
+                            background: 'radial-gradient(circle, rgba(13,148,136,0.25) 0%, transparent 70%)',
                             top: -60, right: -60, pointerEvents: 'none', zIndex: 0 }} />
                         )}
                         {m.badge && <span className="pub-model-badge">{m.badge}</span>}
                         <div style={{ position: 'relative', zIndex: 1 }}>
                           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase',
-                            color: m.dark ? 'rgba(93,202,165,0.7)' : '#8A9E97', marginBottom: 8 }}>Vision Model</div>
+                            color: m.dark ? 'rgba(93,202,165,0.7)' : '#64748B', marginBottom: 8 }}>Vision Model</div>
                           <div className={m.dark ? 'pub-model-name-dark' : 'pub-model-name-light'}>{m.name}</div>
                           <div className={m.dark ? 'pub-model-desc-dark' : 'pub-model-desc-light'}>{m.desc}</div>
                           {m.acc && (
                             <div style={{ display: 'flex', gap: 16, margin: '14px 0',
                               padding: '10px 14px', borderRadius: 8,
-                              background: m.dark ? 'rgba(29,158,117,0.12)' : '#F4F9F7' }}>
+                              background: m.dark ? 'rgba(13,148,136,0.12)' : '#F8FAFC' }}>
                               <div>
                                 <div style={{ fontSize: 18, fontFamily: 'var(--font-dm-serif, serif)',
-                                  color: m.dark ? '#5DCAA5' : '#1D9E75' }}>{m.acc}</div>
-                                <div style={{ fontSize: 10, color: m.dark ? 'rgba(255,255,255,0.4)' : '#8A9E97', letterSpacing: 0.5 }}>Accuracy</div>
+                                  color: m.dark ? '#5DCAA5' : '#0D9488' }}>{m.acc}</div>
+                                <div style={{ fontSize: 10, color: m.dark ? 'rgba(255,255,255,0.4)' : '#64748B', letterSpacing: 0.5 }}>Accuracy</div>
                               </div>
-                              <div style={{ width: 1, background: m.dark ? 'rgba(255,255,255,0.1)' : '#E1F5EE' }} />
+                              <div style={{ width: 1, background: m.dark ? 'rgba(255,255,255,0.1)' : '#F0FDFA' }} />
                               <div>
                                 <div style={{ fontSize: 18, fontFamily: 'var(--font-dm-serif, serif)',
-                                  color: m.dark ? '#5DCAA5' : '#1D9E75' }}>{m.auc}</div>
-                                <div style={{ fontSize: 10, color: m.dark ? 'rgba(255,255,255,0.4)' : '#8A9E97', letterSpacing: 0.5 }}>AUC Score</div>
+                                  color: m.dark ? '#5DCAA5' : '#0D9488' }}>{m.auc}</div>
+                                <div style={{ fontSize: 10, color: m.dark ? 'rgba(255,255,255,0.4)' : '#64748B', letterSpacing: 0.5 }}>AUC Score</div>
                               </div>
                             </div>
                           )}
@@ -448,21 +448,21 @@ export default function HomePage() {
                 {/* LAB PIPELINE */}
                 <div style={{ marginTop: 48 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#1D9E75', flexShrink: 0 }} />
-                    <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', color: '#1D9E75' }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#0D9488', flexShrink: 0 }} />
+                    <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase', color: '#0D9488' }}>
                       Lab Results Pipeline
                     </span>
-                    <div style={{ flex: 1, height: 1, background: 'rgba(29,158,117,0.2)' }} />
-                    <span style={{ fontSize: 11, color: '#8A9E97', whiteSpace: 'nowrap' }}>3 ML Models</span>
+                    <div style={{ flex: 1, height: 1, background: 'rgba(13,148,136,0.2)' }} />
+                    <span style={{ fontSize: 11, color: '#64748B', whiteSpace: 'nowrap' }}>3 ML Models</span>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
                     {models.filter(m => m.category === 'Lab').map(m => (
                       <div key={m.name} className="pub-model-card pub-model-card-light">
                         {m.badge && <span className="pub-model-badge" style={{
-                          background: 'rgba(29,158,117,0.1)', border: '1px solid rgba(29,158,117,0.3)',
+                          background: 'rgba(13,148,136,0.1)', border: '1px solid rgba(13,148,136,0.3)',
                           color: '#0F6E56', borderRadius: 100 }}>{m.badge}</span>}
                         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5,
-                          textTransform: 'uppercase', color: '#8A9E97', marginBottom: 8,
+                          textTransform: 'uppercase', color: '#64748B', marginBottom: 8,
                           marginTop: m.badge ? 8 : 0 }}>Lab Model</div>
                         <div className="pub-model-name-light">{m.name}</div>
                         <div className="pub-model-desc-light">{m.desc}</div>
@@ -474,17 +474,17 @@ export default function HomePage() {
 
                 {/* ADDITIONAL MODELS NOTE */}
                 <div style={{ marginTop: 32, padding: '16px 24px', background: '#fff',
-                  border: '1px solid #E1F5EE', borderRadius: 12,
+                  border: '1px solid #F0FDFA', borderRadius: 12,
                   display: 'flex', alignItems: 'center', gap: 16 }}>
                   <div style={{ display: 'flex', gap: 8 }}>
                     {['Enhancement', 'Auto-Select', 'Report'].map(tag => (
                       <span key={tag} style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1,
                         textTransform: 'uppercase', padding: '4px 12px', borderRadius: 100,
-                        background: '#E1F5EE', color: '#0F6E56' }}>{tag}</span>
+                        background: '#F0FDFA', color: '#0F6E56' }}>{tag}</span>
                     ))}
                   </div>
-                  <div style={{ width: 1, height: 28, background: '#E1F5EE' }} />
-                  <span style={{ fontSize: 13, color: '#8A9E97', lineHeight: 1.5 }}>
+                  <div style={{ width: 1, height: 28, background: '#F0FDFA' }} />
+                  <span style={{ fontSize: 13, color: '#64748B', lineHeight: 1.5 }}>
                     Plus dedicated models for image enhancement, automatic pipeline selection, and structured report generation.
                   </span>
                 </div>
@@ -538,11 +538,11 @@ export default function HomePage() {
                                 );
                             })}
                             {/* Confidence badge */}
-                            <div style={{ marginTop: 24, background: '#E1F5EE', border: '1px solid #C5D6D0', borderRadius: 12, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#1D9E75', animation: 'dotBlink 1.4s ease-in-out infinite' }} />
+                            <div style={{ marginTop: 24, background: '#F0FDFA', border: '1px solid #C5D6D0', borderRadius: 12, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#0D9488', animation: 'dotBlink 1.4s ease-in-out infinite' }} />
                                 <div>
-                                    <div style={{ fontFamily: 'var(--font-dm-serif, serif)', fontSize: 20, color: '#0D1B17', lineHeight: 1 }}>97.4%</div>
-                                    <div style={{ fontSize: 11, color: '#8A9E97', marginTop: 2 }}>Confidence · Majority Vote</div>
+                                    <div style={{ fontFamily: 'var(--font-dm-serif, serif)', fontSize: 20, color: '#0F172A', lineHeight: 1 }}>97.4%</div>
+                                    <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>Confidence · Majority Vote</div>
                                 </div>
                             </div>
                         </div>
@@ -557,11 +557,11 @@ export default function HomePage() {
                     <div>
                         <Link href="/" className="pub-footer-logo">
                             <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
-                                <polygon points="18,2 32,9.5 32,26.5 18,34 4,26.5 4,9.5" fill="#1D9E75" opacity="0.15" stroke="#1D9E75" strokeWidth="1.5" />
-                                <circle cx="18" cy="18" r="5" fill="#1D9E75" />
+                                <polygon points="18,2 32,9.5 32,26.5 18,34 4,26.5 4,9.5" fill="#0D9488" opacity="0.15" stroke="#0D9488" strokeWidth="1.5" />
+                                <circle cx="18" cy="18" r="5" fill="#0D9488" />
                             </svg>
                             <span style={{ fontFamily: 'var(--font-dm-serif, serif)', fontSize: 18, color: '#fff' }}>
-                                Diagn<em style={{ fontStyle: 'italic', color: '#1D9E75' }}>ovate</em>
+                                Diagn<em style={{ fontStyle: 'italic', color: '#0D9488' }}>ovate</em>
                             </span>
                         </Link>
                         <div className="pub-footer-tagline">Medical AI Diagnostics</div>

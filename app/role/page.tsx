@@ -1,174 +1,356 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ShieldCheck, Stethoscope } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ShieldCheck, Stethoscope, ArrowRight } from 'lucide-react';
 
 export default function RolePage() {
+    const router = useRouter();
+    const [hov, setHov] = useState<'admin' | 'doctor' | null>(null);
+
     return (
         <>
             <style>{`
-                .rl-page{position:relative;z-index:1;min-height:100vh;background:#F0F7F4;display:flex;flex-direction:column;overflow-x:hidden}
-                .rl-hex{position:fixed;inset:0;width:100%;height:100%;opacity:.035;pointer-events:none;z-index:0}
-                .rl-blob{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
-                .rl-blob-1{width:600px;height:600px;background:radial-gradient(circle,rgba(29,158,117,.06) 0%,transparent 65%);top:-200px;right:-150px}
-                .rl-blob-2{width:400px;height:400px;background:radial-gradient(circle,rgba(8,80,65,.04) 0%,transparent 65%);bottom:-120px;left:-100px}
+                *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-                .rl-nav{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:68px;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(29,158,117,.08);flex-shrink:0}
-                .rl-logo{display:flex;align-items:center;gap:12px;text-decoration:none}
-                .rl-logo-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#1D9E75,#0D9488);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(29,158,117,.3);flex-shrink:0}
-                .rl-logo-word{font-family:'DM Serif Display',serif;font-size:20px;color:#0D1B17;letter-spacing:-.3px}
-                .rl-logo-word em{font-style:italic;color:#1D9E75}
-                .rl-back{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#2F4A40;text-decoration:none;padding:8px 16px;border:1.5px solid #D1E5DC;border-radius:10px;background:white;transition:all .18s}
-                .rl-back:hover{border-color:#1D9E75;color:#1D9E75;background:#F0F7F4}
-
-                .rl-main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px}
-
-                .rl-header{text-align:center;margin-bottom:52px;animation:rlFadeUp .55s ease both}
-                .rl-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(29,158,117,.07);border:1px solid rgba(29,158,117,.18);color:#0F6E56;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:100px;margin-bottom:22px}
-                .rl-badge-dot{width:7px;height:7px;border-radius:50%;background:#1D9E75;animation:rlBlink 2s ease-in-out infinite;box-shadow:0 0 0 3px rgba(29,158,117,.15)}
-                .rl-h1{font-family:'DM Serif Display',serif;font-size:clamp(34px,5vw,52px);font-weight:400;line-height:1.1;letter-spacing:-1px;color:#0D1B17;margin-bottom:14px}
-                .rl-h1 em{font-style:italic;color:#1D9E75}
-                .rl-sub{font-size:16px;color:#8A9E97;max-width:440px;margin:0 auto;line-height:1.65}
-
-                .rl-cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:860px;width:100%;animation:rlFadeUp .55s .15s ease both}
-                .rl-card{position:relative;background:white;border:1.5px solid #D1E5DC;border-radius:24px;padding:40px 36px;text-decoration:none;color:#0D1B17;transition:all .25s cubic-bezier(.4,0,.2,1);overflow:hidden;box-shadow:0 2px 12px rgba(13,27,23,.05),0 8px 32px rgba(13,27,23,.03)}
-                .rl-card:hover{transform:translateY(-10px)}
-                .rl-card--admin:hover{border-color:#BFDBFE;box-shadow:0 8px 32px rgba(30,64,175,.1),0 32px 72px rgba(30,64,175,.07)}
-                .rl-card--doctor:hover{border-color:rgba(29,158,117,.4);box-shadow:0 8px 32px rgba(29,158,117,.1),0 32px 72px rgba(29,158,117,.07)}
-
-                .rl-check{position:absolute;top:16px;right:16px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .25s}
-                .rl-card:hover .rl-check{opacity:1}
-                .rl-check--admin{background:#3B82F6}
-                .rl-check--doctor{background:#1D9E75}
-
-                .rl-icon{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:24px}
-                .rl-tag{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
-                .rl-h2{font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;letter-spacing:-.5px;color:#0D1B17;margin-bottom:12px;line-height:1.1}
-                .rl-p{font-size:14px;color:#8A9E97;line-height:1.65;margin-bottom:28px}
-                .rl-perms{display:flex;flex-direction:column;gap:8px;margin-bottom:32px}
-                .rl-perm{display:flex;align-items:center;gap:9px;font-size:13px;color:#334E47;font-weight:500}
-                .rl-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-                .rl-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:700;padding:13px 24px;border-radius:12px;border:none;cursor:pointer;transition:all .25s;width:100%;color:white}
-                .rl-btn svg{transition:transform .25s}
-                .rl-card:hover .rl-btn svg{transform:translateX(4px)}
-
-                .rl-footer{position:relative;z-index:1;text-align:center;padding:20px 24px 36px;display:flex;flex-direction:column;align-items:center;gap:10px}
-                .rl-footer-text{font-size:11px;color:#8A9E97;letter-spacing:.3px}
-                .rl-badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-                .rl-badge-comp{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8A9E97;border:1px solid #D1E5DC;padding:3px 10px;border-radius:100px}
-
-                @keyframes rlFadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-                @keyframes rlBlink{0%,100%{opacity:1}50%{opacity:.4}}
-
-                @media(max-width:720px){
-                    .rl-nav{padding:0 20px}
-                    .rl-cards{grid-template-columns:1fr}
-                    .rl-main{padding:40px 16px}
+                .rp-page {
+                    min-height: 100vh;
+                    background: #F0F4F8;
+                    display: flex;
+                    flex-direction: column;
+                    position: relative;
+                    overflow-x: hidden;
                 }
+                .rp-page::before {
+                    content: '';
+                    position: absolute; inset: 0;
+                    background-image: radial-gradient(circle, rgba(13,148,136,0.04) 1px, transparent 1px);
+                    background-size: 28px 28px;
+                    pointer-events: none; z-index: 0;
+                }
+
+                /* Navbar */
+                .rp-nav {
+                    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+                    height: 68px;
+                    background: rgba(255,255,255,0.95);
+                    backdrop-filter: blur(20px);
+                    -webkit-backdrop-filter: blur(20px);
+                    border-bottom: 1px solid #EBF0F5;
+                    display: flex; align-items: center; justify-content: space-between;
+                    padding: 0 48px;
+                    box-shadow: 0 1px 0 rgba(13,148,136,0.05);
+                }
+                .rp-back {
+                    display: inline-flex; align-items: center; gap: 7px;
+                    font-family: 'DM Sans', sans-serif;
+                    font-size: 13px; font-weight: 600; color: #64748B;
+                    text-decoration: none; padding: 7px 14px;
+                    background: #F8FAFC; border: 1px solid #E2E8F0;
+                    border-radius: 10px; transition: all 0.18s;
+                }
+                .rp-back:hover { color: #0D9488; border-color: #CCFBF1; background: #F0FDFA; transform: translateX(-2px); }
+                .rp-wordmark { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+                .rp-mark {
+                    width: 38px; height: 38px; border-radius: 11px;
+                    background: linear-gradient(140deg, #0D9488, #0891B2);
+                    display: flex; align-items: center; justify-content: center;
+                    box-shadow: 0 4px 12px rgba(13,148,136,0.28);
+                }
+                .rp-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: #0F172A; letter-spacing: -0.3px; }
+                .rp-name em { color: #0D9488; font-style: italic; }
+                .rp-nav-r {
+                    display: inline-flex; align-items: center; gap: 6px;
+                    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; color: #94A3B8;
+                }
+
+                /* Body */
+                .rp-body {
+                    flex: 1;
+                    display: flex; flex-direction: column; align-items: center; justify-content: center;
+                    padding: 104px 24px 64px;
+                    position: relative; z-index: 1;
+                    max-width: 1000px; margin: 0 auto; width: 100%;
+                }
+
+                /* Logo header */
+                .rp-logo-wrap {
+                    display: flex; align-items: center; gap: 12px;
+                    margin-bottom: 10px;
+                    animation: rpFadeUp 0.5s cubic-bezier(.16,1,.3,1) both;
+                }
+                .rp-logo-mark {
+                    width: 52px; height: 52px; border-radius: 15px;
+                    background: linear-gradient(140deg, #0D9488, #0891B2);
+                    display: flex; align-items: center; justify-content: center;
+                    box-shadow: 0 6px 20px rgba(13,148,136,0.3);
+                }
+                .rp-logo-name { font-family: 'DM Serif Display', serif; font-size: 28px; color: #0F172A; letter-spacing: -0.5px; }
+                .rp-logo-name em { color: #0D9488; font-style: italic; }
+                .rp-subtitle {
+                    font-family: 'DM Sans', sans-serif; font-size: 15px; color: #64748B;
+                    text-align: center; margin-bottom: 48px;
+                    animation: rpFadeUp 0.5s 0.06s cubic-bezier(.16,1,.3,1) both;
+                }
+
+                /* Cards */
+                .rp-cards {
+                    display: grid; grid-template-columns: 1fr 1fr;
+                    gap: 24px; width: 100%; margin-bottom: 40px;
+                    animation: rpFadeUp 0.5s 0.12s cubic-bezier(.16,1,.3,1) both;
+                }
+                .rp-card {
+                    background: white;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 16px;
+                    padding: 40px 32px;
+                    cursor: pointer;
+                    transition: all 250ms ease;
+                    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+                    position: relative; overflow: hidden;
+                }
+                /* top accent bar */
+                .rp-card::before {
+                    content: ''; position: absolute;
+                    top: 0; left: 0; right: 0; height: 3px;
+                    background: linear-gradient(90deg, #0D9488, #0891B2);
+                    opacity: 0; transition: opacity 0.25s;
+                }
+                .rp-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 16px 48px rgba(13,148,136,0.12), 0 4px 16px rgba(15,23,42,0.06);
+                    border-color: rgba(13,148,136,0.25);
+                }
+                .rp-card:hover::before { opacity: 1; }
+
+                /* Icon */
+                .rp-icon {
+                    width: 56px; height: 56px; border-radius: 50%;
+                    background: #0D9488;
+                    display: flex; align-items: center; justify-content: center;
+                    margin-bottom: 20px;
+                    box-shadow: 0 6px 20px rgba(13,148,136,0.28);
+                    transition: transform 0.25s, box-shadow 0.25s;
+                }
+                .rp-card:hover .rp-icon { transform: scale(1.06); box-shadow: 0 10px 28px rgba(13,148,136,0.38); }
+
+                /* Role badge */
+                .rp-role-badge {
+                    display: inline-flex; align-items: center; gap: 6px;
+                    padding: 4px 12px;
+                    background: rgba(13,148,136,0.08);
+                    border: 1px solid rgba(13,148,136,0.2);
+                    border-radius: 9999px;
+                    font-family: 'DM Sans', sans-serif;
+                    font-size: 10.5px; font-weight: 700; letter-spacing: 1.5px;
+                    text-transform: uppercase; color: #0D9488;
+                    margin-bottom: 16px;
+                }
+                .rp-role-dot { width: 6px; height: 6px; border-radius: 50%; background: #0D9488; flex-shrink: 0; }
+
+                /* Card title */
+                .rp-card-h { font-size: clamp(26px, 2.5vw, 34px); color: #0F172A; margin-bottom: 12px; line-height: 1.1; }
+                .rp-card-h strong { font-weight: 800; }
+                .rp-card-h em { font-style: italic; color: #0D9488; font-family: Georgia, 'DM Serif Display', serif; }
+
+                /* Card desc */
+                .rp-card-sub {
+                    font-family: 'DM Sans', sans-serif;
+                    font-size: 14px; color: #64748B; line-height: 1.65;
+                    margin-bottom: 24px;
+                }
+
+                /* Feature list */
+                .rp-features { display: flex; flex-direction: column; gap: 9px; margin-bottom: 32px; }
+                .rp-feat {
+                    display: flex; align-items: center; gap: 10px;
+                    font-family: 'DM Sans', sans-serif;
+                    font-size: 13.5px; font-weight: 500; color: #334155;
+                }
+                .rp-feat-dot {
+                    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+                    background: #0D9488; box-shadow: 0 0 0 3px rgba(13,148,136,0.15);
+                }
+
+                /* Button */
+                .rp-btn {
+                    display: flex; align-items: center; justify-content: center; gap: 9px;
+                    width: 100%; padding: 14px;
+                    background: #0D9488; color: white;
+                    border: none; border-radius: 10px;
+                    font-family: 'DM Sans', sans-serif;
+                    font-size: 15px; font-weight: 700;
+                    cursor: pointer;
+                    box-shadow: 0 4px 16px rgba(13,148,136,0.28);
+                    transition: all 0.2s;
+                }
+                .rp-btn:hover { background: #0F766E; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(13,148,136,0.38); }
+                .rp-btn:active { transform: scale(0.98); }
+
+                /* Compliance footer */
+                .rp-foot {
+                    display: flex; flex-direction: column; align-items: center; gap: 10px;
+                    animation: rpFadeUp 0.5s 0.18s cubic-bezier(.16,1,.3,1) both;
+                }
+                .rp-compliance { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+                .rp-comp {
+                    font-family: 'DM Sans', sans-serif;
+                    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+                    text-transform: uppercase; color: white;
+                    background: #1E293B; padding: 4px 12px; border-radius: 9999px;
+                }
+                .rp-secure-txt { font-family: 'DM Sans', sans-serif; font-size: 11.5px; color: #94A3B8; }
+
+                /* Responsive */
+                @media (max-width: 760px) {
+                    .rp-cards { grid-template-columns: 1fr; max-width: 480px; margin-left: auto; margin-right: auto; }
+                    .rp-nav { padding: 0 20px; }
+                    .rp-body { padding: 92px 16px 48px; }
+                }
+                @media (max-width: 480px) {
+                    .rp-card { padding: 28px 24px 24px; }
+                    .rp-nav-r { display: none; }
+                }
+
+                @keyframes rpFadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
             `}</style>
 
-            {/* Hex grid */}
-            <svg className="rl-hex" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <pattern id="rlHex" x="0" y="0" width="56" height="48" patternUnits="userSpaceOnUse">
-                        <polygon points="28,2 52,14 52,38 28,50 4,38 4,14" fill="none" stroke="#1D9E75" strokeWidth="1"/>
-                    </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#rlHex)"/>
-            </svg>
-            <span className="rl-blob rl-blob-1"/>
-            <span className="rl-blob rl-blob-2"/>
+            <div className="rp-page">
 
-            <div className="rl-page">
+                {/* Navbar */}
+                <nav className="rp-nav">
+                    <Link href="/" className="rp-back">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                            <polyline points="15 18 9 12 15 6"/>
+                        </svg>
+                        Back to Home
+                    </Link>
 
-                {/* Nav */}
-                <nav className="rl-nav">
-                    <Link href="/" className="rl-logo">
-                        <div className="rl-logo-mark">
+                    <Link href="/" className="rp-wordmark">
+                        <div className="rp-mark">
                             <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
-                                <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/>
+                                <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5"/>
                                 <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
                                 <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
                                 <circle cx="20" cy="20" r="3.5" fill="white"/>
                             </svg>
                         </div>
-                        <span className="rl-logo-word">Diagno<em>vate</em></span>
+                        <span className="rp-name">Diagn<em>ovate</em></span>
                     </Link>
-                    <Link href="/" className="rl-back">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-                        Back to Home
-                    </Link>
+
+                    <div className="rp-nav-r">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        Secure access
+                    </div>
                 </nav>
 
-                {/* Main */}
-                <div className="rl-main">
-                    <div className="rl-header">
-                        <div className="rl-badge"><span className="rl-badge-dot"/>Secure Access</div>
-                        <h1 className="rl-h1">Select your<br/><em>role</em> to continue.</h1>
-                        <p className="rl-sub">Each role provides a tailored experience built for your specific workflow and permissions.</p>
+                {/* Body */}
+                <div className="rp-body">
+
+                    {/* Logo + subtitle */}
+                    <div className="rp-logo-wrap">
+                        <div className="rp-logo-mark">
+                            <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+                                <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5"/>
+                                <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                                <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                                <circle cx="20" cy="20" r="3.5" fill="white"/>
+                            </svg>
+                        </div>
+                        <span className="rp-logo-name">Diagn<em>ovate</em></span>
                     </div>
 
-                    <div className="rl-cards">
+                    <p className="rp-subtitle">Select your access portal</p>
+
+                    {/* Cards */}
+                    <div className="rp-cards">
+
                         {/* Admin card */}
-                        <Link href="/log-in?role=admin" className="rl-card rl-card--admin">
-                            <div className="rl-check rl-check--admin">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        <div
+                            className="rp-card"
+                            onClick={() => router.push('/log-in?role=admin')}
+                            onMouseEnter={() => setHov('admin')}
+                            onMouseLeave={() => setHov(null)}
+                            style={{ opacity: hov === 'doctor' ? 0.7 : 1 }}
+                        >
+                            <div className="rp-icon">
+                                <ShieldCheck size={26} color="white"/>
                             </div>
-                            <div className="rl-icon" style={{background:'linear-gradient(135deg,#1E40AF,#3B82F6)',boxShadow:'0 8px 24px rgba(30,64,175,.3)'}}>
-                                <ShieldCheck size={28} color="white"/>
+                            <div className="rp-role-badge">
+                                <span className="rp-role-dot"/>
+                                Administrator
                             </div>
-                            <div className="rl-tag" style={{color:'#1E40AF'}}>Administrator</div>
-                            <div className="rl-h2">Admin Console</div>
-                            <p className="rl-p">Oversee the entire platform — verify clinicians, review diagnostic submissions, monitor AI performance, and configure system-wide settings.</p>
-                            <div className="rl-perms">
-                                {['Doctor account management','Request approval & rejection','Platform analytics access','System configuration'].map(p => (
-                                    <div key={p} className="rl-perm">
-                                        <span className="rl-dot" style={{background:'#3B82F6'}}/>
-                                        {p}
+                            <h2 className="rp-card-h">
+                                <strong>Admin</strong> <em>Console.</em>
+                            </h2>
+                            <p className="rp-card-sub">
+                                Platform oversight, clinician verification, and system control.
+                            </p>
+                            <div className="rp-features">
+                                {['Doctor account management', 'Request approval & review', 'Platform analytics', 'System configuration'].map(f => (
+                                    <div key={f} className="rp-feat">
+                                        <span className="rp-feat-dot"/>
+                                        {f}
                                     </div>
                                 ))}
                             </div>
-                            <div className="rl-btn" style={{background:'linear-gradient(135deg,#1E40AF,#3B82F6)',boxShadow:'0 6px 20px rgba(30,64,175,.3)'}}>
-                                Enter as Admin <ArrowRight size={16}/>
-                            </div>
-                        </Link>
+                            <button className="rp-btn">
+                                Enter Admin Console
+                                <ArrowRight size={16}/>
+                            </button>
+                        </div>
 
                         {/* Doctor card */}
-                        <Link href="/log-in?role=doctor" className="rl-card rl-card--doctor">
-                            <div className="rl-check rl-check--doctor">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        <div
+                            className="rp-card"
+                            onClick={() => router.push('/log-in?role=doctor')}
+                            onMouseEnter={() => setHov('doctor')}
+                            onMouseLeave={() => setHov(null)}
+                            style={{ opacity: hov === 'admin' ? 0.7 : 1 }}
+                        >
+                            <div className="rp-icon">
+                                <Stethoscope size={26} color="white"/>
                             </div>
-                            <div className="rl-icon" style={{background:'linear-gradient(135deg,#1D9E75,#0D9488)',boxShadow:'0 8px 24px rgba(29,158,117,.3)'}}>
-                                <Stethoscope size={28} color="white"/>
+                            <div className="rp-role-badge">
+                                <span className="rp-role-dot"/>
+                                Clinician
                             </div>
-                            <div className="rl-tag" style={{color:'#1D9E75'}}>Clinician</div>
-                            <div className="rl-h2">Doctor Portal</div>
-                            <p className="rl-p">Your AI-powered clinical workspace — enhance ultrasound imagery, run ensemble diagnostics, manage patient records, and generate clinical-grade reports.</p>
-                            <div className="rl-perms">
-                                {['AI-powered image enhancement','Ensemble diagnostic analysis','Patient record management','Clinical report generation'].map(p => (
-                                    <div key={p} className="rl-perm">
-                                        <span className="rl-dot" style={{background:'#1D9E75'}}/>
-                                        {p}
+                            <h2 className="rp-card-h">
+                                <strong>Doctor</strong> <em>Portal.</em>
+                            </h2>
+                            <p className="rp-card-sub">
+                                AI-powered diagnostics, patient management, and clinical report generation.
+                            </p>
+                            <div className="rp-features">
+                                {['AI-powered image enhancement', 'Ensemble diagnostic analysis', 'Patient record management', 'Clinical report generation'].map(f => (
+                                    <div key={f} className="rp-feat">
+                                        <span className="rp-feat-dot"/>
+                                        {f}
                                     </div>
                                 ))}
                             </div>
-                            <div className="rl-btn" style={{background:'linear-gradient(135deg,#1D9E75,#0D9488)',boxShadow:'0 6px 20px rgba(29,158,117,.3)'}}>
-                                Enter as Doctor <ArrowRight size={16}/>
-                            </div>
-                        </Link>
-                    </div>
-                </div>
+                            <button className="rp-btn">
+                                Enter Doctor Portal
+                                <ArrowRight size={16}/>
+                            </button>
+                        </div>
 
-                {/* Footer */}
-                <div className="rl-footer">
-                    <p className="rl-footer-text">Protected by JWT authentication · Role-based access control</p>
-                    <div className="rl-badges">
-                        {['HIPAA','ICCR','WHO','TI-RADS','GDPR'].map(t => (
-                            <span key={t} className="rl-badge-comp">{t}</span>
-                        ))}
                     </div>
-                </div>
 
+                    {/* Security badges */}
+                    <div className="rp-foot">
+                        <div className="rp-compliance">
+                            {['HIPAA', 'ICCR', 'WHO', 'TI-RADS', 'GDPR'].map(t => (
+                                <span key={t} className="rp-comp">{t}</span>
+                            ))}
+                        </div>
+                        <p className="rp-secure-txt">Protected by JWT · Role-based access control</p>
+                    </div>
+
+                </div>
             </div>
         </>
     );

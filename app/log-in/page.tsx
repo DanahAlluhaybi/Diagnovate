@@ -60,56 +60,56 @@ function LoginForm() {
         }
     };
 
-    const btnGrad    = isAdmin ? 'linear-gradient(135deg,#1E40AF,#3B82F6)' : 'linear-gradient(135deg,#1D9E75,#0D9488)';
-    const btnShadow  = isAdmin ? '0 6px 20px rgba(30,64,175,0.28)'         : '0 6px 20px rgba(29,158,117,0.28)';
+    const btnGrad    = isAdmin ? 'linear-gradient(135deg,#1E40AF,#3B82F6)' : 'linear-gradient(135deg,#0D9488,#0D9488)';
+    const btnShadow  = isAdmin ? '0 6px 20px rgba(30,64,175,0.28)'         : '0 6px 20px rgba(13,148,136,0.28)';
     const badgeColor = isAdmin ? '#1E40AF'                                  : '#0F6E56';
-    const badgeBg    = isAdmin ? 'rgba(30,64,175,0.07)'                     : 'rgba(29,158,117,0.07)';
-    const badgeBord  = isAdmin ? 'rgba(30,64,175,0.18)'                     : 'rgba(29,158,117,0.18)';
-    const badgeDot   = isAdmin ? '#3B82F6'                                  : '#1D9E75';
+    const badgeBg    = isAdmin ? 'rgba(30,64,175,0.07)'                     : 'rgba(13,148,136,0.07)';
+    const badgeBord  = isAdmin ? 'rgba(30,64,175,0.18)'                     : 'rgba(13,148,136,0.18)';
+    const badgeDot   = isAdmin ? '#3B82F6'                                  : '#0D9488';
 
     return (
         <>
             <style>{`
-                .dgl-page{position:relative;z-index:1;min-height:100vh;background:#F0F7F4;display:flex;flex-direction:column;overflow:hidden}
+                .dgl-page{position:relative;z-index:1;min-height:100vh;background:#F0F4F8;display:flex;flex-direction:column;overflow:hidden}
                 .dgl-hex{position:fixed;inset:0;width:100%;height:100%;opacity:.035;pointer-events:none;z-index:0}
                 .dgl-blob{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
-                .dgl-blob-1{width:600px;height:600px;background:radial-gradient(circle,rgba(29,158,117,.06) 0%,transparent 65%);top:-200px;right:-150px}
+                .dgl-blob-1{width:600px;height:600px;background:radial-gradient(circle,rgba(13,148,136,.06) 0%,transparent 65%);top:-200px;right:-150px}
                 .dgl-blob-2{width:400px;height:400px;background:radial-gradient(circle,rgba(8,80,65,.04) 0%,transparent 65%);bottom:-120px;left:-100px}
 
-                .dgl-topbar{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:68px;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(29,158,117,.08);flex-shrink:0}
+                .dgl-topbar{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:68px;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(13,148,136,.08);flex-shrink:0}
                 .dgl-logo{display:flex;align-items:center;gap:12px;text-decoration:none}
-                .dgl-logo-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#1D9E75,#0D9488);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(29,158,117,.3);flex-shrink:0}
-                .dgl-logo-word{font-family:'DM Serif Display',serif;font-size:20px;color:#0D1B17;letter-spacing:-.3px}
-                .dgl-logo-word em{font-style:italic;color:#1D9E75}
-                .dgl-back{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#2F4A40;text-decoration:none;padding:8px 16px;border:1.5px solid #D1E5DC;border-radius:10px;background:white;transition:all .18s}
-                .dgl-back:hover{border-color:#1D9E75;color:#1D9E75;background:#F0F7F4}
+                .dgl-logo-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#0D9488,#0D9488);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(13,148,136,.3);flex-shrink:0}
+                .dgl-logo-word{font-family:'DM Serif Display',serif;font-size:20px;color:#0F172A;letter-spacing:-.3px}
+                .dgl-logo-word em{font-style:italic;color:#0D9488}
+                .dgl-back{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#334155;text-decoration:none;padding:8px 16px;border:1.5px solid #E2E8F0;border-radius:10px;background:white;transition:all .18s}
+                .dgl-back:hover{border-color:#0D9488;color:#0D9488;background:#F0F4F8}
 
                 .dgl-main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px 40px}
 
-                .dgl-card{width:100%;max-width:440px;background:#fff;border:1px solid rgba(29,158,117,.12);border-radius:24px;padding:48px;box-shadow:0 20px 60px rgba(13,27,23,.08),0 4px 16px rgba(13,27,23,.04);animation:dglFadeUp .45s ease both;position:relative;overflow:hidden}
-                .dgl-top-line{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#1D9E75,#0D9488,#1D9E75,transparent);pointer-events:none}
+                .dgl-card{width:100%;max-width:440px;background:#fff;border:1px solid rgba(13,148,136,.12);border-radius:24px;padding:48px;box-shadow:0 20px 60px rgba(13,27,23,.08),0 4px 16px rgba(13,27,23,.04);animation:dglFadeUp .45s ease both;position:relative;overflow:hidden}
+                .dgl-top-line{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#0D9488,#0D9488,#0D9488,transparent);pointer-events:none}
 
                 .dgl-role-badge{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:100px;margin-bottom:20px;border:1px solid}
                 .dgl-role-dot{width:5px;height:5px;border-radius:50%;animation:dglBlink 2s ease-in-out infinite}
-                .dgl-h2{font-family:'DM Serif Display',serif;font-size:36px;letter-spacing:-.7px;color:#0D1B17;margin-bottom:8px;line-height:1.05}
-                .dgl-sub{font-size:14px;color:#8A9E97;margin-bottom:28px;line-height:1.6}
-                .dgl-sub a{color:#1D9E75;font-weight:700;text-decoration:none}
+                .dgl-h2{font-family:'DM Serif Display',serif;font-size:36px;letter-spacing:-.7px;color:#0F172A;margin-bottom:8px;line-height:1.05}
+                .dgl-sub{font-size:14px;color:#64748B;margin-bottom:28px;line-height:1.6}
+                .dgl-sub a{color:#0D9488;font-weight:700;text-decoration:none}
                 .dgl-sub a:hover{text-decoration:underline}
 
                 .dgl-fields{display:flex;flex-direction:column;gap:14px}
                 .dgl-field{display:flex;flex-direction:column}
-                .dgl-label{display:block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#2F4A40;margin-bottom:7px}
+                .dgl-label{display:block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#334155;margin-bottom:7px}
                 .dgl-iw{position:relative}
-                .dgl-iw-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#8A9E97;pointer-events:none;display:flex;z-index:1}
-                .dgl-input{width:100%;height:50px;background:#F4F9F7;border:1.5px solid #D1E5DC;border-radius:12px;padding:0 44px 0 42px;font-family:'DM Sans',sans-serif;font-size:14.5px;color:#0D1B17;outline:none;transition:all .2s;appearance:none}
-                .dgl-input:focus{border-color:#1D9E75;background:#fff;box-shadow:0 0 0 4px rgba(29,158,117,.1)}
-                .dgl-input::placeholder{color:#8A9E97}
-                .dgl-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#8A9E97;display:flex;padding:4px;transition:color .15s;z-index:2}
-                .dgl-eye:hover{color:#2F4A40}
+                .dgl-iw-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#64748B;pointer-events:none;display:flex;z-index:1}
+                .dgl-input{width:100%;height:50px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:0 44px 0 42px;font-family:'DM Sans',sans-serif;font-size:14.5px;color:#0F172A;outline:none;transition:all .2s;appearance:none}
+                .dgl-input:focus{border-color:#0D9488;background:#fff;box-shadow:0 0 0 4px rgba(13,148,136,.1)}
+                .dgl-input::placeholder{color:#64748B}
+                .dgl-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#64748B;display:flex;padding:4px;transition:color .15s;z-index:2}
+                .dgl-eye:hover{color:#334155}
 
                 .dgl-forgot-row{display:flex;justify-content:flex-end;margin-top:6px}
-                .dgl-forgot{font-size:12.5px;font-weight:600;color:#8A9E97;text-decoration:none;transition:color .15s}
-                .dgl-forgot:hover{color:#1D9E75}
+                .dgl-forgot{font-size:12.5px;font-weight:600;color:#64748B;text-decoration:none;transition:color .15s}
+                .dgl-forgot:hover{color:#0D9488}
 
                 .dgl-alert{display:flex;align-items:center;gap:9px;padding:12px 16px;border-radius:12px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.18);color:#DC2626;font-size:13px;font-weight:600;margin-top:4px}
 
@@ -122,23 +122,23 @@ function LoginForm() {
                 .dgl-divider{display:flex;align-items:center;gap:10px;font-size:12px;color:#C4D4CE;margin:16px 0}
                 .dgl-divider::before,.dgl-divider::after{content:'';flex:1;height:1px;background:#E8F0ED}
 
-                .dgl-ghost{width:100%;height:48px;border-radius:12px;background:#fff;color:#2F4A40;border:1.5px solid #D1E5DC;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .2s;text-decoration:none}
-                .dgl-ghost:hover{border-color:#1D9E75;color:#1D9E75;background:#F0F7F4}
+                .dgl-ghost{width:100%;height:48px;border-radius:12px;background:#fff;color:#334155;border:1.5px solid #E2E8F0;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .2s;text-decoration:none}
+                .dgl-ghost:hover{border-color:#0D9488;color:#0D9488;background:#F0F4F8}
 
                 .dgl-switch-row{display:flex;justify-content:center;margin-top:20px}
-                .dgl-switch{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#8A9E97;text-decoration:none;padding:8px 16px;border:1.5px solid #D1E5DC;border-radius:100px;background:white;transition:all .22s}
-                .dgl-switch:hover{color:#1D9E75;border-color:#1D9E75;background:#F0F7F4;transform:translateY(-1px)}
+                .dgl-switch{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#64748B;text-decoration:none;padding:8px 16px;border:1.5px solid #E2E8F0;border-radius:100px;background:white;transition:all .22s}
+                .dgl-switch:hover{color:#0D9488;border-color:#0D9488;background:#F0F4F8;transform:translateY(-1px)}
 
-                .dgl-otp-input{width:100%;height:56px;background:#F4F9F7;border:1.5px solid #D1E5DC;border-radius:13px;padding:0 20px;font-family:'DM Serif Display',serif;font-size:26px;color:#0D1B17;outline:none;transition:all .2s;letter-spacing:8px;text-align:center}
-                .dgl-otp-input:focus{border-color:#1D9E75;background:#fff;box-shadow:0 0 0 4px rgba(29,158,117,.1)}
+                .dgl-otp-input{width:100%;height:56px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:13px;padding:0 20px;font-family:'DM Serif Display',serif;font-size:26px;color:#0F172A;outline:none;transition:all .2s;letter-spacing:8px;text-align:center}
+                .dgl-otp-input:focus{border-color:#0D9488;background:#fff;box-shadow:0 0 0 4px rgba(13,148,136,.1)}
                 .dgl-otp-input::placeholder{color:#C4D4CE;letter-spacing:6px}
-                .dgl-back-btn{width:100%;height:44px;border-radius:12px;background:#F4F9F7;color:#8A9E97;border:1.5px solid #D1E5DC;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:all .18s;margin-top:10px}
-                .dgl-back-btn:hover{color:#2F4A40;border-color:#8A9E97;background:#E8F0ED}
+                .dgl-back-btn{width:100%;height:44px;border-radius:12px;background:#F8FAFC;color:#64748B;border:1.5px solid #E2E8F0;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:all .18s;margin-top:10px}
+                .dgl-back-btn:hover{color:#334155;border-color:#64748B;background:#E8F0ED}
 
                 .dgl-footer{position:relative;z-index:1;text-align:center;padding:20px 24px 36px;display:flex;flex-direction:column;align-items:center;gap:10px}
-                .dgl-footer-text{font-size:11px;color:#8A9E97;letter-spacing:.3px}
+                .dgl-footer-text{font-size:11px;color:#64748B;letter-spacing:.3px}
                 .dgl-badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-                .dgl-badge-comp{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8A9E97;border:1px solid #D1E5DC;padding:3px 10px;border-radius:100px}
+                .dgl-badge-comp{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#64748B;border:1px solid #E2E8F0;padding:3px 10px;border-radius:100px}
 
                 @keyframes dglFadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
                 @keyframes dglBlink{0%,100%{opacity:1}50%{opacity:.4}}
@@ -157,7 +157,7 @@ function LoginForm() {
                 <svg className="dgl-hex" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <pattern id="dglHex" x="0" y="0" width="56" height="48" patternUnits="userSpaceOnUse">
-                            <polygon points="28,2 52,14 52,38 28,50 4,38 4,14" fill="none" stroke="#1D9E75" strokeWidth="1"/>
+                            <polygon points="28,2 52,14 52,38 28,50 4,38 4,14" fill="none" stroke="#0D9488" strokeWidth="1"/>
                         </pattern>
                     </defs>
                     <rect width="100%" height="100%" fill="url(#dglHex)"/>
@@ -197,7 +197,7 @@ function LoginForm() {
                         {otpStep ? (
                             <>
                                 <h2 className="dgl-h2">Check your email.</h2>
-                                <p className="dgl-sub">Code sent to <strong style={{color:'#0D1B17'}}>{identifier}</strong></p>
+                                <p className="dgl-sub">Code sent to <strong style={{color:'#0F172A'}}>{identifier}</strong></p>
                                 <form onSubmit={handleVerifyOtp}>
                                     <div className="dgl-fields">
                                         <div className="dgl-field">

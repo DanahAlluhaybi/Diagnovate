@@ -93,7 +93,7 @@ export default function AdminProfilePage() {
 
                 /* ── NAVBAR (same as dashboard) ── */
                 .pf-nav{height:56px;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-bottom:1px solid #EBF0F5;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:200;box-shadow:0 1px 12px rgba(15,23,42,0.06)}
-                .pf-nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:13px;font-weight:800;letter-spacing:1.5px;color:#0F172A}
+                .pf-nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:16px;font-weight:700;letter-spacing:-0.2px;color:#0F172A}
                 .pf-nav-logomark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#0D9488,#0891B2);display:flex;align-items:center;justify-content:center}
                 .pf-nav-accent{color:#0D9488}
                 .pf-nav-links{display:flex;align-items:center;gap:4px;margin-left:16px}
@@ -203,9 +203,14 @@ export default function AdminProfilePage() {
                 <nav className="pf-nav">
                     <Link href="/admin" className="pf-nav-logo">
                         <div className="pf-nav-logomark">
-                            <Shield size={16} color="white" />
+                            <svg width="16" height="16" viewBox="0 0 40 40" fill="none">
+                                <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5"/>
+                                <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                                <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                                <circle cx="20" cy="20" r="3.5" fill="white"/>
+                            </svg>
                         </div>
-                        <span>DIAGNO<span className="pf-nav-accent">VATE</span></span>
+                        <span>Diagno<span className="pf-nav-accent">vate</span></span>
                     </Link>
 
                     <div className="pf-nav-links">

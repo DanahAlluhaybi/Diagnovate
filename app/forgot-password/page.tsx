@@ -26,56 +26,56 @@ export default function ForgotPasswordPage() {
     return (
         <>
             <style>{`
-                .dgf-page{position:relative;z-index:1;min-height:100vh;background:#F0F7F4;display:flex;flex-direction:column;overflow:hidden}
+                .dgf-page{position:relative;z-index:1;min-height:100vh;background:#F0F4F8;display:flex;flex-direction:column;overflow:hidden}
                 .dgf-hex{position:fixed;inset:0;width:100%;height:100%;opacity:.035;pointer-events:none;z-index:0}
                 .dgf-blob{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
-                .dgf-blob-1{width:600px;height:600px;background:radial-gradient(circle,rgba(29,158,117,.06) 0%,transparent 65%);top:-200px;right:-150px}
+                .dgf-blob-1{width:600px;height:600px;background:radial-gradient(circle,rgba(13,148,136,.06) 0%,transparent 65%);top:-200px;right:-150px}
                 .dgf-blob-2{width:400px;height:400px;background:radial-gradient(circle,rgba(8,80,65,.04) 0%,transparent 65%);bottom:-120px;left:-100px}
 
-                .dgf-topbar{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:68px;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(29,158,117,.08);flex-shrink:0}
+                .dgf-topbar{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:68px;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(13,148,136,.08);flex-shrink:0}
                 .dgf-logo{display:flex;align-items:center;gap:12px;text-decoration:none}
-                .dgf-logo-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#1D9E75,#0D9488);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(29,158,117,.3);flex-shrink:0}
-                .dgf-logo-word{font-family:'DM Serif Display',serif;font-size:20px;color:#0D1B17;letter-spacing:-.3px}
-                .dgf-logo-word em{font-style:italic;color:#1D9E75}
-                .dgf-back{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#2F4A40;text-decoration:none;padding:8px 16px;border:1.5px solid #D1E5DC;border-radius:10px;background:white;transition:all .18s}
-                .dgf-back:hover{border-color:#1D9E75;color:#1D9E75;background:#F0F7F4}
+                .dgf-logo-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#0D9488,#0D9488);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(13,148,136,.3);flex-shrink:0}
+                .dgf-logo-word{font-family:'DM Serif Display',serif;font-size:20px;color:#0F172A;letter-spacing:-.3px}
+                .dgf-logo-word em{font-style:italic;color:#0D9488}
+                .dgf-back{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#334155;text-decoration:none;padding:8px 16px;border:1.5px solid #E2E8F0;border-radius:10px;background:white;transition:all .18s}
+                .dgf-back:hover{border-color:#0D9488;color:#0D9488;background:#F0F4F8}
 
                 .dgf-main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px 40px}
 
-                .dgf-card{width:100%;max-width:420px;background:#fff;border:1px solid rgba(29,158,117,.12);border-radius:24px;padding:48px;box-shadow:0 20px 60px rgba(13,27,23,.08),0 4px 16px rgba(13,27,23,.04);animation:dgfFadeUp .45s ease both;text-align:center;position:relative;overflow:hidden}
-                .dgf-top-line{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#1D9E75,#0D9488,#1D9E75,transparent);pointer-events:none}
+                .dgf-card{width:100%;max-width:420px;background:#fff;border:1px solid rgba(13,148,136,.12);border-radius:24px;padding:48px;box-shadow:0 20px 60px rgba(13,27,23,.08),0 4px 16px rgba(13,27,23,.04);animation:dgfFadeUp .45s ease both;text-align:center;position:relative;overflow:hidden}
+                .dgf-top-line{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#0D9488,#0D9488,#0D9488,transparent);pointer-events:none}
 
-                .dgf-icon-ring{width:68px;height:68px;border-radius:50%;background:#E1F5EE;border:1.5px solid rgba(29,158,117,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 22px;animation:dgfIconPulse 3s ease-in-out infinite}
+                .dgf-icon-ring{width:68px;height:68px;border-radius:50%;background:#F0FDFA;border:1.5px solid rgba(13,148,136,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 22px;animation:dgfIconPulse 3s ease-in-out infinite}
 
-                .dgf-label-sm{display:block;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#1D9E75;margin-bottom:12px}
-                .dgf-h2{font-family:'DM Serif Display',serif;font-size:32px;letter-spacing:-.5px;color:#0D1B17;margin-bottom:10px;line-height:1.1}
-                .dgf-sub{font-size:14px;color:#8A9E97;margin-bottom:28px;line-height:1.6;max-width:300px;margin-left:auto;margin-right:auto}
-                .dgf-sub strong{color:#0D1B17;font-weight:700}
+                .dgf-label-sm{display:block;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#0D9488;margin-bottom:12px}
+                .dgf-h2{font-family:'DM Serif Display',serif;font-size:32px;letter-spacing:-.5px;color:#0F172A;margin-bottom:10px;line-height:1.1}
+                .dgf-sub{font-size:14px;color:#64748B;margin-bottom:28px;line-height:1.6;max-width:300px;margin-left:auto;margin-right:auto}
+                .dgf-sub strong{color:#0F172A;font-weight:700}
 
                 .dgf-iw{position:relative;text-align:left}
-                .dgf-iw-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#8A9E97;pointer-events:none;display:flex;z-index:1}
-                .dgf-input{width:100%;height:50px;background:#F4F9F7;border:1.5px solid #D1E5DC;border-radius:12px;padding:0 16px 0 42px;font-family:'DM Sans',sans-serif;font-size:14.5px;color:#0D1B17;outline:none;transition:all .2s;appearance:none}
-                .dgf-input:focus{border-color:#1D9E75;background:#fff;box-shadow:0 0 0 4px rgba(29,158,117,.1)}
-                .dgf-input::placeholder{color:#8A9E97}
+                .dgf-iw-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#64748B;pointer-events:none;display:flex;z-index:1}
+                .dgf-input{width:100%;height:50px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:0 16px 0 42px;font-family:'DM Sans',sans-serif;font-size:14.5px;color:#0F172A;outline:none;transition:all .2s;appearance:none}
+                .dgf-input:focus{border-color:#0D9488;background:#fff;box-shadow:0 0 0 4px rgba(13,148,136,.1)}
+                .dgf-input::placeholder{color:#64748B}
 
-                .dgf-btn{width:100%;height:52px;border:none;border-radius:13px;background:linear-gradient(135deg,#1D9E75,#0D9488);color:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;transition:all .22s;margin-top:16px;box-shadow:0 6px 20px rgba(29,158,117,.28);position:relative;overflow:hidden}
+                .dgf-btn{width:100%;height:52px;border:none;border-radius:13px;background:linear-gradient(135deg,#0D9488,#0D9488);color:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;transition:all .22s;margin-top:16px;box-shadow:0 6px 20px rgba(13,148,136,.28);position:relative;overflow:hidden}
                 .dgf-btn::after{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);transform:skewX(-15deg);pointer-events:none}
                 .dgf-btn:not(:disabled):hover::after{left:160%;transition:left .55s ease}
-                .dgf-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(29,158,117,.35)}
+                .dgf-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(13,148,136,.35)}
                 .dgf-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
 
-                .dgf-back-link{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#8A9E97;text-decoration:none;padding:10px 18px;border:1.5px solid #D1E5DC;border-radius:100px;background:white;transition:all .18s;margin-top:16px}
-                .dgf-back-link:hover{color:#1D9E75;border-color:#1D9E75;background:#F0F7F4}
+                .dgf-back-link{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#64748B;text-decoration:none;padding:10px 18px;border:1.5px solid #E2E8F0;border-radius:100px;background:white;transition:all .18s;margin-top:16px}
+                .dgf-back-link:hover{color:#0D9488;border-color:#0D9488;background:#F0F4F8}
 
-                .dgf-success-ring{width:80px;height:80px;border-radius:50%;background:#E1F5EE;border:2px solid rgba(29,158,117,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 22px;animation:dgfSuccessPop .5s cubic-bezier(.16,1,.3,1) both}
+                .dgf-success-ring{width:80px;height:80px;border-radius:50%;background:#F0FDFA;border:2px solid rgba(13,148,136,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 22px;animation:dgfSuccessPop .5s cubic-bezier(.16,1,.3,1) both}
 
                 .dgf-footer{position:relative;z-index:1;text-align:center;padding:20px 24px 36px;display:flex;flex-direction:column;align-items:center;gap:10px}
-                .dgf-footer-text{font-size:11px;color:#8A9E97;letter-spacing:.3px}
+                .dgf-footer-text{font-size:11px;color:#64748B;letter-spacing:.3px}
                 .dgf-badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-                .dgf-badge-comp{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8A9E97;border:1px solid #D1E5DC;padding:3px 10px;border-radius:100px}
+                .dgf-badge-comp{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#64748B;border:1px solid #E2E8F0;padding:3px 10px;border-radius:100px}
 
                 @keyframes dgfFadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-                @keyframes dgfIconPulse{0%,100%{box-shadow:0 0 0 0 rgba(29,158,117,.15)}50%{box-shadow:0 0 0 10px rgba(29,158,117,.04)}}
+                @keyframes dgfIconPulse{0%,100%{box-shadow:0 0 0 0 rgba(13,148,136,.15)}50%{box-shadow:0 0 0 10px rgba(13,148,136,.04)}}
                 @keyframes dgfSuccessPop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
                 @keyframes dgfSpin{to{transform:rotate(360deg)}}
 
@@ -92,7 +92,7 @@ export default function ForgotPasswordPage() {
                 <svg className="dgf-hex" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <pattern id="dgfHex" x="0" y="0" width="56" height="48" patternUnits="userSpaceOnUse">
-                            <polygon points="28,2 52,14 52,38 28,50 4,38 4,14" fill="none" stroke="#1D9E75" strokeWidth="1"/>
+                            <polygon points="28,2 52,14 52,38 28,50 4,38 4,14" fill="none" stroke="#0D9488" strokeWidth="1"/>
                         </pattern>
                     </defs>
                     <rect width="100%" height="100%" fill="url(#dgfHex)"/>
@@ -127,10 +127,10 @@ export default function ForgotPasswordPage() {
                         {!sent ? (
                             <>
                                 <div className="dgf-icon-ring">
-                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="1.8" strokeLinecap="round">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="1.8" strokeLinecap="round">
                                         <rect x="3" y="11" width="18" height="11" rx="2"/>
                                         <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                                        <circle cx="12" cy="16" r="1.2" fill="#1D9E75" stroke="none"/>
+                                        <circle cx="12" cy="16" r="1.2" fill="#0D9488" stroke="none"/>
                                     </svg>
                                 </div>
                                 <span className="dgf-label-sm">Account Recovery</span>
@@ -172,7 +172,7 @@ export default function ForgotPasswordPage() {
                         ) : (
                             <>
                                 <div className="dgf-success-ring">
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                                         <polyline points="20 6 9 17 4 12"/>
                                     </svg>
                                 </div>

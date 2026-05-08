@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
     Users, CheckCircle, XCircle, Clock, Shield,
-    Search, ChevronDown, Building2, AlertCircle,
+    Search, ChevronDown, AlertCircle,
     UserCheck, UserX, LogOut, Bell, User,
 } from 'lucide-react';
 import s from './styles.module.css';
@@ -262,8 +262,8 @@ export default function AdminPage() {
                 body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#CBD5E1 1px,transparent 1px);background-size:28px 28px;opacity:.45;pointer-events:none;z-index:0}
                 .loading-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
                 .loading-card{background:white;border:1px solid #E2E8F0;border-radius:28px;padding:52px 64px;text-align:center;box-shadow:0 32px 80px rgba(15,23,42,.12);display:flex;flex-direction:column;align-items:center}
-                .loading-logo{width:52px;height:52px;background:linear-gradient(145deg,#0D9488,#0891B2);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(13,148,136,.3);margin-bottom:24px}
-                .loading-spinner{width:36px;height:36px;border:3px solid #F0FDFA;border-top-color:#0D9488;border-radius:50%;animation:spin .75s linear infinite;margin-bottom:20px}
+                .loading-logo{width:52px;height:52px;background:linear-gradient(145deg,#0D9488,#0F766E);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1px rgba(13,148,136,0.3),0 8px 24px rgba(13,148,136,.35);margin-bottom:24px}
+                .loading-spinner{width:36px;height:36px;border:3px solid rgba(13,148,136,0.15);border-top-color:#0D9488;border-radius:50%;animation:spin .75s linear infinite;margin-bottom:20px}
                 .loading-title{font-family:'DM Serif Display',serif;font-size:22px;color:#0F172A;margin:0 0 6px}
                 .loading-sub{font-size:13px;color:#64748B;margin:0}
                 @keyframes spin{to{transform:rotate(360deg)}}
@@ -271,8 +271,11 @@ export default function AdminPage() {
             <div className="loading-screen">
                 <div className="loading-card">
                     <div className="loading-logo">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white" />
+                        <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
+                            <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5"/>
+                            <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                            <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                            <circle cx="20" cy="20" r="3.5" fill="white"/>
                         </svg>
                     </div>
                     <div className="loading-spinner" />
@@ -289,8 +292,11 @@ export default function AdminPage() {
             <nav className={s.nav}>
                 <Link href="/admin" className={s.navLogo}>
                     <div className={s.navLogoMark}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white" />
+                        <svg width="18" height="18" viewBox="0 0 40 40" fill="none">
+                            <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5"/>
+                            <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                            <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                            <circle cx="20" cy="20" r="3" fill="white"/>
                         </svg>
                     </div>
                     <div>
@@ -454,9 +460,8 @@ export default function AdminPage() {
                                 <thead>
                                 <tr>
                                     <th>Clinician</th>
-                                    <th>Institution</th>
+                                    <th>Specialty</th>
                                     <th>ID Number</th>
-                                    <th>Verification</th>
                                     <th>Registered</th>
                                     <th>Actions</th>
                                 </tr>
@@ -472,28 +477,14 @@ export default function AdminPage() {
                                                 <div>
                                                     <div className={s.userName}>{u.full_name}</div>
                                                     <div className={s.userEmail}>{u.email}</div>
-                                                    {u.specialty && <div className={s.userSpec}>{u.specialty}</div>}
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <div className={s.cellWithIc}>
-                                                <Building2 size={13} color="#94A3B8" />
-                                                <span>{u.institution}</span>
-                                            </div>
+                                            <span style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 13, color: '#334155' }}>{u.specialty || '—'}</span>
                                         </td>
                                         <td>
                                             <span className={s.licenseTag}>{u.mobile}</span>
-                                        </td>
-                                        <td>
-                                            <div className={s.verifyBadges}>
-                                                <span className={`${s.verifyBadge} ${u.email_verified ? s.verifyOk : s.verifyNo}`}>
-                                                    {u.email_verified ? <CheckCircle size={10}/> : <XCircle size={10}/>} Email
-                                                </span>
-                                                <span className={`${s.verifyBadge} ${u.sms_verified ? s.verifyOk : s.verifyNo}`}>
-                                                    {u.sms_verified ? <CheckCircle size={10}/> : <XCircle size={10}/>} SMS
-                                                </span>
-                                            </div>
                                         </td>
                                         <td>
                                             <div className={s.dateCell}>
@@ -533,7 +524,7 @@ export default function AdminPage() {
                                 <thead>
                                 <tr>
                                     <th>Clinician</th>
-                                    <th>Institution</th>
+                                    <th>Specialty</th>
                                     <th>Status</th>
                                     <th>Last Login</th>
                                     <th>Joined</th>
@@ -555,15 +546,11 @@ export default function AdminPage() {
                                                 <div>
                                                     <div className={s.userName}>{u.full_name}</div>
                                                     <div className={s.userEmail}>{u.email}</div>
-                                                    {u.specialty && <div className={s.userSpec}>{u.specialty}</div>}
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <div className={s.cellWithIc}>
-                                                <Building2 size={13} color="#94A3B8" />
-                                                <span>{u.institution}</span>
-                                            </div>
+                                            <span style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 13, color: '#334155' }}>{u.specialty || '—'}</span>
                                         </td>
                                         <td>
                                             <span className={`${s.statusTag} ${u.status === 'active' ? s.statusActive : s.statusInactive}`}>

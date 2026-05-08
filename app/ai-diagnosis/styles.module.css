@@ -125,11 +125,11 @@
     color: var(--muted); cursor: pointer; transition: all .15s; white-space: nowrap;
 }
 .typeBtn:hover { border-color: var(--teal-ring); color: var(--teal); background: var(--teal-light); }
-.typeBtnActive { font-weight: 800; }
+.typeBtnActive { font-weight: 800; background: var(--teal); color: white; border-color: var(--teal); }
 
 /* ── Upload zone ── */
 .uploadZone {
-    position: relative; border: 2px dashed var(--border);
+    position: relative; border: 2px dashed var(--teal);
     border-radius: 14px; padding: 32px 20px;
     text-align: center; cursor: pointer;
     transition: all .2s cubic-bezier(.16,1,.3,1);
@@ -397,9 +397,9 @@
     background: #FFFBEB; border: 1px solid #FDE68A;
     border-radius: 12px;
 }
-.disclaimerIcon { flex-shrink: 0; margin-top: 1px; color: #D97706; }
+.disclaimerIcon { flex-shrink: 0; margin-top: 1px; color: #F59E0B; }
 .disclaimerText { font-size: 11.5px; color: #78350F; line-height: 1.6; }
-.disclaimerText strong { color: #92400E; font-weight: 700; }
+.disclaimerText strong { color: #0D9488; font-weight: 600; }
 
 /* ── How it works ── */
 .howList { display: flex; flex-direction: column; gap: 10px; }

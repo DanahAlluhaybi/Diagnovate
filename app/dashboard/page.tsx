@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
-import { Scan, Brain, Users, FileText } from 'lucide-react';
+import { Scan, Brain, Users, FileText, Mail, AlertTriangle } from 'lucide-react';
 import { dashboard } from '@/lib/api';
 
 interface Stats {
@@ -77,19 +77,19 @@ export default function DoctorDashboard() {
         return (
             <>
                 <style>{`
-                    .db-load{min-height:100vh;background:#F0F7F4;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-                    .db-load-hex{position:absolute;inset:0;opacity:.035;pointer-events:none}
-                    .db-load-card{background:white;border:1px solid rgba(29,158,117,.12);border-radius:28px;padding:52px 64px;text-align:center;box-shadow:0 32px 80px rgba(13,27,23,.08);display:flex;flex-direction:column;align-items:center;position:relative;z-index:1}
-                    .db-load-logo{width:52px;height:52px;background:linear-gradient(145deg,#1D9E75,#0D9488);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(29,158,117,.3);margin-bottom:24px}
-                    .db-load-spin{width:36px;height:36px;border:3px solid #E1F5EE;border-top-color:#1D9E75;border-radius:50%;animation:dbSpin .75s linear infinite;margin-bottom:20px}
-                    .db-load-title{font-family:'DM Serif Display',serif;font-size:22px;color:#0D1B17;margin:0 0 6px;letter-spacing:-.3px}
-                    .db-load-sub{font-family:'DM Sans',sans-serif;font-size:13px;color:#8A9E97;margin:0}
+                    .db-load{min-height:100vh;background:#F0F4F8;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+                    .db-load-hex{position:absolute;inset:0;opacity:.03;pointer-events:none}
+                    .db-load-card{background:white;border:1px solid rgba(13,148,136,.10);border-radius:28px;padding:52px 64px;text-align:center;box-shadow:0 32px 80px rgba(15,23,42,.08);display:flex;flex-direction:column;align-items:center;position:relative;z-index:1}
+                    .db-load-logo{width:52px;height:52px;background:linear-gradient(145deg,#0D9488,#0891B2);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(13,148,136,.3);margin-bottom:24px}
+                    .db-load-spin{width:36px;height:36px;border:3px solid #CCFBF1;border-top-color:#0D9488;border-radius:50%;animation:dbSpin .75s linear infinite;margin-bottom:20px}
+                    .db-load-title{font-family:'DM Serif Display',serif;font-size:22px;color:#0F172A;margin:0 0 6px;letter-spacing:-.3px}
+                    .db-load-sub{font-family:'DM Sans',sans-serif;font-size:13px;color:#64748B;margin:0}
                     @keyframes dbSpin{to{transform:rotate(360deg)}}
                 `}</style>
                 <div className="db-load">
                     <svg className="db-load-hex" xmlns="http://www.w3.org/2000/svg">
                         <defs><pattern id="dbHexLoad" x="0" y="0" width="56" height="48" patternUnits="userSpaceOnUse">
-                            <polygon points="28,2 52,14 52,38 28,50 4,38 4,14" fill="none" stroke="#1D9E75" strokeWidth="1"/>
+                            <polygon points="28,2 52,14 52,38 28,50 4,38 4,14" fill="none" stroke="#0D9488" strokeWidth="1"/>
                         </pattern></defs>
                         <rect width="100%" height="100%" fill="url(#dbHexLoad)"/>
                     </svg>
@@ -114,81 +114,93 @@ export default function DoctorDashboard() {
     return (
         <>
             <style>{`
-                .db-page{position:relative;z-index:1;min-height:100vh;background:#F0F7F4}
-                .db-hex{position:fixed;inset:0;width:100%;height:100%;opacity:.035;pointer-events:none;z-index:0}
+                .db-page{position:relative;z-index:1;min-height:100vh;background:#F0F4F8}
+                .db-hex{position:fixed;inset:0;width:100%;height:100%;opacity:.025;pointer-events:none;z-index:0}
 
                 .db-main{position:relative;z-index:1;padding:calc(68px + 32px) 48px 80px;max-width:1360px;margin:0 auto}
                 @media(max-width:1024px){.db-main{padding:calc(68px + 24px) 24px 64px}}
                 @media(max-width:600px){.db-main{padding:calc(68px + 16px) 16px 56px}}
 
                 /* Hero */
-                .db-hero{background:white;border:1.5px solid #D1E5DC;border-left:4px solid #1D9E75;border-radius:24px;padding:36px 40px;margin-bottom:28px;box-shadow:0 4px 20px rgba(13,27,23,.05);position:relative;overflow:hidden;display:flex;align-items:center;gap:32px}
-                .db-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(29,158,117,.04) 0%,transparent 60%);pointer-events:none}
+                .db-hero{background:white;border:1px solid #E2E8F0;border-radius:20px;padding:40px;margin-bottom:28px;box-shadow:0 2px 16px rgba(0,0,0,0.06);position:relative;overflow:hidden;display:flex;align-items:center;gap:32px}
+                .db-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(13,148,136,.03) 0%,transparent 60%);pointer-events:none}
                 .db-hero-left{position:relative;z-index:1;flex:1;min-width:0}
                 .db-hero-right{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;flex-shrink:0;width:420px;position:relative;z-index:1}
                 @media(max-width:1100px){.db-hero-right{width:340px}}
                 @media(max-width:900px){.db-hero{flex-direction:column;align-items:stretch}.db-hero-right{width:100%;grid-template-columns:repeat(4,1fr)}}
                 @media(max-width:600px){.db-hero-right{grid-template-columns:repeat(2,1fr)}}
-                .db-hero-stat{background:#F4F9F7;border-radius:14px;padding:20px 24px}
-                .db-hero-stat-val{font-family:'DM Serif Display',serif;font-size:40px;color:#1D9E75;letter-spacing:-1px;line-height:1;margin-bottom:5px}
-                .db-hero-stat-lbl{font-family:'DM Sans',sans-serif;font-size:11px;color:#8A9E97;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
-                .db-hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(29,158,117,.07);border:1px solid rgba(29,158,117,.18);color:#0F6E56;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:100px;margin-bottom:14px}
-                .db-hero-dot{width:6px;height:6px;border-radius:50%;background:#1D9E75;animation:dbBlink 2s ease-in-out infinite;box-shadow:0 0 0 3px rgba(29,158,117,.15)}
-                .db-greeting{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#1D9E75;letter-spacing:.5px;margin-bottom:6px}
-                .db-hero-h1{font-family:'DM Serif Display',serif;font-size:clamp(24px,3vw,48px);color:#0D1B17;letter-spacing:-1px;margin-bottom:6px}
-                .db-hero-sub{font-family:'DM Sans',sans-serif;font-size:15px;color:#8A9E97}
+                .db-hero-stat{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px}
+                .db-hero-stat-val{font-family:'DM Serif Display',serif;font-size:2rem;font-weight:700;color:#0D9488;letter-spacing:-1px;line-height:1;margin-bottom:5px}
+                .db-hero-stat-lbl{font-family:'DM Sans',sans-serif;font-size:0.7rem;color:#94A3B8;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+                .db-hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(13,148,136,.07);border:1px solid rgba(13,148,136,.18);color:#0D9488;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:100px;margin-bottom:14px}
+                .db-hero-dot{width:6px;height:6px;border-radius:50%;background:#0D9488;animation:dbBlink 2s ease-in-out infinite;box-shadow:0 0 0 3px rgba(13,148,136,.15)}
+                .db-greeting{font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:500;color:#0D9488;margin-bottom:6px}
+                .db-hero-h1{font-family:'DM Serif Display',serif;font-size:clamp(24px,3vw,40px);font-weight:800;color:#0F172A;letter-spacing:-1px;margin-bottom:6px}
+                .db-hero-sub{font-family:'DM Sans',sans-serif;font-size:15px;color:#64748B}
 
                 /* Section header */
                 .db-sec{display:flex;align-items:center;gap:14px;margin-bottom:16px}
-                .db-sec-label{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#1D9E75;white-space:nowrap}
-                .db-sec-line{flex:1;height:1px;background:linear-gradient(to right,rgba(29,158,117,.2),transparent)}
+                .db-sec-label{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#0D9488;white-space:nowrap}
+                .db-sec-line{flex:1;height:1px;background:linear-gradient(to right,rgba(13,148,136,.2),transparent)}
 
                 /* Module cards */
                 .db-modules{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
                 @media(max-width:900px){.db-modules{grid-template-columns:repeat(2,1fr)}}
                 @media(max-width:480px){.db-modules{grid-template-columns:1fr}}
-                .db-mod{background:white;border:1.5px solid #D1E5DC;border-radius:20px;padding:26px 22px;text-decoration:none;color:#0D1B17;transition:all .28s;display:block;box-shadow:0 2px 8px rgba(13,27,23,.04);position:relative;overflow:hidden}
-                .db-mod::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#1D9E75,#0D9488);transform:scaleX(0);transform-origin:left;transition:transform .28s ease}
+                .db-mod{background:white;border:1.5px solid #EBF0F5;border-radius:20px;padding:26px 22px;text-decoration:none;color:#0F172A;transition:all .28s;display:block;box-shadow:0 2px 8px rgba(15,23,42,.04);position:relative;overflow:hidden}
+                .db-mod::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#0D9488,#0891B2);transform:scaleX(0);transform-origin:left;transition:transform .28s ease}
                 .db-mod:hover::after{transform:scaleX(1)}
-                .db-mod:hover{transform:translateY(-4px);border-color:rgba(29,158,117,.35);box-shadow:0 16px 40px rgba(13,27,23,.08)}
-                .db-mod-icon{width:56px;height:56px;border-radius:50%;background:#E1F5EE;border:1px solid rgba(29,158,117,.2);color:#1D9E75;display:flex;align-items:center;justify-content:center;margin-bottom:18px;transition:all .25s}
-                .db-mod:hover .db-mod-icon{background:#1D9E75;color:white;border-color:#1D9E75;box-shadow:0 6px 18px rgba(29,158,117,.3)}
-                .db-mod-label{font-family:'DM Serif Display',serif;font-size:18px;color:#0D1B17;margin-bottom:7px;line-height:1.2}
-                .db-mod-desc{font-family:'DM Sans',sans-serif;font-size:13px;color:#8A9E97;line-height:1.55}
-                .db-mod-arr{display:flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;margin-top:16px;color:#1D9E75;transition:gap .2s}
+                .db-mod:hover{transform:translateY(-4px);border-color:rgba(13,148,136,.3);box-shadow:0 16px 40px rgba(15,23,42,.08)}
+                .db-mod-icon{width:56px;height:56px;border-radius:50%;background:#F0FDFA;border:1px solid rgba(13,148,136,.18);color:#0D9488;display:flex;align-items:center;justify-content:center;margin-bottom:18px;transition:all .25s}
+                .db-mod:hover .db-mod-icon{background:#0D9488;color:white;border-color:#0D9488;box-shadow:0 6px 18px rgba(13,148,136,.3)}
+                .db-mod-label{font-family:'DM Serif Display',serif;font-size:18px;color:#0F172A;margin-bottom:7px;line-height:1.2}
+                .db-mod-desc{font-family:'DM Sans',sans-serif;font-size:13px;color:#94A3B8;line-height:1.55}
+                .db-mod-arr{display:flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;margin-top:16px;color:#0D9488;transition:gap .2s}
                 .db-mod:hover .db-mod-arr{gap:8px}
 
                 /* Recent cases table */
-                .db-recent{background:white;border:1.5px solid #D1E5DC;border-radius:20px;overflow:hidden;box-shadow:0 2px 8px rgba(13,27,23,.04)}
+                .db-recent{background:white;border:1.5px solid #EBF0F5;border-radius:20px;overflow:hidden;box-shadow:0 2px 8px rgba(15,23,42,.04)}
                 .db-table{width:100%;border-collapse:collapse}
-                .db-table thead tr{background:#F0F7F4}
-                .db-table th{padding:12px 20px;text-align:left;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#8A9E97;border-bottom:1px solid #D1E5DC}
-                .db-table td{padding:14px 20px;border-bottom:1px solid #E1F5EE;font-family:'DM Sans',sans-serif;font-size:13.5px;vertical-align:middle}
+                .db-table thead tr{background:#F8FAFC}
+                .db-table th{padding:12px 20px;text-align:left;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#94A3B8;border-bottom:1px solid #EBF0F5}
+                .db-table td{padding:14px 20px;border-bottom:1px solid #F1F5F9;font-family:'DM Sans',sans-serif;font-size:13.5px;vertical-align:middle}
                 .db-table tr:last-child td{border-bottom:none}
                 .db-row{cursor:pointer;transition:background .15s}
-                .db-row:hover{background:#F0F7F4}
+                .db-row:hover{background:#F8FAFC}
                 .db-chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:20px}
                 .db-dot{width:5px;height:5px;border-radius:50%}
                 .db-score-badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;font-size:13px;font-weight:800;border:1px solid transparent}
-                .db-open-btn{display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#1D9E75;background:#E1F5EE;border:1px solid rgba(29,158,117,.2);border-radius:8px;padding:5px 11px;cursor:pointer;transition:all .18s;white-space:nowrap}
-                .db-open-btn:hover{background:#1D9E75;color:white;border-color:#1D9E75}
+                .db-open-btn{display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#0D9488;background:#F0FDFA;border:1px solid rgba(13,148,136,.2);border-radius:8px;padding:5px 11px;cursor:pointer;transition:all .18s;white-space:nowrap}
+                .db-open-btn:hover{background:#0D9488;color:white;border-color:#0D9488}
 
                 /* Empty state */
                 .db-empty{padding:52px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
-                .db-empty-icon{width:56px;height:56px;border-radius:16px;background:#E1F5EE;border:1px solid rgba(29,158,117,.2);display:flex;align-items:center;justify-content:center;color:#1D9E75;margin-bottom:4px}
-                .db-empty-title{font-family:'DM Serif Display',serif;font-size:20px;color:#0D1B17;letter-spacing:-.3px;margin:0}
-                .db-empty-sub{font-family:'DM Sans',sans-serif;font-size:13px;color:#8A9E97;margin:0;max-width:300px}
-                .db-empty-cta{display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:white;background:linear-gradient(135deg,#1D9E75,#0D9488);padding:11px 22px;border-radius:12px;text-decoration:none;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(29,158,117,.28);transition:all .2s;margin-top:4px}
-                .db-empty-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(29,158,117,.35)}
+                .db-empty-icon{width:56px;height:56px;border-radius:16px;background:#F0FDFA;border:1px solid rgba(13,148,136,.18);display:flex;align-items:center;justify-content:center;color:#0D9488;margin-bottom:4px}
+                .db-empty-title{font-family:'DM Serif Display',serif;font-size:20px;color:#0F172A;letter-spacing:-.3px;margin:0}
+                .db-empty-sub{font-family:'DM Sans',sans-serif;font-size:13px;color:#64748B;margin:0;max-width:300px}
+                .db-empty-cta{display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:white;background:linear-gradient(135deg,#0D9488,#0891B2);padding:11px 22px;border-radius:12px;text-decoration:none;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(13,148,136,.28);transition:all .2s;margin-top:4px}
+                .db-empty-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(13,148,136,.35)}
 
                 @media(max-width:900px){.db-recent{overflow-x:auto}}
                 @keyframes dbBlink{0%,100%{opacity:1}50%{opacity:.4}}
+
+                /* Support cards */
+                .db-support{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+                @media(max-width:900px){.db-support{grid-template-columns:repeat(2,1fr)}}
+                @media(max-width:480px){.db-support{grid-template-columns:1fr}}
+                .db-sup-card{background:white;border:1.5px solid #EBF0F5;border-radius:20px;padding:26px 22px;text-decoration:none;color:#0F172A;display:flex;flex-direction:column;gap:12px;transition:all .28s;box-shadow:0 2px 8px rgba(15,23,42,.04)}
+                .db-sup-card:hover{transform:translateY(-3px);border-color:rgba(13,148,136,.3);box-shadow:0 16px 40px rgba(15,23,42,.08)}
+                .db-sup-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+                .db-sup-title{font-family:'DM Serif Display',serif;font-size:17px;color:#0F172A}
+                .db-sup-desc{font-family:'DM Sans',sans-serif;font-size:13px;color:#94A3B8;line-height:1.55}
+                .db-sup-warn{border-color:rgba(245,158,11,.3)}
+                .db-sup-warn:hover{border-color:#F59E0B;box-shadow:0 16px 40px rgba(245,158,11,.1)}
             `}</style>
 
             <div className="db-page">
                 <svg className="db-hex" xmlns="http://www.w3.org/2000/svg">
                     <defs><pattern id="dbMainHex" x="0" y="0" width="56" height="48" patternUnits="userSpaceOnUse">
-                        <polygon points="28,2 52,14 52,38 28,50 4,38 4,14" fill="none" stroke="#1D9E75" strokeWidth="1"/>
+                        <polygon points="28,2 52,14 52,38 28,50 4,38 4,14" fill="none" stroke="#0D9488" strokeWidth="1"/>
                     </pattern></defs>
                     <rect width="100%" height="100%" fill="url(#dbMainHex)"/>
                 </svg>
@@ -287,10 +299,10 @@ export default function DoctorDashboard() {
                                     };
 
                                     const sc = caseItem.status === 'completed'
-                                        ? { bg: '#E1F5EE', col: '#1D9E75', dot: '#1D9E75', border: 'rgba(29,158,117,.2)' }
+                                        ? { bg: '#F0FDFA', col: '#0D9488', dot: '#0D9488', border: 'rgba(13,148,136,.2)' }
                                         : caseItem.status === 'follow-up'
                                             ? { bg: '#FFFBEB', col: '#D97706', dot: '#F59E0B', border: '#FDE68A' }
-                                            : { bg: '#F0F7F4', col: '#0F6E56', dot: '#1D9E75', border: 'rgba(29,158,117,.15)' };
+                                            : { bg: '#F0FDFA', col: '#0F766E', dot: '#0D9488', border: 'rgba(13,148,136,.15)' };
 
                                     const scoreNum  = parseInt(caseItem.score, 10);
                                     const safeScore = isNaN(scoreNum) ? 0 : scoreNum;
@@ -298,28 +310,28 @@ export default function DoctorDashboard() {
                                         ? { bg: '#FFF1F2', col: '#EF4444', border: '#FECDD3' }
                                         : safeScore === 3
                                             ? { bg: '#FFFBEB', col: '#D97706', border: '#FDE68A' }
-                                            : { bg: '#E1F5EE', col: '#1D9E75', border: 'rgba(29,158,117,.2)' };
+                                            : { bg: '#F0FDFA', col: '#0D9488', border: 'rgba(13,148,136,.2)' };
 
                                     const statusLabel = caseItem.status.charAt(0).toUpperCase() + caseItem.status.slice(1);
 
                                     return (
                                         <tr key={caseItem.id} className="db-row"
                                             onClick={() => router.push(`/patient-management?patientId=${caseItem.patientId}&tab=diagnosis`)}>
-                                            <td style={{ fontFamily: "'DM Serif Display',serif", fontSize: 15, color: '#0D1B17' }}>{caseItem.id}</td>
-                                            <td style={{ fontWeight: 600, color: '#2F4A40' }}>{caseItem.patient}</td>
+                                            <td style={{ fontFamily: "'DM Serif Display',serif", fontSize: 15, color: '#0F172A' }}>{caseItem.id}</td>
+                                            <td style={{ fontWeight: 600, color: '#334155' }}>{caseItem.patient}</td>
                                             <td>
                                                 <div className="db-score-badge" style={{ background: sr.bg, color: sr.col, border: `1px solid ${sr.border}` }}>
                                                     {caseItem.score}
                                                 </div>
                                             </td>
-                                            <td style={{ color: '#8A9E97', fontSize: 13 }}>{caseItem.bethesda}</td>
+                                            <td style={{ color: '#94A3B8', fontSize: 13 }}>{caseItem.bethesda}</td>
                                             <td>
                                                 <span className="db-chip" style={{ background: sc.bg, color: sc.col, border: `1px solid ${sc.border}` }}>
                                                     <span className="db-dot" style={{ background: sc.dot }}/>
                                                     {statusLabel}
                                                 </span>
                                             </td>
-                                            <td style={{ color: '#8A9E97', fontSize: 13 }}>{caseItem.date}</td>
+                                            <td style={{ color: '#94A3B8', fontSize: 13 }}>{caseItem.date}</td>
                                             <td onClick={e => e.stopPropagation()}>
                                                 <button className="db-open-btn"
                                                         onClick={() => router.push(`/patient-management?patientId=${caseItem.patientId}&tab=diagnosis`)}>
@@ -335,6 +347,35 @@ export default function DoctorDashboard() {
                                 </tbody>
                             </table>
                         )}
+                    </div>
+
+                    {/* Support */}
+                    <div className="db-sec" style={{ marginTop: 28 }}>
+                        <span className="db-sec-label">Support &amp; Help</span>
+                        <div className="db-sec-line"/>
+                    </div>
+                    <div className="db-support">
+                        <a href="https://diagnovate.com/docs" target="_blank" rel="noreferrer" className="db-sup-card">
+                            <div className="db-sup-icon" style={{ background: '#F0FDFA', color: '#0D9488' }}>
+                                <FileText size={20}/>
+                            </div>
+                            <div className="db-sup-title">Documentation</div>
+                            <div className="db-sup-desc">Platform guides, API references, and clinical workflow documentation.</div>
+                        </a>
+                        <a href="mailto:diagnovate@outlook.com" className="db-sup-card">
+                            <div className="db-sup-icon" style={{ background: '#F0FDFA', color: '#0D9488' }}>
+                                <Mail size={20}/>
+                            </div>
+                            <div className="db-sup-title">Contact Support</div>
+                            <div className="db-sup-desc">Reach our clinical support team for assistance with the platform.</div>
+                        </a>
+                        <a href="mailto:diagnovate@outlook.com?subject=Issue%20Report" className="db-sup-card db-sup-warn">
+                            <div className="db-sup-icon" style={{ background: '#FFFBEB', color: '#F59E0B' }}>
+                                <AlertTriangle size={20}/>
+                            </div>
+                            <div className="db-sup-title">Report Issue</div>
+                            <div className="db-sup-desc">Found a bug or unexpected behaviour? Let us know so we can fix it.</div>
+                        </a>
                     </div>
 
                 </main>
