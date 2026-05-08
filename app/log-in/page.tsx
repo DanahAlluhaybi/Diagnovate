@@ -88,7 +88,28 @@ function LoginForm() {
 
                 .dgl-main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 24px 32px}
 
-                .dgl-card{width:100%;max-width:480px;background:rgba(255,255,255,.04);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1);border-radius:28px;padding:52px 48px;box-shadow:0 32px 80px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08);animation:dglFadeUp .5s ease both}
+                /* Card wrap — holds glow + floating hexes + card */
+                .dgl-card-wrap{position:relative;width:100%;max-width:560px;display:flex;align-items:center;justify-content:center}
+                .dgl-card-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(29,158,117,.08) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:0}
+
+                /* Floating decorative hexes */
+                .dgl-hex-float{position:absolute;pointer-events:none;opacity:.15;z-index:0}
+                .dgl-hex-float-1{top:-44px;left:4px;animation:dglFloat 7s ease-in-out infinite}
+                .dgl-hex-float-2{top:-20px;right:0px;animation:dglFloat 9s ease-in-out infinite;animation-delay:-3s}
+                .dgl-hex-float-3{bottom:-30px;left:8px;animation:dglFloat 8.5s ease-in-out infinite;animation-delay:-1.5s}
+                .dgl-hex-float-4{bottom:20px;right:4px;animation:dglFloat 11s ease-in-out infinite;animation-delay:-5s}
+
+                /* Card */
+                .dgl-card{position:relative;z-index:1;width:100%;max-width:480px;background:rgba(255,255,255,.04);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1);border-radius:28px;padding:52px 48px;box-shadow:0 32px 80px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08);animation:dglFadeUp .5s ease both;overflow:hidden}
+
+                /* Top gradient bar */
+                .dgl-top-line{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#1D9E75,#0D9488,#1D9E75,transparent);pointer-events:none;z-index:2}
+
+                /* Scan line */
+                .dgl-scan-line{position:absolute;left:0;right:0;height:40%;background:linear-gradient(to bottom,transparent,rgba(29,158,117,.03),transparent);pointer-events:none;z-index:0;animation:dglScanMove 12s ease-in-out infinite}
+
+                /* Card content above scan */
+                .dgl-card-body{position:relative;z-index:1}
 
                 .dgl-role-badge{display:inline-flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:5px 13px;border-radius:100px;margin-bottom:20px;border:1px solid}
                 .dgl-role-dot{width:5px;height:5px;border-radius:50%;animation:dglBlink 2s ease-in-out infinite}
@@ -102,9 +123,9 @@ function LoginForm() {
                 .dgl-label{display:block;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:7px}
                 .dgl-iw{position:relative}
                 .dgl-iw-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.35);pointer-events:none;display:flex;z-index:1}
-                .dgl-input{width:100%;height:50px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:13px;padding:0 44px 0 42px;font-family:'DM Sans',sans-serif;font-size:14.5px;color:white;outline:none;transition:all .2s;appearance:none}
-                .dgl-input:focus{border-color:rgba(29,158,117,.6);background:rgba(255,255,255,.09);box-shadow:0 0 0 3px rgba(29,158,117,.18)}
-                .dgl-input::placeholder{color:rgba(255,255,255,.22)}
+                .dgl-input{width:100%;height:50px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:13px;padding:0 44px 0 42px;font-family:'DM Sans',sans-serif;font-size:14.5px;color:white;outline:none;transition:all .2s;appearance:none}
+                .dgl-input:focus{border-color:rgba(29,158,117,.6);background:rgba(255,255,255,.09);box-shadow:0 0 0 3px rgba(29,158,117,.2)}
+                .dgl-input::placeholder{color:rgba(255,255,255,.3)}
                 .dgl-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:rgba(255,255,255,.35);display:flex;padding:4px;transition:color .15s;z-index:2}
                 .dgl-eye:hover{color:rgba(255,255,255,.75)}
 
@@ -130,8 +151,8 @@ function LoginForm() {
                 .dgl-switch{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:rgba(255,255,255,.4);text-decoration:none;padding:8px 16px;border:1px solid rgba(255,255,255,.1);border-radius:100px;background:rgba(255,255,255,.06);transition:all .22s}
                 .dgl-switch:hover{color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.1);transform:translateY(-1px)}
 
-                .dgl-otp-input{width:100%;height:56px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:14px;padding:0 20px;font-family:'DM Serif Display',serif;font-size:26px;color:white;outline:none;transition:all .2s;letter-spacing:8px;text-align:center}
-                .dgl-otp-input:focus{border-color:rgba(29,158,117,.6);background:rgba(255,255,255,.09);box-shadow:0 0 0 3px rgba(29,158,117,.18)}
+                .dgl-otp-input{width:100%;height:56px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:0 20px;font-family:'DM Serif Display',serif;font-size:26px;color:white;outline:none;transition:all .2s;letter-spacing:8px;text-align:center}
+                .dgl-otp-input:focus{border-color:rgba(29,158,117,.6);background:rgba(255,255,255,.09);box-shadow:0 0 0 3px rgba(29,158,117,.2)}
                 .dgl-otp-input::placeholder{color:rgba(255,255,255,.18);letter-spacing:6px}
                 .dgl-back-btn{width:100%;height:44px;border-radius:12px;background:rgba(255,255,255,.04);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1);font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:all .18s;margin-top:10px}
                 .dgl-back-btn:hover{color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.08)}
@@ -146,11 +167,14 @@ function LoginForm() {
                 @keyframes dglFadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
                 @keyframes dglBlink{0%,100%{opacity:1}50%{opacity:.4}}
                 @keyframes dglSpin{to{transform:rotate(360deg)}}
+                @keyframes dglFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-16px) rotate(10deg)}}
+                @keyframes dglScanMove{0%{top:-40%;opacity:0}15%{opacity:1}85%{opacity:1}100%{top:120%;opacity:0}}
 
                 @media(max-width:640px){
                     .dgl-topbar{padding:20px 20px}
                     .dgl-card{padding:36px 24px;border-radius:22px}
                     .dgl-h2{font-size:32px}
+                    .dgl-hex-float{display:none}
                 }
             `}</style>
 
@@ -188,142 +212,167 @@ function LoginForm() {
                     </Link>
                 </div>
 
-                {/* Card */}
+                {/* Main — card wrap with floating decoration */}
                 <div className="dgl-main">
-                    <div className="dgl-card">
+                    <div className="dgl-card-wrap">
 
-                        <div className="dgl-role-badge" style={{ background: badgeBg, borderColor: badgeBord, color: badgeColor }}>
-                            <span className="dgl-role-dot" style={{ background: badgeDot }}/>
-                            {isAdmin ? '• ADMIN CONSOLE' : '• DOCTOR PORTAL'}
-                        </div>
+                        {/* Teal glow ring behind card */}
+                        <div className="dgl-card-glow"/>
 
-                        {otpStep ? (
-                            <>
-                                <h2 className="dgl-h2">Check your email.</h2>
-                                <p className="dgl-sub">Code sent to <strong style={{color:'rgba(255,255,255,0.85)'}}>{identifier}</strong></p>
-                                <form onSubmit={handleVerifyOtp}>
-                                    <div className="dgl-fields">
-                                        <div className="dgl-field">
-                                            <label className="dgl-label">Verification Code</label>
-                                            <input
-                                                className="dgl-otp-input"
-                                                type="text"
-                                                placeholder="• • • • • •"
-                                                value={otp}
-                                                onChange={e => setOtp(e.target.value)}
-                                                maxLength={6}
-                                                required
-                                                autoFocus
-                                            />
-                                        </div>
-                                    </div>
-                                    {error && (
-                                        <div className="dgl-alert" style={{marginTop:14}}>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                                            {error}
-                                        </div>
-                                    )}
-                                    <button type="submit" className="dgl-btn" disabled={loading} style={{ background: btnGrad, boxShadow: btnShadow }}>
-                                        {loading
-                                            ? <><Loader2 size={17} style={{animation:'dglSpin .75s linear infinite'}}/>Verifying...</>
-                                            : <>Verify &amp; Sign In <ArrowRight size={16}/></>
-                                        }
-                                    </button>
-                                </form>
-                                <button type="button" className="dgl-back-btn" onClick={() => { setOtpStep(false); setOtp(''); setError(''); }}>
-                                    ← Back to login
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <h2 className="dgl-h2">Welcome back.</h2>
-                                <p className="dgl-sub">
-                                    Sign in to your {isAdmin ? 'admin' : 'clinical'} workspace.
-                                    {!isAdmin && <>{' '}<Link href="/sign-up">New doctor?</Link></>}
-                                </p>
-                                <form onSubmit={handleSubmit}>
-                                    <div className="dgl-fields">
-                                        <div className="dgl-field">
-                                            <label className="dgl-label">Email Address</label>
-                                            <div className="dgl-iw">
-                                                <span className="dgl-iw-icon">
-                                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
-                                                </span>
-                                                <input
-                                                    className="dgl-input"
-                                                    type="email"
-                                                    placeholder={isAdmin ? 'admin@diagnovate.com' : 'doctor@hospital.com'}
-                                                    value={email}
-                                                    onChange={e => setEmail(e.target.value)}
-                                                    required
-                                                    autoFocus
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="dgl-field">
-                                            <label className="dgl-label">Password</label>
-                                            <div className="dgl-iw">
-                                                <span className="dgl-iw-icon">
-                                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                                </span>
-                                                <input
-                                                    className="dgl-input"
-                                                    type={show ? 'text' : 'password'}
-                                                    placeholder="••••••••"
-                                                    value={password}
-                                                    onChange={e => {
-                                                        setPassword(e.target.value);
-                                                        setPwError(e.target.value.length > 0 && e.target.value.length < 8 ? 'Password must be at least 8 characters.' : '');
-                                                    }}
-                                                    required
-                                                    minLength={8}
-                                                />
-                                                <button type="button" className="dgl-eye" onClick={() => setShow(v => !v)}>
-                                                    {show ? <EyeOff size={16}/> : <Eye size={16}/>}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {pwError && <p style={{color:'#FCA5A5',fontSize:12,marginTop:5}}>{pwError}</p>}
-                                    <div className="dgl-forgot-row">
-                                        <Link href="/forgot-password" className="dgl-forgot">Forgot password?</Link>
-                                    </div>
-                                    {error && (
-                                        <div className="dgl-alert" style={{marginTop:14}}>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                                            {error}
-                                        </div>
-                                    )}
-                                    <button
-                                        type="submit"
-                                        className="dgl-btn"
-                                        disabled={loading}
-                                        style={{ background: btnGrad, boxShadow: btnShadow }}
-                                    >
-                                        {loading
-                                            ? <><Loader2 size={17} style={{animation:'dglSpin .75s linear infinite'}}/>Signing in...</>
-                                            : <>Sign In <ArrowRight size={16}/></>
-                                        }
-                                    </button>
-                                </form>
+                        {/* Floating hex marks */}
+                        <svg className="dgl-hex-float dgl-hex-float-1" width="46" height="52" viewBox="0 0 46 52" fill="none">
+                            <polygon points="23,2 44,13 44,39 23,50 2,39 2,13" stroke="#1D9E75" strokeWidth="1.5" fill="none"/>
+                        </svg>
+                        <svg className="dgl-hex-float dgl-hex-float-2" width="34" height="38" viewBox="0 0 34 38" fill="none">
+                            <polygon points="17,2 32,9.5 32,28.5 17,36 2,28.5 2,9.5" stroke="#1D9E75" strokeWidth="1.5" fill="none"/>
+                        </svg>
+                        <svg className="dgl-hex-float dgl-hex-float-3" width="38" height="44" viewBox="0 0 38 44" fill="none">
+                            <polygon points="19,2 36,10.5 36,33.5 19,42 2,33.5 2,10.5" stroke="#1D9E75" strokeWidth="1.5" fill="none"/>
+                        </svg>
+                        <svg className="dgl-hex-float dgl-hex-float-4" width="28" height="32" viewBox="0 0 28 32" fill="none">
+                            <polygon points="14,2 26,8.5 26,23.5 14,30 2,23.5 2,8.5" stroke="#1D9E75" strokeWidth="1.5" fill="none"/>
+                        </svg>
 
-                                {!isAdmin && (
+                        {/* Glass card */}
+                        <div className="dgl-card">
+                            <div className="dgl-top-line"/>
+                            <div className="dgl-scan-line"/>
+
+                            <div className="dgl-card-body">
+                                <div className="dgl-role-badge" style={{ background: badgeBg, borderColor: badgeBord, color: badgeColor }}>
+                                    <span className="dgl-role-dot" style={{ background: badgeDot }}/>
+                                    {isAdmin ? '• ADMIN CONSOLE' : '• DOCTOR PORTAL'}
+                                </div>
+
+                                {otpStep ? (
                                     <>
-                                        <div className="dgl-divider">or</div>
-                                        <Link href="/sign-up" className="dgl-ghost">
-                                            Create a new account <ArrowRight size={15}/>
-                                        </Link>
+                                        <h2 className="dgl-h2">Check your email.</h2>
+                                        <p className="dgl-sub">Code sent to <strong style={{color:'rgba(255,255,255,0.85)'}}>{identifier}</strong></p>
+                                        <form onSubmit={handleVerifyOtp}>
+                                            <div className="dgl-fields">
+                                                <div className="dgl-field">
+                                                    <label className="dgl-label">Verification Code</label>
+                                                    <input
+                                                        className="dgl-otp-input"
+                                                        type="text"
+                                                        placeholder="• • • • • •"
+                                                        value={otp}
+                                                        onChange={e => setOtp(e.target.value)}
+                                                        maxLength={6}
+                                                        required
+                                                        autoFocus
+                                                    />
+                                                </div>
+                                            </div>
+                                            {error && (
+                                                <div className="dgl-alert" style={{marginTop:14}}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                                    {error}
+                                                </div>
+                                            )}
+                                            <button type="submit" className="dgl-btn" disabled={loading} style={{ background: btnGrad, boxShadow: btnShadow }}>
+                                                {loading
+                                                    ? <><Loader2 size={17} style={{animation:'dglSpin .75s linear infinite'}}/>Verifying...</>
+                                                    : <>Verify &amp; Sign In <ArrowRight size={16}/></>
+                                                }
+                                            </button>
+                                        </form>
+                                        <button type="button" className="dgl-back-btn" onClick={() => { setOtpStep(false); setOtp(''); setError(''); }}>
+                                            ← Back to login
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h2 className="dgl-h2">Welcome back.</h2>
+                                        <p className="dgl-sub">
+                                            Sign in to your {isAdmin ? 'admin' : 'clinical'} workspace.
+                                            {!isAdmin && <>{' '}<Link href="/sign-up">New doctor?</Link></>}
+                                        </p>
+                                        <form onSubmit={handleSubmit}>
+                                            <div className="dgl-fields">
+                                                <div className="dgl-field">
+                                                    <label className="dgl-label">Email Address</label>
+                                                    <div className="dgl-iw">
+                                                        <span className="dgl-iw-icon">
+                                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+                                                        </span>
+                                                        <input
+                                                            className="dgl-input"
+                                                            type="email"
+                                                            placeholder={isAdmin ? 'admin@diagnovate.com' : 'doctor@hospital.com'}
+                                                            value={email}
+                                                            onChange={e => setEmail(e.target.value)}
+                                                            required
+                                                            autoFocus
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="dgl-field">
+                                                    <label className="dgl-label">Password</label>
+                                                    <div className="dgl-iw">
+                                                        <span className="dgl-iw-icon">
+                                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                                        </span>
+                                                        <input
+                                                            className="dgl-input"
+                                                            type={show ? 'text' : 'password'}
+                                                            placeholder="••••••••"
+                                                            value={password}
+                                                            onChange={e => {
+                                                                setPassword(e.target.value);
+                                                                setPwError(e.target.value.length > 0 && e.target.value.length < 8 ? 'Password must be at least 8 characters.' : '');
+                                                            }}
+                                                            required
+                                                            minLength={8}
+                                                        />
+                                                        <button type="button" className="dgl-eye" onClick={() => setShow(v => !v)}>
+                                                            {show ? <EyeOff size={16}/> : <Eye size={16}/>}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {pwError && <p style={{color:'#FCA5A5',fontSize:12,marginTop:5}}>{pwError}</p>}
+                                            <div className="dgl-forgot-row">
+                                                <Link href="/forgot-password" className="dgl-forgot">Forgot password?</Link>
+                                            </div>
+                                            {error && (
+                                                <div className="dgl-alert" style={{marginTop:14}}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                                    {error}
+                                                </div>
+                                            )}
+                                            <button
+                                                type="submit"
+                                                className="dgl-btn"
+                                                disabled={loading}
+                                                style={{ background: btnGrad, boxShadow: btnShadow }}
+                                            >
+                                                {loading
+                                                    ? <><Loader2 size={17} style={{animation:'dglSpin .75s linear infinite'}}/>Signing in...</>
+                                                    : <>Sign In <ArrowRight size={16}/></>
+                                                }
+                                            </button>
+                                        </form>
+
+                                        {!isAdmin && (
+                                            <>
+                                                <div className="dgl-divider">or</div>
+                                                <Link href="/sign-up" className="dgl-ghost">
+                                                    Create a new account <ArrowRight size={15}/>
+                                                </Link>
+                                            </>
+                                        )}
+
+                                        <div className="dgl-switch-row">
+                                            <Link href="/role" className="dgl-switch">
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                                                Switch to {isAdmin ? 'Doctor' : 'Admin'} Login
+                                            </Link>
+                                        </div>
                                     </>
                                 )}
-
-                                <div className="dgl-switch-row">
-                                    <Link href="/role" className="dgl-switch">
-                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                                        Switch to {isAdmin ? 'Doctor' : 'Admin'} Login
-                                    </Link>
-                                </div>
-                            </>
-                        )}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
