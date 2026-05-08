@@ -76,17 +76,17 @@ export default function PublicNavbar() {
                 {/* Logo */}
                 <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
                     <div style={{
-                        width: 40, height: 40, borderRadius: 12,
+                        width: 44, height: 44, borderRadius: 13,
                         background: 'linear-gradient(145deg,#1D9E75,#0D9488)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 6px 18px rgba(29,158,117,0.3)',
+                        boxShadow: '0 6px 20px rgba(29,158,117,0.4)',
                         flexShrink: 0,
                     }}>
                         <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
-                            <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5"/>
-                            <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-                            <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-                            <circle cx="20" cy="20" r="3" fill="white"/>
+                            <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/>
+                            <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                            <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                            <circle cx="20" cy="20" r="3.5" fill="white"/>
                         </svg>
                     </div>
                     <span style={{
