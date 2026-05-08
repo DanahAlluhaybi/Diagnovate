@@ -695,11 +695,12 @@ a           { color: inherit; }
   display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
 }
 .auth-compliance {
-  background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 7px; padding: 4px 10px;
-  font-size: 10.5px; font-weight: 700;
-  color: rgba(255,255,255,.32); letter-spacing: .5px;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 100px; padding: 4px 12px;
+  font-size: 10px; font-weight: 700;
+  color: rgba(255,255,255,.58); letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -857,13 +858,50 @@ a           { color: inherit; }
 /* ─── Switch role link ─────────────────────────────────────────── */
 .auth-switch-row { display: flex; justify-content: center; margin-top: 18px; }
 .auth-switch-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12.5px; font-weight: 600; color: var(--subtle);
-  text-decoration: none; padding: 7px 14px;
-  border: 1px solid var(--border); border-radius: 100px;
-  transition: all .2s; background: var(--surface);
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12px; font-weight: 700; color: var(--subtle);
+  text-decoration: none; padding: 8px 16px;
+  border: 1.5px solid var(--border); border-radius: 100px;
+  transition: all .22s cubic-bezier(.16,1,.3,1); background: var(--surface);
+  letter-spacing: 0.01em;
 }
-.auth-switch-btn:hover { border-color: var(--teal-ring); background: var(--teal-light); color: var(--teal); }
+.auth-switch-btn:hover {
+  border-color: rgba(29,158,117,0.35);
+  background: #E1F5EE;
+  color: #1D9E75;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(29,158,117,0.12);
+}
+
+/* ─── Input teal focus ring ─────────────────────────────────────── */
+.auth-iw .dv-input:focus {
+  box-shadow: 0 0 0 4px rgba(29,158,117,0.12), 0 1px 4px rgba(15,23,42,.04);
+  border-color: rgba(29,158,117,0.45);
+  outline: none;
+}
+
+/* ─── Button shimmer on hover ─────────────────────────────────── */
+.auth-btn-primary { position: relative; overflow: hidden; }
+.auth-btn-primary::after {
+  content: '';
+  position: absolute; top: 0; left: -100%;
+  width: 55%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+  transform: skewX(-15deg);
+  pointer-events: none;
+}
+.auth-btn-primary:not(:disabled):hover::after {
+  left: 160%;
+  transition: left 0.55s ease;
+}
+
+/* ─── Portal label above form heading ─────────────────────────── */
+.auth-portal-label {
+  display: block;
+  font-size: 10px; font-weight: 800; letter-spacing: 2.5px;
+  text-transform: uppercase; color: #1D9E75;
+  margin-bottom: 8px;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    KEYFRAMES (auth-shared)

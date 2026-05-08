@@ -111,21 +111,21 @@ export default function Loading() {
                 Medical AI Diagnostics
             </div>
 
-            {/* Shimmer progress bar */}
-            <div style={{ width: 200, height: 3, borderRadius: 99, background: '#C5D6D0', overflow: 'hidden' }}>
-                <div style={{
-                    height: '100%',
-                    borderRadius: 99,
-                    background: 'linear-gradient(90deg, #E1F5EE 25%, #1D9E75 50%, #E1F5EE 75%)',
-                    backgroundSize: '200% 100%',
-                    animation: 'shimmer 1.6s ease-in-out infinite',
-                }} />
+            {/* Staggered loading dots */}
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', marginTop: 28 }}>
+                {[0, 0.22, 0.44].map((delay, i) => (
+                    <div key={i} style={{
+                        width: 9, height: 9, borderRadius: '50%',
+                        background: '#1D9E75',
+                        animation: `dotBlink 1.4s ease-in-out ${delay}s infinite`,
+                    }} />
+                ))}
             </div>
 
             <style>{`
                 @keyframes hexPulse { 0%,100%{opacity:0.2;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.06)} }
                 @keyframes hexRotate { to { transform: rotate(360deg); } }
-                @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+                @keyframes dotBlink { 0%,100%{opacity:1} 50%{opacity:0.18} }
             `}</style>
         </div>
     );

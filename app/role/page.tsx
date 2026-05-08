@@ -42,10 +42,12 @@ export default function RolePage() {
         .sub{font-size:16px;color:var(--muted);max-width:440px;margin:0 auto;line-height:1.65}
 
         .cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:860px;width:100%;animation:fadeUp .6s .15s ease both}
-        .role-card{position:relative;background:white;border:1.5px solid var(--border);border-radius:24px;padding:40px 36px;text-decoration:none;color:var(--text);transition:all .35s cubic-bezier(.16,1,.3,1);overflow:hidden;box-shadow:0 2px 12px rgba(13,27,23,.06),0 8px 32px rgba(13,27,23,.04)}
+        .role-card{position:relative;background:white;border:1.5px solid var(--border);border-radius:24px;padding:40px 36px;text-decoration:none;color:var(--text);transition:all .25s cubic-bezier(0.4,0,0.2,1);overflow:hidden;box-shadow:0 2px 12px rgba(13,27,23,.06),0 8px 32px rgba(13,27,23,.04)}
         .role-card:hover{transform:translateY(-10px);box-shadow:0 8px 32px rgba(13,27,23,.1),0 32px 72px rgba(13,27,23,.08)}
         .rc-glow{position:absolute;inset:0;opacity:0;transition:opacity .35s}
         .role-card:hover .rc-glow{opacity:1}
+        .rc-check{position:absolute;top:16px;right:16px;width:26px;height:26px;border-radius:50%;background:#1D9E75;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .25s cubic-bezier(0.4,0,0.2,1);z-index:2}
+        .role-card:hover .rc-check{opacity:1}
         .rc-icon{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:24px;position:relative;z-index:1}
         .rc-tag{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;position:relative;z-index:1}
         .rc-h2{font-family:var(--display);font-size:30px;font-weight:400;letter-spacing:-.5px;margin-bottom:12px;line-height:1.1;position:relative;z-index:1}
@@ -53,7 +55,9 @@ export default function RolePage() {
         .rc-perms{display:flex;flex-direction:column;gap:8px;margin-bottom:32px;position:relative;z-index:1}
         .rc-perm{display:flex;align-items:center;gap:9px;font-size:13px;color:#334E47;font-weight:500}
         .rc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-        .rc-btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--body);font-size:14.5px;font-weight:700;padding:13px 24px;border-radius:12px;border:none;cursor:pointer;transition:all .22s;position:relative;z-index:1;width:100%;justify-content:center}
+        .rc-btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--body);font-size:14.5px;font-weight:700;padding:13px 24px;border-radius:12px;border:none;cursor:pointer;transition:all .25s cubic-bezier(0.4,0,0.2,1);position:relative;z-index:1;width:100%;justify-content:center}
+        .rc-btn svg{transition:transform .25s cubic-bezier(0.4,0,0.2,1)}
+        .role-card:hover .rc-btn svg{transform:translateX(4px)}
 
         @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
@@ -101,12 +105,15 @@ export default function RolePage() {
                 <div className="cards">
                     <Link href="/log-in?role=admin" className="role-card role-card--admin">
                         <div className="rc-glow" style={{background:'radial-gradient(circle at 30% 20%, rgba(30,64,175,.05) 0%, transparent 60%)'}}/>
+                        <div className="rc-check">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
                         <div className="rc-icon" style={{background:'linear-gradient(135deg,#1E40AF,#3B82F6)',boxShadow:'0 8px 24px rgba(30,64,175,.35)'}}>
                             <ShieldCheck size={28} color="white"/>
                         </div>
                         <div className="rc-tag" style={{color:'#1E40AF'}}>Administrator</div>
                         <div className="rc-h2">Admin Console</div>
-                        <p className="rc-p">Full platform oversight — manage doctor accounts, review requests, and monitor system health.</p>
+                        <p className="rc-p">Oversee the entire platform — verify clinicians, review diagnostic submissions, monitor AI performance, and configure system-wide settings.</p>
                         <div className="rc-perms">
                             {['Doctor account management','Request approval & rejection','Platform analytics access','System configuration'].map(p=>(
                                 <div key={p} className="rc-perm">
@@ -122,21 +129,24 @@ export default function RolePage() {
 
                     <Link href="/log-in?role=doctor" className="role-card role-card--doctor">
                         <div className="rc-glow" style={{background:'radial-gradient(circle at 30% 20%, rgba(13,148,136,.05) 0%, transparent 60%)'}}/>
-                        <div className="rc-icon" style={{background:'linear-gradient(135deg,#0D9488,#0891B2)',boxShadow:'0 8px 24px rgba(13,148,136,.35)'}}>
+                        <div className="rc-check">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div className="rc-icon" style={{background:'linear-gradient(135deg,#1D9E75,#0D9488)',boxShadow:'0 8px 24px rgba(29,158,117,.35)'}}>
                             <Stethoscope size={28} color="white"/>
                         </div>
-                        <div className="rc-tag" style={{color:'#0D9488'}}>Clinician</div>
+                        <div className="rc-tag" style={{color:'#1D9E75'}}>Clinician</div>
                         <div className="rc-h2">Doctor Portal</div>
-                        <p className="rc-p">Your complete diagnostic workspace — enhance images, run AI analysis, and manage your patients.</p>
+                        <p className="rc-p">Your AI-powered clinical workspace — enhance ultrasound imagery, run ensemble diagnostics, manage patient records, and generate clinical-grade reports.</p>
                         <div className="rc-perms">
-                            {['AI-powered image enhancement','Smart diagnostic recommendations','Patient record management','Clinical report generation'].map(p=>(
+                            {['AI-powered image enhancement','Ensemble diagnostic analysis','Patient record management','Clinical report generation'].map(p=>(
                                 <div key={p} className="rc-perm">
-                                    <span className="rc-dot" style={{background:'#0D9488'}}/>
+                                    <span className="rc-dot" style={{background:'#1D9E75'}}/>
                                     {p}
                                 </div>
                             ))}
                         </div>
-                        <div className="rc-btn" style={{background:'linear-gradient(135deg,#0D9488,#0891B2)',color:'white',boxShadow:'0 6px 20px rgba(13,148,136,.35)'}}>
+                        <div className="rc-btn" style={{background:'linear-gradient(135deg,#1D9E75,#0D9488)',color:'white',boxShadow:'0 6px 20px rgba(29,158,117,.35)'}}>
                             Enter as Doctor <ArrowRight size={16}/>
                         </div>
                     </Link>

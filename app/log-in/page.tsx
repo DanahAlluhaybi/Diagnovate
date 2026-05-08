@@ -102,8 +102,8 @@ function LoginForm() {
                     </div>
                     <h1 className="auth-left__h1">
                         The future of<br />
-                        <em>thyroid</em><br />
-                        diagnostics.
+                        <em>AI-powered</em><br />
+                        thyroid diagnostics.
                     </h1>
                     <p className="auth-left__sub">
                         AI-powered platform combining image enhancement, diagnostic intelligence, and clinical workflows.
@@ -152,6 +152,7 @@ function LoginForm() {
 
                         {otpStep ? (
                             <>
+                                <span className="auth-portal-label">Diagnovate Portal</span>
                                 <h2 className="auth-form-h2">Check your email.</h2>
                                 <p className="auth-form-sub">
                                     We sent a verification code to <strong>{identifier}</strong>.
@@ -209,6 +210,7 @@ function LoginForm() {
                             </>
                         ) : (
                             <>
+                                <span className="auth-portal-label">Diagnovate Portal</span>
                                 <h2 className="auth-form-h2">Welcome back.</h2>
                                 <p className="auth-form-sub">
                                     Sign in to your clinical workspace.{' '}
