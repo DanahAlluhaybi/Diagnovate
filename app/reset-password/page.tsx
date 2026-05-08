@@ -6,6 +6,24 @@ import { useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
 import { BASE } from '@/lib/api';
 
+function getStrength(pw: string): number {
+    if (!pw) return 0;
+    let score = 0;
+    if (pw.length >= 8)  score++;
+    if (pw.length >= 12) score++;
+    if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    return Math.min(score, 4) as 0 | 1 | 2 | 3 | 4;
+}
+
+const strengthMeta = [
+    { label: '',       color: '#E5E7EB' },
+    { label: 'Weak',   color: '#ef4444' },
+    { label: 'Fair',   color: '#f97316' },
+    { label: 'Good',   color: '#eab308' },
+    { label: 'Strong', color: '#1D9E75' },
+] as const;
+
 function ResetForm() {
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
@@ -13,13 +31,14 @@ function ResetForm() {
     const [pw,      setPw]      = useState('');
     const [confirm, setConfirm] = useState('');
     const [show,    setShow]    = useState(false);
+    const [showC,   setShowC]   = useState(false);
     const [loading, setLoading] = useState(false);
     const [done,    setDone]    = useState(false);
     const [error,   setError]   = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (pw !== confirm)  { setError('Passwords do not match.');              return; }
+        if (pw !== confirm)  { setError('Passwords do not match.');                  return; }
         if (pw.length < 8)   { setError('Password must be at least 8 characters.'); return; }
         setError(''); setLoading(true);
         try {
@@ -33,134 +52,240 @@ function ResetForm() {
         setDone(true);
     };
 
+    const strength  = getStrength(pw);
+    const { label: strengthLabel, color: strengthColor } = strengthMeta[strength];
+    const matches   = confirm.length > 0 && pw === confirm;
+    const mismatch  = confirm.length > 0 && pw !== confirm;
+
     return (
-        <>
-            <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        :root {
-          --teal: #0D9488; --teal-light: #F0FDFA; --teal-ring: #99F6E4;
-          --bg: #F0F4F8; --surface2: #F8FAFC;
-          --text: #0F172A; --text2: #334155; --muted: #64748B; --subtle: #94A3B8; --border: #E2E8F0;
-          --grad: linear-gradient(135deg, #0D9488, #0891B2);
-          --display: 'DM Serif Display', serif; --body: 'Plus Jakarta Sans', sans-serif;
-        }
-        body { background: var(--bg); color: var(--text); font-family: var(--body); -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
-        body::before { content: ''; position: fixed; inset: 0; background-image: radial-gradient(circle, #CBD5E1 1px, transparent 1px); background-size: 28px 28px; opacity: .45; pointer-events: none; z-index: 0; }
+        <div className="auth-page">
 
-        .blob1 { position: fixed; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(13,148,136,.1) 0%, transparent 65%); top: -200px; right: -150px; pointer-events: none; z-index: 0; }
-        .blob2 { position: fixed; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(124,58,237,.07) 0%, transparent 65%); bottom: -100px; left: -80px; pointer-events: none; z-index: 0; }
+            {/* ══ LEFT PANEL ══ */}
+            <div className="auth-left">
+                <div className="auth-left__dots" />
+                {/* Hex grid overlay */}
+                <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.07, pointerEvents: 'none', zIndex: 1 }} xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="hexRP" x="0" y="0" width="52" height="45" patternUnits="userSpaceOnUse">
+                            <polygon points="26,2 48,13 48,35 26,46 4,35 4,13" fill="none" stroke="#5EEAD4" strokeWidth="1" />
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#hexRP)" />
+                </svg>
+                <span className="auth-left__blob auth-left__blob--1" />
+                <span className="auth-left__blob auth-left__blob--2" />
+                <span className="auth-left__blob auth-left__blob--3" />
 
-        .card { position: relative; z-index: 1; background: white; border: 1px solid var(--border); border-radius: 28px; padding: 52px 48px; width: 100%; max-width: 440px; box-shadow: 0 24px 72px rgba(15,23,42,.12); overflow: hidden; }
-        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--grad); }
-
-        .icon { width: 64px; height: 64px; border-radius: 18px; background: var(--teal-light); border: 1.5px solid var(--teal-ring); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
-        .h2 { font-family: var(--display); font-size: 30px; letter-spacing: -.3px; margin-bottom: 8px; text-align: center; }
-        .sub { font-size: 14px; color: var(--muted); line-height: 1.65; margin-bottom: 32px; text-align: center; }
-
-        .field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
-        .label { font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--text2); }
-        .pw-wrap { position: relative; }
-        .input { width: 100%; height: 48px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 12px; padding: 0 14px; font-family: var(--body); font-size: 14.5px; color: var(--text); outline: none; transition: all .2s; }
-        .input::placeholder { color: var(--subtle); }
-        .input:focus { border-color: var(--teal); background: white; box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
-        .pw-wrap .input { padding-right: 44px; }
-        .eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--subtle); display: flex; transition: color .15s; }
-        .eye:hover { color: var(--text); }
-
-        .err { display: flex; align-items: center; gap: 8px; padding: 11px 14px; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 10px; font-size: 13px; font-weight: 600; color: #EF4444; margin-bottom: 16px; }
-
-        .submit { width: 100%; height: 50px; border: none; border-radius: 12px; background: var(--grad); color: white; font-family: var(--body); font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px; transition: all .22s; box-shadow: 0 6px 20px rgba(13,148,136,.3); }
-        .submit:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(13,148,136,.4); }
-        .submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
-
-        .success-wrap { text-align: center; }
-        .success-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--teal-light); border: 2px solid var(--teal-ring); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
-        .btn-signin { display: inline-flex; align-items: center; gap: 8px; background: var(--grad); color: white; font-family: var(--body); font-weight: 700; font-size: 14.5px; padding: 12px 26px; border-radius: 12px; text-decoration: none; box-shadow: 0 6px 20px rgba(13,148,136,.3); transition: all .22s; }
-        .btn-signin:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(13,148,136,.4); }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 480px) { .card { padding: 36px 20px; } }
-      `}</style>
-
-            <div className="blob1" /><div className="blob2" />
-
-            <div className="card">
-                {!done ? (
-                    <>
-                        <div className="icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="2" strokeLinecap="round">
-                                <rect x="3" y="11" width="18" height="11" rx="2"/>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                            </svg>
-                        </div>
-                        <h2 className="h2">Reset your password.</h2>
-                        <p className="sub">Create a new secure password for your Diagnovate account.</p>
-
-                        <form onSubmit={handleSubmit}>
-                            <div className="field">
-                                <label className="label">New Password</label>
-                                <div className="pw-wrap">
-                                    <input
-                                        type={show ? 'text' : 'password'}
-                                        className="input"
-                                        placeholder="Min. 8 characters"
-                                        value={pw}
-                                        onChange={e => setPw(e.target.value)}
-                                        required
-                                    />
-                                    <button type="button" className="eye" onClick={() => setShow(s => !s)}>
-                                        {show ? <EyeOff size={15} /> : <Eye size={15} />}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="field">
-                                <label className="label">Confirm New Password</label>
-                                <input
-                                    type="password" className="input"
-                                    placeholder="Repeat your new password"
-                                    value={confirm}
-                                    onChange={e => setConfirm(e.target.value)}
-                                    required
-                                />
-                            </div>
-
-                            {error && (
-                                <div className="err">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                                    </svg>
-                                    {error}
-                                </div>
-                            )}
-
-                            <button type="submit" className="submit" disabled={!pw || !confirm || loading}>
-                                {loading
-                                    ? <><Loader2 size={17} style={{ animation: 'spin .75s linear infinite' }} />Resetting...</>
-                                    : <>Set New Password <ArrowRight size={16} /></>
-                                }
-                            </button>
-                        </form>
-                    </>
-                ) : (
-                    <div className="success-wrap">
-                        <div className="success-icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="20 6 9 17 4 12"/>
-                            </svg>
-                        </div>
-                        <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: 26, marginBottom: 8 }}>Password updated!</p>
-                        <p style={{ fontSize: 14, color: '#64748B', marginBottom: 28, lineHeight: 1.65 }}>
-                            Your password has been changed. You can now sign in with your new credentials.
-                        </p>
-                        <Link href="/log-in?role=doctor" className="btn-signin">
-                            Sign In Now <ArrowRight size={15} />
-                        </Link>
+                <Link href="/" className="auth-logo">
+                    <div className="auth-logo__mark">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white" />
+                        </svg>
                     </div>
-                )}
+                    <span className="auth-logo__word">Diagno<span>vate</span></span>
+                </Link>
+
+                <div className="auth-left__body">
+                    <div className="auth-left__badge">
+                        <span className="auth-left__badge-dot" />
+                        Password Reset
+                    </div>
+
+                    {/* Animated shield icon */}
+                    <div style={{ marginBottom: 28, position: 'relative', zIndex: 2 }}>
+                        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" style={{ animation: 'hexPulse 3s ease-in-out infinite' }}>
+                            <circle cx="32" cy="32" r="30" stroke="rgba(94,234,212,0.2)" strokeWidth="1.5"/>
+                            <circle cx="32" cy="32" r="22" fill="rgba(13,148,136,0.12)"/>
+                            <path d="M32 16 L44 21 L44 32 C44 39 38.5 45.5 32 47.5 C25.5 45.5 20 39 20 32 L20 21 Z"
+                                  stroke="#5EEAD4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                            <polyline points="27,32 30.5,35.5 37,29" stroke="#5EEAD4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                    </div>
+
+                    <h1 className="auth-left__h1">
+                        Secure password<br />
+                        reset made <em>safe.</em>
+                    </h1>
+                    <p className="auth-left__sub">
+                        Create a strong new password to protect your Diagnovate account. Your security is our priority throughout this process.
+                    </p>
+                </div>
+
+                <div className="auth-left__foot">
+                    {['HIPAA', 'ICCR', 'WHO', 'TI-RADS', 'GDPR'].map(t => (
+                        <span key={t} className="auth-compliance">{t}</span>
+                    ))}
+                </div>
             </div>
-        </>
+
+            {/* ══ RIGHT PANEL ══ */}
+            <div className="auth-right">
+                <nav className="auth-right__nav">
+                    <Link href="/"        className="auth-right__nav-link">Home</Link>
+                    <Link href="/about"   className="auth-right__nav-link">About</Link>
+                    <Link href="/contact" className="auth-right__nav-link">Contact</Link>
+                </nav>
+
+                <div className="auth-form-area">
+                    <div className="auth-form-inner">
+
+                        {!done ? (
+                            <>
+                                <span className="auth-portal-label">Reset Password</span>
+                                <h2 className="auth-form-h2">Create a new password.</h2>
+                                <p className="auth-form-sub">Choose a strong password for your Diagnovate account.</p>
+
+                                <form onSubmit={handleSubmit}>
+                                    <div className="auth-fields">
+
+                                        {/* New Password */}
+                                        <div className="auth-field">
+                                            <label className="dv-label">New Password</label>
+                                            <div className="auth-iw">
+                                                <span className="auth-iw__icon">
+                                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                                        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                                    </svg>
+                                                </span>
+                                                <input
+                                                    className="dv-input auth-iw__input--pw"
+                                                    type={show ? 'text' : 'password'}
+                                                    placeholder="Min. 8 characters"
+                                                    value={pw}
+                                                    onChange={e => setPw(e.target.value)}
+                                                    required
+                                                    autoFocus
+                                                />
+                                                <button type="button" className="auth-eye" onClick={() => setShow(s => !s)}>
+                                                    {show ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                </button>
+                                            </div>
+
+                                            {/* Strength bar */}
+                                            {pw.length > 0 && (
+                                                <div style={{ marginTop: 8 }}>
+                                                    <div style={{ display: 'flex', gap: 4 }}>
+                                                        {[1, 2, 3, 4].map(seg => (
+                                                            <div key={seg} style={{
+                                                                flex: 1, height: 4, borderRadius: 2,
+                                                                background: seg <= strength ? strengthColor : '#E5E7EB',
+                                                                transition: 'background .25s',
+                                                            }} />
+                                                        ))}
+                                                    </div>
+                                                    {strengthLabel && (
+                                                        <p style={{ fontSize: 11, fontWeight: 700, color: strengthColor, marginTop: 4, letterSpacing: '0.5px' }}>
+                                                            {strengthLabel}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Confirm Password */}
+                                        <div className="auth-field">
+                                            <label className="dv-label">Confirm New Password</label>
+                                            <div className="auth-iw" style={
+                                                mismatch ? { borderColor: '#ef4444' } :
+                                                matches  ? { borderColor: '#1D9E75' } : {}
+                                            }>
+                                                <span className="auth-iw__icon">
+                                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                                        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                                    </svg>
+                                                </span>
+                                                <input
+                                                    className="dv-input auth-iw__input--pw"
+                                                    type={showC ? 'text' : 'password'}
+                                                    placeholder="Repeat your new password"
+                                                    value={confirm}
+                                                    onChange={e => setConfirm(e.target.value)}
+                                                    required
+                                                />
+                                                <button type="button" className="auth-eye" onClick={() => setShowC(s => !s)}>
+                                                    {showC ? <EyeOff size={16} /> : <Eye size={16} />}
+                                                </button>
+                                            </div>
+                                            {matches  && <p style={{ fontSize: 11, fontWeight: 700, color: '#1D9E75', marginTop: 4 }}>Passwords match</p>}
+                                            {mismatch && <p style={{ fontSize: 11, fontWeight: 700, color: '#ef4444', marginTop: 4 }}>Passwords do not match</p>}
+                                        </div>
+
+                                    </div>
+
+                                    {error && (
+                                        <div className="dv-alert dv-alert-error" style={{ marginTop: 14 }}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                                                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                            </svg>
+                                            {error}
+                                        </div>
+                                    )}
+
+                                    <button
+                                        type="submit" className="auth-btn-primary"
+                                        disabled={!pw || !confirm || loading}
+                                        style={{ marginTop: 20 }}
+                                    >
+                                        {loading
+                                            ? <><Loader2 size={17} style={{ animation: 'spinIcon .75s linear infinite' }} />Updating...</>
+                                            : <>Update Password <ArrowRight size={16} /></>
+                                        }
+                                    </button>
+                                </form>
+
+                                <div className="auth-switch-row">
+                                    <Link href="/log-in?role=doctor" className="auth-switch-btn">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                                            <polyline points="15 18 9 12 15 6"/>
+                                        </svg>
+                                        Back to Sign In
+                                    </Link>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div style={{ textAlign: 'center', padding: '8px 0 0' }}>
+                                    <div style={{
+                                        width: 76, height: 76, borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, #E1F5EE, #C6F6D5)',
+                                        border: '2px solid rgba(29,158,117,0.25)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        margin: '0 auto 20px',
+                                        boxShadow: '0 0 0 10px rgba(29,158,117,0.06)',
+                                        animation: 'hexPulse 2.5s ease-in-out infinite',
+                                    }}>
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="20 6 9 17 4 12"/>
+                                        </svg>
+                                    </div>
+                                    <span className="auth-portal-label" style={{ textAlign: 'center' }}>Success</span>
+                                    <h2 className="auth-form-h2">Password updated!</h2>
+                                    <p className="auth-form-sub">
+                                        Your password has been changed. You can now sign in with your new credentials.
+                                    </p>
+                                </div>
+                                <Link
+                                    href="/log-in?role=doctor"
+                                    className="auth-btn-primary"
+                                    style={{ marginTop: 8, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                                >
+                                    Sign In Now <ArrowRight size={16} />
+                                </Link>
+                                <div className="auth-switch-row" style={{ marginTop: 12 }}>
+                                    <Link href="/" className="auth-switch-btn">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                                            <polyline points="15 18 9 12 15 6"/>
+                                        </svg>
+                                        Back to Home
+                                    </Link>
+                                </div>
+                            </>
+                        )}
+
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
 

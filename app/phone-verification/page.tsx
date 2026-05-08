@@ -13,11 +13,17 @@ export default function PhoneVerificationPage() {
     const [loading, setLoading] = useState(false);
     const [done,    setDone]    = useState(false);
     const [error,   setError]   = useState('');
-    const [resent,  setResent]  = useState(false);
+    const [resent,     setResent]     = useState(false);
     const [identifier, setIdentifier] = useState('');
+    const [countdown,  setCountdown]  = useState(60);
 
     useEffect(() => {
         setIdentifier(new URLSearchParams(window.location.search).get('identifier') ?? '');
+    }, []);
+
+    useEffect(() => {
+        const id = setInterval(() => setCountdown(c => c > 0 ? c - 1 : 0), 1000);
+        return () => clearInterval(id);
     }, []);
 
     const r0 = useRef<HTMLInputElement>(null);
@@ -69,6 +75,7 @@ export default function PhoneVerificationPage() {
             setCode(['', '', '', '', '', '']);
             setError('');
             setResent(true);
+            setCountdown(60);
             r0.current?.focus();
             setTimeout(() => setResent(false), 4000);
         } catch (err: unknown) {
@@ -103,14 +110,27 @@ export default function PhoneVerificationPage() {
 
             <div className="acard-wrap">
                 <div className="acard">
-                    <Link href="/" className="acard-logo">
-                        <div className="acard-logo__mark">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white" />
+                    {/* Animated hex mark */}
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
+                        <div style={{ position: 'relative' }}>
+                            <svg width="56" height="64" viewBox="0 0 96 108" fill="none"
+                                 style={{ animation: 'hexPulse 2.5s ease-in-out infinite' }}>
+                                <polygon points="48,4 90,26 90,80 48,104 6,80 6,26" fill="rgba(29,158,117,0.08)" stroke="#1D9E75" strokeWidth="1.5"/>
+                                <polygon points="48,16 78,32 78,72 48,88 18,72 18,32" fill="rgba(29,158,117,0.05)" stroke="#1D9E75" strokeWidth="1" strokeDasharray="4 3" opacity="0.6"/>
                             </svg>
+                            <svg width="56" height="64" viewBox="0 0 96 108" fill="none"
+                                 style={{ position: 'absolute', top: 0, left: 0, animation: 'hexRotate 3s linear infinite', transformOrigin: '28px 32px' }}>
+                                <circle cx="48" cy="4" r="3.5" fill="#1D9E75" opacity="0.7"/>
+                                <circle cx="90" cy="26" r="3.5" fill="#1D9E75" opacity="0.5"/>
+                                <circle cx="90" cy="80" r="3.5" fill="#1D9E75" opacity="0.3"/>
+                            </svg>
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg, #1D9E75, #0F6E56)', boxShadow: '0 4px 12px rgba(29,158,117,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white"/>
+                                </svg>
+                            </div>
                         </div>
-                        <span className="acard-logo__word">Diagno<span>vate</span></span>
-                    </Link>
+                    </div>
 
                     {!done ? (
                         <>
@@ -126,9 +146,9 @@ export default function PhoneVerificationPage() {
                                 Phone Verification
                             </div>
 
-                            <h2 className="acard-h2">Check your phone.</h2>
+                            <h2 className="acard-h2">Verify your account.</h2>
                             <p className="acard-p" style={{ marginBottom: 20 }}>
-                                We sent a 6-digit code to your phone number.<br />Enter it below to continue.
+                                We sent a 6-digit code to your phone number.<br />Enter it below to verify your account.
                             </p>
 
 
@@ -182,10 +202,10 @@ export default function PhoneVerificationPage() {
                             <button
                                 className="verify-resend"
                                 onClick={handleResend}
-                                disabled={resent}
+                                disabled={countdown > 0}
                             >
                                 <RotateCcw size={14} />
-                                {resent ? 'Code sent!' : 'Resend code'}
+                                {countdown > 0 ? `Resend in ${countdown}s` : 'Resend code'}
                             </button>
 
                             <Link href="/sign-up" className="verify-back">
