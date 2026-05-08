@@ -1,257 +1,216 @@
-// About page — mission statement, platform stats, feature breakdown, CTA, and footer. Public-facing, no auth required.
+// About page — company story, mission, tech stack, and vision. Public-facing marketing redesign.
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Target, Microscope, ShieldCheck, Cpu, CheckCircle2 } from 'lucide-react';
+import PublicNavbar from '../../components/PublicNavbar';
 
-const stats = [
-  { val: '98.7%', lbl: 'Diagnostic Accuracy', sub: 'Validated across clinical trials' },
-  { val: '< 2s',  lbl: 'Analysis Speed',       sub: 'Real-time AI processing'         },
-  { val: '5',     lbl: 'AI Modules',            sub: 'Fully integrated workflow'       },
-  { val: '2026',  lbl: 'Launched',              sub: 'Built for modern pathology'      },
+const milestones = [
+    { period: '2023 Q3', event: 'Research began on thyroid cancer AI detection' },
+    { period: '2024 Q1', event: 'First ensemble model achieved 94% accuracy' },
+    { period: '2024 Q3', event: 'Real-time inference pipeline launched' },
+    { period: '2025 Q1', event: 'Clinical trial integration phase begins' },
 ];
 
-const offer = [
-  {
-    icon: <Microscope size={22}/>, color: '#0D9488', bg: '#F0FDFA', border: '#99F6E4',
-    title: 'Automated Image Enhancement',
-    desc: 'Transforms low-quality ultrasound scans into clinically actionable images using our proprietary AI pipeline.',
-    points: ['Noise reduction & contrast boost','Edge sharpening for nodule boundaries','Instant before/after comparison'],
-  },
-  {
-    icon: <Cpu size={22}/>, color: '#7C3AED', bg: '#F5F3FF', border: '#DDD6FE',
-    title: 'Context-Aware AI Diagnostics',
-    desc: 'Our AI understands patient history, scan type, and clinical guidelines — not just pixels.',
-    points: ['Follows ICCR, WHO & TI-RADS','Bethesda III decision support','Explainable recommendations'],
-  },
-  {
-    icon: <ShieldCheck size={22}/>, color: '#0891B2', bg: '#F0F9FF', border: '#BAE6FD',
-    title: 'HIPAA-Compliant Security',
-    desc: 'Every scan, every result, every note — encrypted end-to-end with full audit trails.',
-    points: ['End-to-end encryption','Full audit logging','Role-based access control'],
-  },
-  {
-    icon: <Target size={22}/>, color: '#F59E0B', bg: '#FFFBEB', border: '#FDE68A',
-    title: 'Clinician-First Workflow',
-    desc: 'Designed with pathologists, not around algorithms. Every screen was user-tested by clinicians.',
-    points: ['1-click feedback loop','Customizable model selection','Integrates with existing EHR'],
-  },
+const values = [
+    { title: 'Accuracy', desc: 'Every prediction backed by ensemble consensus' },
+    { title: 'Privacy', desc: 'Patient data never leaves your infrastructure' },
+    { title: 'Speed', desc: 'Clinical workflow requires real-time response' },
+    { title: 'Transparency', desc: 'Explainable confidence scores, not black boxes' },
+];
+
+const stack = [
+    { name: 'Flask', desc: 'Python REST API backend', icon: '🐍' },
+    { name: 'Next.js 14', desc: 'React framework, App Router', icon: '▲' },
+    { name: 'Railway', desc: 'Backend deployment & scaling', icon: '🚄' },
+    { name: 'Vercel', desc: 'Frontend edge deployment', icon: '▲' },
+    { name: 'scikit-learn', desc: 'XGBoost & classical ML', icon: '📊' },
+    { name: 'HuggingFace', desc: 'Pretrained vision models', icon: '🤗' },
+    { name: 'OpenCV', desc: 'CLAHE image preprocessing', icon: '📷' },
+    { name: 'PostgreSQL', desc: 'Relational data storage', icon: '🐘' },
 ];
 
 export default function AboutPage() {
-  return (
-      <>
-        <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        :root{
-          --teal:#0D9488;--teal-light:#F0FDFA;--teal-ring:#99F6E4;--teal-muted:#CCFBF1;
-          --sky:#0891B2;--purple:#7C3AED;--amber:#F59E0B;
-          --bg:#F0F4F8;--surface:#fff;--surface2:#F8FAFC;
-          --text:#0F172A;--text2:#334155;--muted:#64748B;--subtle:#94A3B8;--border:#E2E8F0;
-          --grad:linear-gradient(135deg,#0D9488,#0891B2);
-          --display:'DM Serif Display',serif;--body:'Plus Jakarta Sans',sans-serif;
-        }
-        html{scroll-behavior:smooth}
-        body{background:var(--bg);color:var(--text);font-family:var(--body);overflow-x:hidden;-webkit-font-smoothing:antialiased}
-        body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#CBD5E1 1px,transparent 1px);background-size:28px 28px;opacity:.45;pointer-events:none;z-index:0}
+    return (
+        <>
+            <style>{`
+                *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+                html { scroll-behavior: smooth; }
+                body { overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
-        .nav{position:fixed;top:0;left:0;right:0;z-index:100;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(255,255,255,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
-        .nav-logo{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--text)}
-        .nav-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#0D9488,#0891B2,#0369A1);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(13,148,136,.32),inset 0 1px 0 rgba(255,255,255,.18);position:relative}
-        .nav-mark-ring{position:absolute;inset:-3px;border-radius:15px;border:1.5px solid rgba(13,148,136,.22);animation:ringPulse 3.5s ease-in-out infinite}
-        .nav-wordmark{font-family:var(--display);font-size:20px;letter-spacing:-.3px}
-        .nav-wordmark span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .nav-links{display:flex;align-items:center;gap:4px}
-        .nav-link{padding:7px 14px;border-radius:9px;font-size:13.5px;font-weight:500;color:var(--muted);text-decoration:none;transition:all .15s}
-        .nav-link:hover{color:var(--text);background:#F1F5F9}
-        .nav-link.active{color:var(--teal);background:var(--teal-light);font-weight:700}
-        .nav-cta{display:inline-flex;align-items:center;gap:7px;background:var(--grad);color:white;font-size:13.5px;font-weight:700;padding:9px 20px;border-radius:11px;text-decoration:none;box-shadow:0 4px 16px rgba(13,148,136,.3);transition:all .2s}
-        .nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(13,148,136,.4)}
+                .ab-hero { background: #fff; padding: 120px 48px 80px; }
+                .ab-hero-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
 
-        .page{position:relative;z-index:1;padding-top:68px}
+                .ab-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: #1D9E75; margin-bottom: 16px; }
+                .ab-h1 { font-family: var(--font-dm-serif, 'DM Serif Display', serif); font-size: clamp(34px, 3.5vw, 44px); font-weight: 400; line-height: 1.12; letter-spacing: -0.5px; color: #0D1B17; margin-bottom: 20px; animation: fadeUp 0.7s cubic-bezier(.16,1,.3,1) both; }
+                .ab-desc { font-size: 16px; color: #8A9E97; line-height: 1.75; margin-bottom: 28px; animation: fadeUp 0.7s 0.1s cubic-bezier(.16,1,.3,1) both; }
+                .ab-accent-line { width: 64px; height: 3px; background: #1D9E75; border-radius: 2px; }
 
-        .hero{padding:80px 48px 60px;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
-        .badge{display:inline-flex;align-items:center;gap:7px;background:var(--teal-light);border:1px solid var(--teal-ring);color:var(--teal);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:100px;margin-bottom:22px;width:fit-content;animation:fadeUp .6s ease both}
-        .badge-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:blink 2s ease-in-out infinite;box-shadow:0 0 0 3px rgba(13,148,136,.2)}
-        .h1{font-family:var(--display);font-size:clamp(40px,5vw,62px);font-weight:400;line-height:1.08;letter-spacing:-1px;margin-bottom:20px;animation:fadeUp .6s .1s ease both}
-        .h1 em{font-style:italic;background:linear-gradient(120deg,#0D9488,#7C3AED);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .sub{font-size:16px;line-height:1.7;color:var(--muted);margin-bottom:36px;animation:fadeUp .6s .2s ease both}
-        .btn-p{display:inline-flex;align-items:center;gap:8px;background:var(--grad);color:white;font-family:var(--body);font-size:14.5px;font-weight:700;padding:12px 24px;border-radius:12px;border:none;cursor:pointer;text-decoration:none;transition:all .22s;box-shadow:0 6px 20px rgba(13,148,136,.3)}
-        .btn-p:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(13,148,136,.4)}
-        .btn-g{display:inline-flex;align-items:center;gap:8px;background:white;color:var(--text);font-family:var(--body);font-size:14.5px;font-weight:500;padding:12px 24px;border-radius:12px;border:1.5px solid var(--border);cursor:pointer;text-decoration:none;transition:all .22s;box-shadow:0 2px 8px rgba(0,0,0,.05)}
-        .btn-g:hover{border-color:#CBD5E1;transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.09)}
-        .btns{display:flex;gap:12px;animation:fadeUp .6s .3s ease both}
+                /* Timeline */
+                .ab-timeline { position: relative; padding-left: 24px; animation: fadeUp 0.7s 0.15s cubic-bezier(.16,1,.3,1) both; }
+                .ab-timeline::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 2px; background: linear-gradient(to bottom, #1D9E75, #C5D6D0); border-radius: 1px; }
+                .ab-milestone { position: relative; margin-bottom: 28px; }
+                .ab-milestone::before { content: ''; position: absolute; left: -28px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: #1D9E75; border: 2.5px solid #fff; box-shadow: 0 0 0 3px rgba(29,158,117,0.25); }
+                .ab-milestone-period { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: #1D9E75; text-transform: uppercase; margin-bottom: 4px; }
+                .ab-milestone-event { font-size: 14.5px; color: #2F4A40; font-weight: 500; line-height: 1.5; }
 
-        .hero-side{animation:fadeUp .7s .15s ease both}
-        .mission-card{background:white;border:1px solid var(--border);border-radius:22px;padding:32px;box-shadow:0 8px 32px rgba(15,23,42,.09);position:relative;overflow:hidden}
-        .mission-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad)}
-        .mc-label{font-size:10.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-        .mc-label::after{content:'';flex:1;height:1px;background:var(--teal-muted)}
-        .mc-h3{font-family:var(--display);font-size:26px;color:var(--text);margin-bottom:14px;line-height:1.2}
-        .mc-p{font-size:14px;color:var(--muted);line-height:1.75}
-        .mc-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
-        .chip{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--text2)}
+                /* Mission section */
+                .ab-mission { background: #F4F9F7; padding: 96px 48px; }
+                .ab-mission-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: start; }
+                .ab-mission-h2 { font-family: var(--font-dm-serif, serif); font-size: clamp(28px, 3vw, 38px); color: #0D1B17; letter-spacing: -0.5px; margin-bottom: 20px; }
+                .ab-mission-p { font-size: 15px; color: #8A9E97; line-height: 1.75; }
+                .ab-values-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+                .ab-value-card { background: #fff; border: 1px solid #C5D6D0; border-radius: 14px; padding: 22px; transition: all 0.22s; }
+                .ab-value-card:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(29,158,117,0.1); border-color: #5DCAA5; }
+                .ab-value-title { font-family: var(--font-dm-serif, serif); font-size: 16px; color: #0D1B17; margin-bottom: 6px; }
+                .ab-value-desc { font-size: 13px; color: #8A9E97; line-height: 1.6; }
+                .ab-value-dot { width: 8px; height: 8px; border-radius: 50%; background: #1D9E75; margin-bottom: 12px; }
 
-        .stats-wrap{padding:0 48px 64px;position:relative;z-index:1}
-        .stats-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-        .stat-card{background:white;border:1px solid var(--border);border-radius:18px;padding:26px 22px;text-align:center;box-shadow:0 2px 8px rgba(15,23,42,.05);transition:all .25s}
-        .stat-card:hover{border-color:var(--teal-ring);transform:translateY(-4px);box-shadow:0 14px 44px rgba(13,148,136,.12)}
-        .stat-val{font-family:var(--display);font-size:38px;font-weight:400;letter-spacing:-2px;color:var(--text);line-height:1;margin-bottom:6px}
-        .stat-lbl{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:4px}
-        .stat-sub{font-size:11.5px;color:var(--subtle)}
+                /* Tech Stack */
+                .ab-stack { background: #fff; padding: 96px 48px; }
+                .ab-stack-inner { max-width: 1200px; margin: 0 auto; }
+                .ab-sec-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: #1D9E75; text-align: center; margin-bottom: 12px; }
+                .ab-sec-h2 { font-family: var(--font-dm-serif, serif); font-size: clamp(28px, 3vw, 40px); font-weight: 400; text-align: center; color: #0D1B17; letter-spacing: -0.5px; margin-bottom: 52px; }
+                .ab-stack-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+                .ab-stack-card { background: #fff; border: 1px solid #E1F5EE; border-radius: 14px; padding: 24px 20px; text-align: center; transition: all 0.22s; cursor: default; }
+                .ab-stack-card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(29,158,117,0.1); border-color: #5DCAA5; }
+                .ab-stack-icon-circle { width: 48px; height: 48px; border-radius: 12px; background: #E1F5EE; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 14px; }
+                .ab-stack-name { font-family: var(--font-dm-serif, serif); font-size: 15px; color: #0D1B17; margin-bottom: 5px; }
+                .ab-stack-desc { font-size: 12px; color: #8A9E97; line-height: 1.5; }
 
-        .offer-wrap{padding:0 48px 80px;position:relative;z-index:1}
-        .sec-head{max-width:1200px;margin:0 auto 48px;display:flex;align-items:center;gap:14px}
-        .sec-label{font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--teal);white-space:nowrap}
-        .sec-line{flex:1;height:1px;background:linear-gradient(to right,var(--teal-muted),transparent)}
-        .offer-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-        .offer-card{background:white;border:1.5px solid var(--border);border-radius:20px;padding:28px;transition:all .25s;box-shadow:0 2px 8px rgba(15,23,42,.05)}
-        .offer-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(15,23,42,.1)}
-        .oc-icon{width:50px;height:50px;border-radius:15px;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
-        .oc-h3{font-family:var(--display);font-size:21px;color:var(--text);margin-bottom:10px;line-height:1.2}
-        .oc-p{font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:18px}
-        .oc-pts{display:flex;flex-direction:column;gap:8px}
-        .oc-pt{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;color:var(--text2)}
+                /* Vision closing */
+                .ab-vision { background: #0D1B17; padding: 96px 48px; text-align: center; }
+                .ab-vision-inner { max-width: 720px; margin: 0 auto; }
+                .ab-quote { font-family: var(--font-dm-serif, serif); font-size: clamp(22px, 2.5vw, 32px); font-style: italic; color: #fff; line-height: 1.4; letter-spacing: -0.3px; margin-bottom: 24px; }
+                .ab-quote-mark { color: #1D9E75; }
+                .ab-vision-desc { font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.75; margin-bottom: 36px; }
+                .ab-vision-btn { display: inline-flex; align-items: center; gap: 8px; background: #1D9E75; color: #fff; font-family: var(--font-dm-sans, sans-serif); font-size: 15px; font-weight: 700; padding: 13px 28px; border-radius: 12px; text-decoration: none; transition: all 0.22s; }
+                .ab-vision-btn:hover { background: #0F6E56; transform: translateY(-2px); box-shadow: 0 12px 32px rgba(29,158,117,0.4); }
 
-        .cta{padding:0 48px 100px;position:relative;z-index:1}
-        .cta-inner{max-width:1200px;margin:0 auto;background:linear-gradient(135deg,#0D9488 0%,#0891B2 50%,#7C3AED 100%);border-radius:28px;padding:72px;text-align:center;position:relative;overflow:hidden}
-        .cta-c{position:absolute;border-radius:50%;background:rgba(255,255,255,.06)}
-        .cta-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:white;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:100px;margin-bottom:24px;position:relative}
-        .cta-h2{font-family:var(--display);font-size:clamp(28px,3.5vw,46px);color:white;letter-spacing:-.5px;margin-bottom:16px;position:relative}
-        .cta-p{font-size:16px;color:rgba(255,255,255,.75);margin-bottom:36px;position:relative}
-        .cta-btns{display:flex;gap:14px;justify-content:center;position:relative}
-        .btn-white{display:inline-flex;align-items:center;gap:8px;background:white;color:var(--teal);font-family:var(--body);font-size:14.5px;font-weight:700;padding:12px 26px;border-radius:12px;border:none;cursor:pointer;text-decoration:none;transition:all .22s;box-shadow:0 6px 24px rgba(0,0,0,.15)}
-        .btn-white:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(0,0,0,.2)}
-        .btn-ow{display:inline-flex;align-items:center;gap:8px;background:transparent;color:white;font-family:var(--body);font-size:14.5px;font-weight:600;padding:12px 26px;border-radius:12px;border:1.5px solid rgba(255,255,255,.35);cursor:pointer;text-decoration:none;transition:all .22s}
-        .btn-ow:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
+                /* Footer strip */
+                .ab-footer { background: #0D1B17; border-top: 1px solid rgba(255,255,255,0.08); padding: 24px 48px; display: flex; align-items: center; justify-content: space-between; }
+                .ab-footer-copy { font-size: 13px; color: rgba(255,255,255,0.25); }
 
-        .footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:28px 48px;display:flex;align-items:center;justify-content:space-between;background:white}
-        .footer-logo{display:flex;align-items:center;gap:9px;font-family:var(--display);font-size:18px;color:var(--text)}
-        .footer-logo span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .footer-copy{font-size:13px;color:var(--muted)}
+                @media (max-width: 1024px) {
+                    .ab-hero-inner { grid-template-columns: 1fr; gap: 48px; }
+                    .ab-mission-inner { grid-template-columns: 1fr; gap: 40px; }
+                    .ab-stack-grid { grid-template-columns: repeat(2, 1fr); }
+                }
+                @media (max-width: 768px) {
+                    .ab-hero { padding: 100px 24px 60px; }
+                    .ab-mission { padding: 64px 24px; }
+                    .ab-stack { padding: 64px 24px; }
+                    .ab-vision { padding: 64px 24px; }
+                    .ab-footer { padding: 20px 24px; flex-direction: column; gap: 10px; text-align: center; }
+                    .ab-values-grid { grid-template-columns: 1fr; }
+                    .ab-stack-grid { grid-template-columns: repeat(2, 1fr); }
+                }
+            `}</style>
 
-        @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
-        @keyframes ringPulse{0%,100%{opacity:.35;transform:scale(1)}50%{opacity:.8;transform:scale(1.07)}}
+            <PublicNavbar />
 
-        @media(max-width:960px){
-          .hero{grid-template-columns:1fr;gap:40px;padding:60px 20px 40px}
-          .stats-grid{grid-template-columns:repeat(2,1fr)}
-          .offer-grid{grid-template-columns:1fr}
-          .stats-wrap,.offer-wrap,.cta{padding-left:20px;padding-right:20px}
-          .cta-inner{padding:48px 24px}
-          .footer{flex-direction:column;gap:12px;text-align:center;padding:24px 20px}
-          .nav{padding:0 20px}
-        }
-      `}</style>
-
-        <nav className="nav">
-          <Link href="/" className="nav-logo">
-            <div className="nav-mark">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white"/></svg>
-              <span className="nav-mark-ring"/>
-            </div>
-            <span className="nav-wordmark">Diagno<span>vate</span></span>
-          </Link>
-          <div className="nav-links">
-            <Link href="/" className="nav-link">Home</Link>
-            <Link href="/about" className="nav-link active">About</Link>
-            <Link href="/contact" className="nav-link">Contact</Link>
-            <Link href="/role" className="nav-cta">Login & Try <ArrowRight size={14}/></Link>
-          </div>
-        </nav>
-
-        <div className="page">
-          <div style={{position:'relative',overflow:'hidden'}}>
-            <div style={{position:'absolute',width:600,height:600,borderRadius:'50%',background:'radial-gradient(circle,rgba(13,148,136,.1) 0%,transparent 65%)',top:-200,right:-150,pointerEvents:'none'}}/>
-            <div style={{position:'absolute',width:400,height:400,borderRadius:'50%',background:'radial-gradient(circle,rgba(124,58,237,.07) 0%,transparent 65%)',bottom:-80,left:-80,pointerEvents:'none'}}/>
-            <div className="hero">
-              <div>
-                <div className="badge"><span className="badge-dot"/>Our Mission</div>
-                <h1 className="h1">Built for the<br/><em>future of</em><br/>pathology.</h1>
-                <p className="sub">Diagnovate is a clinical AI platform designed to eliminate diagnostic uncertainty in thyroid cancer — starting with the tools pathologists actually need.</p>
-                <div className="btns">
-                  <Link href="/role" className="btn-p">Try the Platform <ArrowRight size={16}/></Link>
-                  <Link href="/contact" className="btn-g">Meet the Team</Link>
-                </div>
-              </div>
-              <div className="hero-side">
-                <div className="mission-card">
-                  <div className="mc-label">Our Mission</div>
-                  <h3 className="mc-h3">Precision diagnostics, accessible to every clinician.</h3>
-                  <p className="mc-p">Thyroid cancer affects millions worldwide. Our mission is to give every pathologist — regardless of institution size or resources — access to AI diagnostic tools that rival the best centres in the world.</p>
-                  <div className="mc-chips">
-                    {['TI-RADS Compliant','WHO Guidelines','ICCR Standards','HIPAA Secure','Real-Time AI'].map(c=>(
-                        <span key={c} className="chip">{c}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="stats-wrap">
-            <div className="stats-grid">
-              {stats.map(s=>(
-                  <div key={s.val} className="stat-card">
-                    <div className="stat-val">{s.val}</div>
-                    <div className="stat-lbl">{s.lbl}</div>
-                    <div className="stat-sub">{s.sub}</div>
-                  </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="offer-wrap">
-            <div className="sec-head">
-              <span className="sec-label">What We Offer</span>
-              <div className="sec-line"/>
-            </div>
-            <div className="offer-grid">
-              {offer.map(o=>(
-                  <div key={o.title} className="offer-card" style={{'--hc':o.color} as React.CSSProperties}
-                       onMouseEnter={e=>{(e.currentTarget as HTMLDivElement).style.borderColor=o.border}}
-                       onMouseLeave={e=>{(e.currentTarget as HTMLDivElement).style.borderColor='var(--border)'}}>
-                    <div className="oc-icon" style={{background:o.bg,border:`1px solid ${o.border}`,color:o.color}}>{o.icon}</div>
-                    <h3 className="oc-h3">{o.title}</h3>
-                    <p className="oc-p">{o.desc}</p>
-                    <div className="oc-pts">
-                      {o.points.map(p=>(
-                          <div key={p} className="oc-pt">
-                            <CheckCircle2 size={15} style={{color:o.color,flexShrink:0}}/> {p}
-                          </div>
-                      ))}
+            {/* ── HERO ─────────────────────────────────────────────────── */}
+            <section className="ab-hero">
+                <div className="ab-hero-inner">
+                    {/* Left */}
+                    <div>
+                        <div className="ab-eyebrow">OUR STORY</div>
+                        <h1 className="ab-h1">Built at the intersection of medicine and machine intelligence</h1>
+                        <p className="ab-desc">
+                            Diagnovate began as a research question: could ensemble deep learning match the diagnostic accuracy of specialist pathologists? Three models, thousands of scans, and one mission later — we believe it can.
+                        </p>
+                        <div className="ab-accent-line" />
                     </div>
-                  </div>
-              ))}
-            </div>
-          </div>
 
-          <div className="cta">
-            <div className="cta-inner">
-              <div className="cta-c" style={{width:400,height:400,top:-160,right:-100}}/>
-              <div className="cta-c" style={{width:280,height:280,bottom:-80,left:-60}}/>
-              <div className="cta-badge"><span style={{width:6,height:6,borderRadius:'50%',background:'white',display:'inline-block'}}/>Join Us</div>
-              <h2 className="cta-h2">Diagnose with confidence.<br/>Every time.</h2>
-              <p className="cta-p">Experience the platform that's changing how thyroid diagnostics work.</p>
-              <div className="cta-btns">
-                <Link href="/role" className="btn-white">Get Started <ArrowRight size={16}/></Link>
-                <Link href="/contact" className="btn-ow">Contact the Team</Link>
-              </div>
-            </div>
-          </div>
+                    {/* Right: Timeline */}
+                    <div>
+                        <div style={{ marginBottom: 20, fontSize: 11, fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase', color: '#1D9E75' }}>Milestones</div>
+                        <div className="ab-timeline">
+                            {milestones.map(m => (
+                                <div key={m.period} className="ab-milestone">
+                                    <div className="ab-milestone-period">{m.period}</div>
+                                    <div className="ab-milestone-event">{m.event}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-          <footer className="footer">
-            <div className="footer-logo">
-              <div className="nav-mark" style={{width:30,height:30,borderRadius:9}}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white"/></svg>
-              </div>
-              Diagno<span>vate</span>
+            {/* ── MISSION ───────────────────────────────────────────────── */}
+            <section className="ab-mission">
+                <div className="ab-mission-inner">
+                    {/* Left */}
+                    <div>
+                        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#1D9E75', marginBottom: 14 }}>Mission</div>
+                        <h2 className="ab-mission-h2">Our Mission</h2>
+                        <p className="ab-mission-p">
+                            We exist to democratize access to clinical-grade thyroid cancer diagnostics. By combining three deep learning models into a single majority-voted prediction engine, Diagnovate gives every clinician — regardless of institution — the confidence of a specialist consensus in under two seconds.
+                        </p>
+                        <p className="ab-mission-p" style={{ marginTop: 16 }}>
+                            We believe AI should augment the clinician, not replace them. Every confidence score is explainable. Every model vote is transparent. Every prediction is a tool, not a verdict.
+                        </p>
+                    </div>
+
+                    {/* Right: Values grid */}
+                    <div>
+                        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#1D9E75', marginBottom: 20 }}>Core Values</div>
+                        <div className="ab-values-grid">
+                            {values.map(v => (
+                                <div key={v.title} className="ab-value-card">
+                                    <div className="ab-value-dot" />
+                                    <div className="ab-value-title">{v.title}</div>
+                                    <div className="ab-value-desc">{v.desc}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ── TECH STACK ────────────────────────────────────────────── */}
+            <section className="ab-stack">
+                <div className="ab-stack-inner">
+                    <div className="ab-sec-eyebrow">Engineering</div>
+                    <h2 className="ab-sec-h2">The Stack Behind the Science</h2>
+                    <div className="ab-stack-grid">
+                        {stack.map(s => (
+                            <div key={s.name} className="ab-stack-card">
+                                <div className="ab-stack-icon-circle">{s.icon}</div>
+                                <div className="ab-stack-name">{s.name}</div>
+                                <div className="ab-stack-desc">{s.desc}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ── VISION ────────────────────────────────────────────────── */}
+            <section className="ab-vision">
+                <div className="ab-vision-inner">
+                    <div style={{ fontSize: 40, color: '#1D9E75', marginBottom: 16, fontFamily: 'var(--font-dm-serif, serif)' }}>"</div>
+                    <div className="ab-quote">
+                        We believe AI should augment the clinician, not replace them.
+                    </div>
+                    <p className="ab-vision-desc">
+                        Every Diagnovate prediction comes with a confidence score, an explanation, and a model-by-model breakdown. Transparency isn't a feature — it's the foundation.
+                    </p>
+                    <Link href="/contact" className="ab-vision-btn">Get in Touch</Link>
+                </div>
+            </section>
+
+            {/* ── FOOTER ────────────────────────────────────────────────── */}
+            <div className="ab-footer">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
+                        <polygon points="18,2 32,9.5 32,26.5 18,34 4,26.5 4,9.5" fill="#1D9E75" opacity="0.2" stroke="#1D9E75" strokeWidth="1.5"/>
+                        <circle cx="18" cy="18" r="4" fill="#1D9E75"/>
+                    </svg>
+                    <span style={{ fontFamily: 'var(--font-dm-serif, serif)', fontSize: 16, color: '#fff' }}>
+                        Diagn<em style={{ fontStyle: 'italic', color: '#1D9E75' }}>ovate</em>
+                    </span>
+                </div>
+                <div className="ab-footer-copy">© 2026 Diagnovate. Advanced AI for thyroid cancer diagnostics.</div>
             </div>
-            <div className="footer-copy">© 2026 Diagnovate. Advanced AI for thyroid cancer diagnostics.</div>
-          </footer>
-        </div>
-      </>
-  );
+        </>
+    );
 }

@@ -73,6 +73,15 @@ function LoginForm() {
 
             <div className="auth-left">
                 <div className="auth-left__dots" />
+                {/* Hexagonal grid overlay */}
+                <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.07, pointerEvents: 'none', zIndex: 1 }} xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="hexAuthL" x="0" y="0" width="52" height="45" patternUnits="userSpaceOnUse">
+                            <polygon points="26,2 48,13 48,35 26,46 4,35 4,13" fill="none" stroke="#5EEAD4" strokeWidth="1" />
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#hexAuthL)" />
+                </svg>
                 <span className="auth-left__blob auth-left__blob--1" />
                 <span className="auth-left__blob auth-left__blob--2" />
                 <span className="auth-left__blob auth-left__blob--3" />

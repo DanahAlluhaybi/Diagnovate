@@ -4,7 +4,7 @@
    Drop this in app/globals.css and it covers every page.
 ═══════════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
 
 /* ─── Reset ──────────────────────────────────────────────── */
 *, *::before, *::after {
@@ -73,7 +73,7 @@
 
   /* Typography */
   --font-display: 'DM Serif Display', serif;
-  --font-body:    'Plus Jakarta Sans', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
 
   /* Navbar height — used for padding-top on pages */
   --nav-h: 68px;
@@ -445,6 +445,40 @@ a           { color: inherit; }
 @keyframes toastIn {
   from { opacity: 0; transform: translateX(20px); }
   to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ─── Public marketing page keyframes ───────────────────── */
+@keyframes fadeUp   { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+@keyframes scanLine { 0%{transform:translateY(-100%);opacity:0} 10%{opacity:0.6} 90%{opacity:0.6} 100%{transform:translateY(400%);opacity:0} }
+@keyframes float    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes dotBlink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+@keyframes hexPulse { 0%,100%{opacity:0.2;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.06)} }
+
+/* ─── Public marketing utility classes ──────────────────── */
+.animate-fadeUp   { animation: fadeUp   0.7s cubic-bezier(.16,1,.3,1) both; }
+.animate-float    { animation: float    3s ease-in-out infinite; }
+.animate-dotBlink { animation: dotBlink 1.4s ease-in-out infinite; }
+.animate-hexPulse { animation: hexPulse 2.5s ease-in-out infinite; }
+.animate-scanLine { animation: scanLine 2.8s ease-in-out infinite; }
+
+/* ─── Shimmer skeleton ───────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.dv-shimmer {
+  background: linear-gradient(90deg, #E1F5EE 25%, #F4F9F7 50%, #E1F5EE 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ─── Hex loading ring ───────────────────────────────────── */
+@keyframes hexRotate { to { transform: rotate(360deg); } }
+@keyframes loadBar   {
+  0%   { width: 0%;   opacity: 1; }
+  70%  { width: 100%; opacity: 1; }
+  100% { width: 100%; opacity: 0; }
 }
 
 /* ─── Responsive base ────────────────────────────────────── */
