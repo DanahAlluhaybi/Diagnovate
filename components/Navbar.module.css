@@ -6,64 +6,64 @@
 /* ── Logout overlay ─────────────────────────────────────── */
 .logoutOverlay {
     position: fixed; inset: 0; z-index: 9999;
-    background: rgba(240, 244, 248, 0.92);
+    background: rgba(240,247,244,0.92);
     backdrop-filter: blur(12px);
     display: flex; align-items: center; justify-content: center;
     animation: fadeIn 0.2s ease;
 }
 .logoutCard {
     background: white;
-    border: 1px solid #E2E8F0;
+    border: 1px solid #D1E5DC;
     border-radius: 28px;
     padding: 52px 64px;
     text-align: center;
-    box-shadow: 0 32px 80px rgba(15,23,42,0.12);
+    box-shadow: 0 32px 80px rgba(13,27,23,0.10);
     display: flex; flex-direction: column; align-items: center; gap: 0;
 }
 .logoutLogo {
     width: 52px; height: 52px;
-    background: linear-gradient(145deg, #0D9488, #0891B2);
+    background: linear-gradient(145deg, #1D9E75, #0D9488);
     border-radius: 16px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 8px 24px rgba(13,148,136,0.3);
+    box-shadow: 0 8px 24px rgba(29,158,117,0.3);
     margin-bottom: 24px;
 }
 .logoutSpinner {
     width: 38px; height: 38px;
-    border: 3px solid #F0FDFA;
-    border-top-color: #0D9488;
+    border: 3px solid #E1F5EE;
+    border-top-color: #1D9E75;
     border-radius: 50%;
     animation: spin 0.75s linear infinite;
     margin-bottom: 20px;
 }
 .logoutTitle {
     font-family: 'DM Serif Display', serif;
-    font-size: 22px; color: #0F172A;
+    font-size: 22px; color: #0D1B17;
     margin: 0 0 6px; letter-spacing: -0.3px;
 }
 .logoutSub {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13px; color: #64748B; margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; color: #8A9E97; margin: 0;
 }
 
 /* ── Nav shell ──────────────────────────────────────────── */
 .nav {
-    position: sticky; top: 0; z-index: 200;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
     height: 68px;
     background: rgba(255,255,255,0.92);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-bottom: 1px solid rgba(226,232,240,0.8);
+    border-bottom: 1px solid rgba(29,158,117,0.08);
     transition: box-shadow 0.25s ease;
 }
 .navScrolled {
-    box-shadow: 0 1px 0 rgba(13,148,136,0.06), 0 8px 32px rgba(15,23,42,0.07);
+    box-shadow: 0 4px 24px rgba(13,27,23,0.06);
 }
 .navInner {
     height: 100%;
     max-width: 1360px;
     margin: 0 auto;
-    padding: 0 40px;
+    padding: 0 48px;
     display: flex;
     align-items: center;
     gap: 0;
@@ -79,17 +79,17 @@
 
 .logoMark {
     position: relative;
-    width: 42px; height: 42px;
-    background: linear-gradient(145deg, #0D9488 0%, #0891B2 60%, #0369A1 100%);
-    border-radius: 13px;
+    width: 40px; height: 40px;
+    background: linear-gradient(145deg, #1D9E75, #0D9488);
+    border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 6px 18px rgba(13,148,136,0.32), inset 0 1px 0 rgba(255,255,255,0.18);
+    box-shadow: 0 6px 18px rgba(29,158,117,0.32), inset 0 1px 0 rgba(255,255,255,0.18);
     flex-shrink: 0;
 }
 .logoPulse {
     position: absolute; inset: -4px;
     border-radius: 17px;
-    border: 1.5px solid rgba(13,148,136,0.22);
+    border: 1.5px solid rgba(29,158,117,0.22);
     animation: ringPulse 3.5s ease-in-out infinite;
 }
 
@@ -97,18 +97,17 @@
 .logoWordmark {
     font-family: 'DM Serif Display', serif;
     font-size: 21px; font-weight: 400;
-    color: #0F172A; letter-spacing: -0.3px;
+    color: #0D1B17; letter-spacing: -0.3px;
 }
 .logoAccent {
-    background: linear-gradient(120deg, #0D9488, #0891B2);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #1D9E75;
+    font-style: italic;
 }
 .logoSub {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     font-size: 9.5px; font-weight: 700;
     letter-spacing: 2px; text-transform: uppercase;
-    color: #94A3B8; margin-top: 3px;
+    color: #8A9E97; margin-top: 3px;
 }
 
 /* ── Nav links ───────────────────────────────────────────── */
@@ -119,18 +118,18 @@
     position: relative;
     padding: 7px 14px;
     border-radius: 9px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     font-size: 13.5px; font-weight: 500;
-    color: #64748B;
+    color: #8A9E97;
     text-decoration: none;
     transition: all 0.18s;
     white-space: nowrap;
 }
-.link:hover { color: #0F172A; background: #F1F5F9; }
+.link:hover { color: #0D1B17; background: rgba(29,158,117,0.06); }
 .linkActive {
-    color: #0D9488 !important;
-    font-weight: 700;
-    background: #F0FDFA !important;
+    color: #1D9E75 !important;
+    font-weight: 600;
+    background: #E1F5EE !important;
 }
 .linkDot {
     position: absolute;
@@ -138,7 +137,7 @@
     transform: translateX(-50%);
     width: 4px; height: 4px;
     border-radius: 50%;
-    background: #0D9488;
+    background: #1D9E75;
 }
 
 /* ── Right cluster ───────────────────────────────────────── */
@@ -148,7 +147,7 @@
 }
 .divider {
     width: 1px; height: 26px;
-    background: #E8EDF2; margin: 0 2px;
+    background: #D1E5DC; margin: 0 2px;
     flex-shrink: 0;
 }
 
@@ -156,16 +155,16 @@
 .iconBtn {
     position: relative;
     width: 38px; height: 38px;
-    border: 1.5px solid #E8EDF2;
-    border-radius: 11px;
-    background: #F8FAFC;
-    color: #94A3B8;
+    border: 1.5px solid #D1E5DC;
+    border-radius: 50%;
+    background: white;
+    color: #8A9E97;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: all 0.18s;
 }
-.iconBtn:hover    { background: #F0FDFA; color: #0D9488; border-color: #CCFBF1; }
-.iconBtnActive    { background: #F0FDFA !important; color: #0D9488 !important; border-color: #99F6E4 !important; }
+.iconBtn:hover    { background: #F0F7F4; color: #1D9E75; border-color: rgba(29,158,117,0.2); }
+.iconBtnActive    { background: #F0F7F4 !important; color: #1D9E75 !important; border-color: rgba(29,158,117,0.25) !important; }
 
 .notifDot {
     position: absolute; top: 6px; right: 6px;
@@ -180,29 +179,29 @@
     display: flex; align-items: center; gap: 9px;
     padding: 5px 10px 5px 14px;
     background: white;
-    border: 1.5px solid #E8EDF2;
+    border: 1.5px solid #D1E5DC;
     border-radius: 40px;
     cursor: pointer;
     transition: all 0.2s;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'DM Sans', sans-serif;
 }
-.profileBtn:hover { border-color: #CCFBF1; background: #F8FFFE; box-shadow: 0 2px 12px rgba(13,148,136,0.1); }
+.profileBtn:hover { border-color: rgba(29,158,117,0.2); background: #F0F7F4; box-shadow: 0 2px 12px rgba(29,158,117,0.10); }
 
 .profileInfo { text-align: left; }
 .profileName {
     display: block;
-    font-size: 12.5px; font-weight: 700; color: #0F172A; line-height: 1.25;
+    font-size: 12.5px; font-weight: 700; color: #0D1B17; line-height: 1.25;
 }
 .profileRole {
     display: block;
-    font-size: 10px; color: #94A3B8; line-height: 1;
+    font-size: 10px; color: #8A9E97; line-height: 1;
 }
 .profileAvatar {
     width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-    background: linear-gradient(135deg, #0D9488, #7C3AED);
+    background: linear-gradient(135deg, #1D9E75, #0D9488);
     display: flex; align-items: center; justify-content: center;
     font-size: 11.5px; font-weight: 800; color: white;
-    box-shadow: 0 2px 8px rgba(13,148,136,0.25);
+    box-shadow: 0 2px 8px rgba(29,158,117,0.25);
 }
 
 /* ── Dropdowns ───────────────────────────────────────────── */
@@ -211,9 +210,9 @@
 .dropdown {
     position: absolute; top: calc(100% + 10px); right: 0;
     background: white;
-    border: 1px solid #EBF0F5;
+    border: 1px solid #D1E5DC;
     border-radius: 20px;
-    box-shadow: 0 20px 56px rgba(15,23,42,0.13), 0 4px 16px rgba(15,23,42,0.07);
+    box-shadow: 0 20px 56px rgba(13,27,23,0.10), 0 4px 16px rgba(13,27,23,0.05);
     z-index: 300; overflow: hidden;
     animation: dropIn 0.2s cubic-bezier(0.16,1,0.3,1) both;
 }
@@ -222,11 +221,11 @@
 
 .dropHead {
     padding: 14px 18px 12px;
-    border-bottom: 1px solid #F1F5F9;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    border-bottom: 1px solid #E1F5EE;
+    font-family: 'DM Sans', sans-serif;
     font-size: 12px; font-weight: 800;
     letter-spacing: 0.5px; text-transform: uppercase;
-    color: #475569;
+    color: #2F4A40;
     display: flex; align-items: center; gap: 7px;
 }
 
@@ -238,16 +237,16 @@
 }
 .emptyDropIcon {
     width: 52px; height: 52px; border-radius: 14px;
-    background: #F8FAFC; border: 1px solid #F1F5F9;
-    display: flex; align-items: center; justify-content: center; color: #CBD5E1;
+    background: #F0F7F4; border: 1px solid #D1E5DC;
+    display: flex; align-items: center; justify-content: center;
 }
 .emptyDropTitle {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13px; font-weight: 700; color: #475569; margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 700; color: #2F4A40; margin: 0;
 }
 .emptyDropSub {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 11.5px; color: #94A3B8; margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11.5px; color: #8A9E97; margin: 0;
 }
 
 /* Notification item */
@@ -261,35 +260,35 @@
     box-shadow: 0 0 6px rgba(245,158,11,0.4);
 }
 .notifItemTitle {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13px; font-weight: 700; color: #0F172A;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 700; color: #0D1B17;
 }
 .notifItemSub {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 11.5px; color: #94A3B8; margin-top: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11.5px; color: #8A9E97; margin-top: 2px;
 }
 
 /* Profile dropdown header */
 .profDropHead {
     padding: 16px 18px 14px;
-    border-bottom: 1px solid #F1F5F9;
+    border-bottom: 1px solid #E1F5EE;
     display: flex; align-items: center; gap: 12px;
-    background: linear-gradient(135deg, #F0FDFA, #F8FAFC);
+    background: linear-gradient(135deg, #F0F7F4, #F8FAF9);
 }
 .profDropAvatar {
     width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
-    background: linear-gradient(135deg, #0D9488, #0891B2);
+    background: linear-gradient(135deg, #1D9E75, #0D9488);
     display: flex; align-items: center; justify-content: center;
     font-size: 14px; font-weight: 800; color: white;
-    box-shadow: 0 4px 12px rgba(13,148,136,0.25);
+    box-shadow: 0 4px 12px rgba(29,158,117,0.25);
 }
 .profDropName {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13.5px; font-weight: 700; color: #0F172A;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px; font-weight: 700; color: #0D1B17;
 }
 .profDropEmail {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 11px; color: #94A3B8; margin-top: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px; color: #8A9E97; margin-top: 2px;
 }
 
 /* Menu items */
@@ -297,16 +296,16 @@
 .menuItem {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 12px; border-radius: 11px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13.5px; font-weight: 500; color: #334155;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px; font-weight: 500; color: #2F4A40;
     cursor: pointer; transition: all 0.15s;
     border: none; background: none; width: 100%;
     text-align: left; text-decoration: none;
 }
-.menuItem:hover { background: #F8FAFC; color: #0D9488; }
+.menuItem:hover { background: #F0F7F4; color: #1D9E75; }
 .menuItemDanger { color: #EF4444 !important; }
 .menuItemDanger:hover { background: #FFF1F2 !important; color: #EF4444 !important; }
-.menuSep { height: 1px; background: #F1F5F9; margin: 4px 0; }
+.menuSep { height: 1px; background: #E1F5EE; margin: 4px 0; }
 
 /* ── Animations ──────────────────────────────────────────── */
 @keyframes dropIn {
@@ -327,7 +326,7 @@
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 1024px) {
     .navInner { padding: 0 24px; }
-    .logo { margin-right: 28px; }
+    .logo { margin-right: 24px; }
 }
 @media (max-width: 860px) {
     .links { display: none; }

@@ -10,8 +10,11 @@ interface NavUser { name: string; email?: string; specialty?: string; }
 interface NavbarProps { pendingCount?: number; variant?: 'doctor' | 'admin'; }
 
 const LogoIcon = ({ size = 20 }: { size?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-        <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white"/>
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
+        <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/>
+        <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+        <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+        <circle cx="20" cy="20" r="3.5" fill="white"/>
     </svg>
 );
 
@@ -96,11 +99,11 @@ export default function Navbar({ pendingCount = 0, variant }: NavbarProps) {
 
                     <Link href={role === 'admin' ? '/admin' : '/dashboard'} className={styles.logo}>
                         <div className={styles.logoMark}>
-                            <LogoIcon size={20} />
+                            <LogoIcon size={22} />
                             <span className={styles.logoPulse} />
                         </div>
                         <div className={styles.logoText}>
-                            <span className={styles.logoWordmark}>Diagno<span className={styles.logoAccent}>vate</span></span>
+                            <span className={styles.logoWordmark}>Diagno<em className={styles.logoAccent}>vate</em></span>
                             <span className={styles.logoSub}>{role === 'admin' ? 'Admin Console' : 'Clinical Platform'}</span>
                         </div>
                     </Link>
@@ -133,7 +136,7 @@ export default function Navbar({ pendingCount = 0, variant }: NavbarProps) {
                             {bellOpen && (
                                 <div className={`${styles.dropdown} ${styles.dropdownBell}`}>
                                     <div className={styles.dropHead}>
-                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="2.5" strokeLinecap="round">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2.5" strokeLinecap="round">
                                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                                         </svg>
                                         Notifications

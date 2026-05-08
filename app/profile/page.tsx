@@ -218,7 +218,7 @@ export default function ProfilePage() {
           top: -200px; right: -150px; pointer-events: none; z-index: 0;
         }
 
-        .pf-main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 48px 48px 80px; }
+        .pf-main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: calc(68px + 48px) 48px 80px; }
 
         .pf-page-head {
           margin-bottom: 40px;

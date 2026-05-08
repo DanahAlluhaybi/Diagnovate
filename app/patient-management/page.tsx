@@ -585,7 +585,10 @@ function PatientManagementPage() {
                                             <div className={`${styles.avatarSm} ${p.gender === 'Female' ? styles.female : styles.male}`}>
                                                 {getInitials(p.firstName, p.lastName)}
                                             </div>
-                                            <span className={styles.patientName}>{p.firstName} {p.lastName}</span>
+                                            <div>
+                                                <div className={styles.pName}>{p.firstName} {p.lastName}</div>
+                                                <div className={styles.pId}>{p.mrn}</div>
+                                            </div>
                                         </div>
                                     </td>
                                     <td className={styles.muted}>{p.mrn}</td>
