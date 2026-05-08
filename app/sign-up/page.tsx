@@ -149,8 +149,11 @@ export default function SignUpPage() {
 
                 <Link href="/" className="auth-logo">
                     <div className="auth-logo__mark">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white" />
+                        <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+                            <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5"/>
+                            <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                            <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                            <circle cx="20" cy="20" r="3" fill="white"/>
                         </svg>
                     </div>
                     <span className="auth-logo__word">Diagno<span>vate</span></span>

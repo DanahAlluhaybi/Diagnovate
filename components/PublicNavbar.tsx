@@ -75,30 +75,20 @@ export default function PublicNavbar() {
             <nav style={navStyle}>
                 {/* Logo */}
                 <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-                    {/* Hexagonal SVG mark */}
-                    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <polygon
-                            points="18,2 32,9.5 32,26.5 18,34 4,26.5 4,9.5"
-                            fill="#1D9E75"
-                            opacity="0.12"
-                            stroke="#1D9E75"
-                            strokeWidth="1.5"
-                        />
-                        <polygon
-                            points="18,7 28,12.5 28,23.5 18,29 8,23.5 8,12.5"
-                            fill="none"
-                            stroke="#1D9E75"
-                            strokeWidth="1.2"
-                            opacity="0.5"
-                        />
-                        <circle cx="18" cy="18" r="5" fill="#1D9E75" />
-                        <circle cx="18" cy="11" r="2" fill="#1D9E75" opacity="0.6" />
-                        <circle cx="18" cy="25" r="2" fill="#1D9E75" opacity="0.6" />
-                        <circle cx="12" cy="14.5" r="2" fill="#1D9E75" opacity="0.6" />
-                        <circle cx="24" cy="14.5" r="2" fill="#1D9E75" opacity="0.6" />
-                        <circle cx="12" cy="21.5" r="2" fill="#1D9E75" opacity="0.6" />
-                        <circle cx="24" cy="21.5" r="2" fill="#1D9E75" opacity="0.6" />
-                    </svg>
+                    <div style={{
+                        width: 40, height: 40, borderRadius: 12,
+                        background: 'linear-gradient(145deg,#1D9E75,#0D9488)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 6px 18px rgba(29,158,117,0.3)',
+                        flexShrink: 0,
+                    }}>
+                        <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+                            <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5"/>
+                            <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                            <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                            <circle cx="20" cy="20" r="3" fill="white"/>
+                        </svg>
+                    </div>
                     <span style={{
                         fontFamily: 'var(--font-dm-serif, "DM Serif Display", serif)',
                         fontSize: 20,
@@ -115,7 +105,7 @@ export default function PublicNavbar() {
                     <Link href="/about" style={linkStyle('/about')}>About</Link>
                     <Link href="/contact" style={linkStyle('/contact')}>Contact</Link>
                     <Link
-                        href="/log-in"
+                        href="/role"
                         style={{
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -123,10 +113,10 @@ export default function PublicNavbar() {
                             fontSize: 14,
                             fontWeight: 600,
                             fontFamily: 'var(--font-dm-sans, sans-serif)',
-                            color: isActive('/log-in') ? '#0F6E56' : '#1D9E75',
-                            background: isActive('/log-in') ? '#E1F5EE' : 'transparent',
+                            color: isActive('/role') ? '#0F6E56' : '#1D9E75',
+                            background: isActive('/role') ? '#E1F5EE' : 'transparent',
                             border: '1.5px solid',
-                            borderColor: isActive('/log-in') ? '#1D9E75' : 'rgba(29,158,117,0.35)',
+                            borderColor: isActive('/role') ? '#1D9E75' : 'rgba(29,158,117,0.35)',
                             borderRadius: 9,
                             padding: '6px 16px',
                             transition: 'all 0.18s',
@@ -139,8 +129,8 @@ export default function PublicNavbar() {
                         }}
                         onMouseLeave={e => {
                             const el = e.currentTarget as HTMLAnchorElement;
-                            el.style.background = isActive('/log-in') ? '#E1F5EE' : 'transparent';
-                            el.style.borderColor = isActive('/log-in') ? '#1D9E75' : 'rgba(29,158,117,0.35)';
+                            el.style.background = isActive('/role') ? '#E1F5EE' : 'transparent';
+                            el.style.borderColor = isActive('/role') ? '#1D9E75' : 'rgba(29,158,117,0.35)';
                         }}
                     >
                         Log In
@@ -218,7 +208,7 @@ export default function PublicNavbar() {
                         { href: '/', label: 'Home' },
                         { href: '/about', label: 'About' },
                         { href: '/contact', label: 'Contact' },
-                        { href: '/log-in', label: 'Log In' },
+                        { href: '/role', label: 'Log In' },
                     ].map(({ href, label }) => (
                         <Link
                             key={href}
