@@ -104,86 +104,91 @@ export default function SignUpPage() {
     return (
         <>
             <style>{`
-                .su-page{position:relative;z-index:1;min-height:100vh;background:#F0F4F8;display:flex;flex-direction:column;overflow-x:hidden}
-                .su-hex{position:fixed;inset:0;width:100%;height:100%;opacity:.035;pointer-events:none;z-index:0}
-                .su-blob{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
-                .su-blob-1{width:600px;height:600px;background:radial-gradient(circle,rgba(13,148,136,.06) 0%,transparent 65%);top:-200px;right:-150px}
-                .su-blob-2{width:400px;height:400px;background:radial-gradient(circle,rgba(8,80,65,.04) 0%,transparent 65%);bottom:-120px;left:-100px}
+                .su-page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;
+                    background:
+                        radial-gradient(ellipse 80% 50% at 50% -5%, rgba(29,158,117,0.07) 0%, transparent 65%),
+                        radial-gradient(ellipse 50% 40% at 85% 90%, rgba(13,148,136,0.05) 0%, transparent 55%),
+                        #FFFFFF;}
+                .su-hex{position:fixed;inset:0;width:100%;height:100%;opacity:.025;pointer-events:none;z-index:0}
 
-                .su-topbar{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:68px;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(13,148,136,.08);flex-shrink:0}
+                .su-topbar{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(255,255,255,.8);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid rgba(0,0,0,.06);flex-shrink:0}
                 .su-logo{display:flex;align-items:center;gap:12px;text-decoration:none}
-                .su-logo-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#0D9488,#0D9488);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(13,148,136,.3);flex-shrink:0}
-                .su-logo-word{font-family:'DM Serif Display',serif;font-size:20px;color:#0F172A;letter-spacing:-.3px}
-                .su-logo-word em{font-style:italic;color:#0D9488}
-                .su-back{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#334155;text-decoration:none;padding:8px 16px;border:1.5px solid #E2E8F0;border-radius:10px;background:white;transition:all .18s}
-                .su-back:hover{border-color:#0D9488;color:#0D9488;background:#F0F4F8}
+                .su-logo-mark{width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,#1D9E75,#0D9488);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(29,158,117,.35);flex-shrink:0}
+                .su-logo-word{font-family:'DM Serif Display',serif;font-size:20px;color:#111827;letter-spacing:-.3px}
+                .su-logo-word em{font-style:italic;color:#1D9E75}
+                .su-back{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#374151;text-decoration:none;padding:8px 16px;border:1px solid rgba(0,0,0,.12);border-radius:10px;background:white;transition:all .18s}
+                .su-back:hover{border-color:#1D9E75;color:#1D9E75;background:#F0FDF9}
 
                 .su-main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px 40px}
 
-                .su-card{width:100%;max-width:520px;background:#fff;border:1px solid rgba(13,148,136,.12);border-radius:24px;padding:48px;box-shadow:0 20px 60px rgba(13,27,23,.08),0 4px 16px rgba(13,27,23,.04);animation:suFadeUp .45s ease both;position:relative;overflow:hidden}
-                .su-top-line{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#0D9488,#0D9488,#0D9488,transparent);pointer-events:none}
-
-                .su-steps{display:flex;align-items:center;justify-content:center;margin-bottom:32px}
+                /* Step progress — ABOVE the card */
+                .su-steps-outer{display:flex;align-items:center;justify-content:center;margin-bottom:20px;width:100%;max-width:520px}
+                .su-steps{display:flex;align-items:center;justify-content:center;gap:0}
                 .su-step{display:flex;align-items:center}
                 .su-step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;flex-shrink:0;transition:all .3s}
-                .su-step-dot--done{background:#0D9488;color:white;box-shadow:0 0 0 3px rgba(13,148,136,.15)}
-                .su-step-dot--curr{background:#F0FDFA;color:#0F6E56;border:1.5px solid #0D9488}
-                .su-step-dot--idle{background:#F8FAFC;color:#64748B;border:1px solid #E2E8F0}
+                .su-step-dot--done{background:#1D9E75;color:white;box-shadow:0 0 0 3px rgba(29,158,117,.15)}
+                .su-step-dot--curr{background:#F0FDF9;color:#0F6E56;border:1.5px solid #1D9E75}
+                .su-step-dot--idle{background:#F8FAFC;color:#9CA3AF;border:1px solid rgba(0,0,0,.1)}
                 .su-step-lbl{font-size:11px;font-weight:600;font-family:'DM Sans',sans-serif;margin:0 8px;white-space:nowrap;transition:color .3s}
-                .su-step-lbl--done{color:#0D9488}
-                .su-step-lbl--curr{color:#0F172A}
-                .su-step-lbl--idle{color:#64748B}
+                .su-step-lbl--done{color:#1D9E75}
+                .su-step-lbl--curr{color:#111827}
+                .su-step-lbl--idle{color:#9CA3AF}
                 .su-step-line{width:36px;height:1.5px;flex-shrink:0;transition:background .3s}
-                .su-step-line--done{background:#0D9488}
-                .su-step-line--idle{background:#E2E8F0}
+                .su-step-line--done{background:#1D9E75}
+                .su-step-line--idle{background:rgba(0,0,0,.1)}
 
-                .su-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(13,148,136,.07);border:1px solid rgba(13,148,136,.18);color:#0F6E56;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:5px 12px;border-radius:100px;margin-bottom:14px}
-                .su-chip-dot{width:6px;height:6px;border-radius:50%;background:#0D9488;animation:suBlink 2s ease-in-out infinite}
-                .su-h2{font-family:'DM Serif Display',serif;font-size:30px;letter-spacing:-.5px;color:#0F172A;margin-bottom:6px;line-height:1.1}
-                .su-sub{font-size:13.5px;color:#64748B;margin-bottom:26px;line-height:1.6}
-                .su-sub a{color:#0D9488;text-decoration:none;font-weight:600}
+                .su-card{width:100%;max-width:520px;background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:20px;padding:48px;
+                    box-shadow:0 1px 3px rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.06),0 0 80px rgba(29,158,117,.06);
+                    animation:suFadeUp .45s ease both;position:relative;overflow:hidden}
+                .su-top-line{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,rgba(29,158,117,.5),#1D9E75,rgba(29,158,117,.5),transparent);pointer-events:none}
+
+                .su-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(29,158,117,.06);border:1px solid rgba(29,158,117,.18);color:#1D9E75;font-size:11px;font-weight:700;letter-spacing:.5px;padding:5px 12px;border-radius:100px;margin-bottom:14px}
+                .su-chip-dot{width:6px;height:6px;border-radius:50%;background:#1D9E75;animation:suBlink 2s ease-in-out infinite}
+                .su-h2{font-family:'DM Serif Display',serif;font-size:30px;letter-spacing:-.5px;color:#111827;margin-bottom:6px;line-height:1.1}
+                .su-sub{font-size:13.5px;color:#6B7280;margin-bottom:26px;line-height:1.6}
+                .su-sub a{color:#1D9E75;text-decoration:none;font-weight:600}
                 .su-sub a:hover{text-decoration:underline}
 
-                .su-label{display:block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#334155;margin-bottom:7px;font-family:'DM Sans',sans-serif}
+                .su-label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;font-family:'DM Sans',sans-serif}
                 .su-iw{position:relative}
-                .su-iw-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#64748B;pointer-events:none;display:flex;z-index:1}
-                .su-input{width:100%;height:50px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:0 16px 0 42px;font-family:'DM Sans',sans-serif;font-size:14.5px;color:#0F172A;outline:none;transition:all .2s;appearance:none;-webkit-appearance:none}
-                .su-input:focus{border-color:#0D9488;background:#fff;box-shadow:0 0 0 4px rgba(13,148,136,.1)}
-                .su-input::placeholder{color:#64748B}
-                .su-input option{background:#fff;color:#0F172A}
-                .su-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#64748B;display:flex;padding:4px;transition:color .18s;z-index:1}
-                .su-eye:hover{color:#334155}
+                .su-iw-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#9CA3AF;pointer-events:none;display:flex;z-index:1}
+                .su-input{width:100%;height:48px;background:#FAFAFA;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:0 16px 0 40px;font-family:'DM Sans',sans-serif;font-size:14px;color:#111827;outline:none;transition:all .2s;appearance:none;-webkit-appearance:none}
+                .su-input:focus{border-color:#1D9E75;background:#fff;box-shadow:0 0 0 3px rgba(29,158,117,.12)}
+                .su-input::placeholder{color:#9CA3AF}
+                .su-input option{background:#fff;color:#111827}
+                .su-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9CA3AF;display:flex;padding:4px;transition:color .18s;z-index:1}
+                .su-eye:hover{color:#374151}
 
                 .su-g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
                 .su-field{display:flex;flex-direction:column}
-                .su-fields{display:flex;flex-direction:column;gap:18px}
+                .su-fields{display:flex;flex-direction:column;gap:16px}
 
                 .su-pw-str{display:flex;align-items:center;gap:8px;margin-top:8px}
                 .su-pw-bars{display:flex;gap:4px;flex:1}
                 .su-pw-bar{flex:1;height:3px;border-radius:2px;transition:background .3s}
                 .su-pw-lbl{font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;min-width:36px}
-                .su-pw-match{display:flex;align-items:center;gap:6px;margin-top:7px;font-size:12px;font-weight:600;color:#0D9488;font-family:'DM Sans',sans-serif}
+                .su-pw-match{display:flex;align-items:center;gap:6px;margin-top:7px;font-size:12px;font-weight:600;color:#1D9E75;font-family:'DM Sans',sans-serif}
 
-                .su-error{display:flex;align-items:center;gap:9px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.18);border-radius:10px;padding:11px 14px;font-size:13px;color:#DC2626;font-family:'DM Sans',sans-serif}
+                .su-error{display:flex;align-items:center;gap:9px;background:#FFF5F5;border-left:3px solid #EF4444;border-radius:0 8px 8px 0;padding:11px 14px;font-size:13px;color:#DC2626;font-family:'DM Sans',sans-serif}
 
-                .su-btn{width:100%;height:52px;border:none;border-radius:13px;background:linear-gradient(135deg,#0D9488,#0D9488);color:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;transition:all .22s;box-shadow:0 6px 20px rgba(13,148,136,.28);position:relative;overflow:hidden}
-                .su-btn::after{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);transform:skewX(-15deg);pointer-events:none}
+                .su-btn{width:100%;height:52px;border:none;border-radius:12px;background:linear-gradient(135deg,#1D9E75 0%,#0D9488 50%,#0F6E56 100%);color:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;transition:all .22s;box-shadow:0 1px 2px rgba(0,0,0,.1),0 4px 16px rgba(29,158,117,.28),inset 0 1px 0 rgba(255,255,255,.15);position:relative;overflow:hidden}
+                .su-btn::after{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transform:skewX(-15deg);pointer-events:none}
                 .su-btn:not(:disabled):hover::after{left:160%;transition:left .55s ease}
-                .su-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(13,148,136,.35)}
+                .su-btn:hover{transform:translateY(-2px);box-shadow:0 1px 2px rgba(0,0,0,.1),0 10px 28px rgba(29,158,117,.36),inset 0 1px 0 rgba(255,255,255,.15)}
                 .su-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
 
-                .su-btn-ghost{width:100%;height:46px;border:1.5px solid #E2E8F0;border-radius:12px;background:#fff;color:#334155;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .18s}
-                .su-btn-ghost:hover{border-color:#0D9488;color:#0D9488;background:#F0F4F8}
+                .su-btn-ghost{width:100%;height:46px;border:1px solid rgba(0,0,0,.12);border-radius:10px;background:#fff;color:#374151;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .18s}
+                .su-btn-ghost:hover{border-color:#1D9E75;color:#1D9E75;background:#F0FDF9}
 
-                .su-verify-card{width:100%;border:1.5px solid #E2E8F0;border-radius:16px;background:#fff;padding:18px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .22s;text-align:left;font-family:'DM Sans',sans-serif}
-                .su-verify-card:hover:not(:disabled){border-color:#0D9488;background:#F0F4F8;box-shadow:0 0 0 4px rgba(13,148,136,.08)}
+                .su-verify-card{width:100%;border:1px solid rgba(0,0,0,.1);border-radius:14px;background:#fff;padding:18px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .22s;text-align:left;font-family:'DM Sans',sans-serif}
+                .su-verify-card:hover:not(:disabled){border-color:#1D9E75;background:#F0FDF9;box-shadow:0 0 0 3px rgba(29,158,117,.1)}
                 .su-verify-card:disabled{cursor:not-allowed;opacity:.5}
-                .su-verify-icon{width:46px;height:46px;border-radius:12px;background:#F0FDFA;border:1px solid rgba(13,148,136,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+                .su-verify-icon{width:46px;height:46px;border-radius:12px;background:#F0FDF9;border:1px solid rgba(29,158,117,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
                 .su-footer{position:relative;z-index:1;text-align:center;padding:16px 24px 32px;display:flex;flex-direction:column;align-items:center;gap:10px}
-                .su-footer-text{font-size:11px;color:#64748B;letter-spacing:.3px}
+                .su-footer-text{font-size:11px;color:#9CA3AF;letter-spacing:.3px}
                 .su-footer-badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-                .su-badge-comp{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#64748B;border:1px solid #E2E8F0;padding:3px 10px;border-radius:100px}
+                .su-badge-comp{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;border:1px solid rgba(0,0,0,.08);padding:3px 10px;border-radius:100px}
 
                 @keyframes suFadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
                 @keyframes suBlink{0%,100%{opacity:1}50%{opacity:.4}}
@@ -191,7 +196,7 @@ export default function SignUpPage() {
 
                 @media(max-width:640px){
                     .su-topbar{padding:0 20px}
-                    .su-card{padding:32px 22px 40px;border-radius:20px}
+                    .su-card{padding:32px 22px 40px;border-radius:16px}
                     .su-h2{font-size:26px}
                     .su-g2{grid-template-columns:1fr}
                     .su-step-lbl{display:none}
@@ -200,19 +205,15 @@ export default function SignUpPage() {
 
             <div className="su-page">
 
-                {/* Hex grid */}
                 <svg className="su-hex" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <pattern id="suHex" x="0" y="0" width="56" height="48" patternUnits="userSpaceOnUse">
-                            <polygon points="28,2 52,14 52,38 28,50 4,38 4,14" fill="none" stroke="#0D9488" strokeWidth="1"/>
+                            <polygon points="28,2 52,14 52,38 28,50 4,38 4,14" fill="none" stroke="#1D9E75" strokeWidth="1"/>
                         </pattern>
                     </defs>
                     <rect width="100%" height="100%" fill="url(#suHex)"/>
                 </svg>
-                <span className="su-blob su-blob-1"/>
-                <span className="su-blob su-blob-2"/>
 
-                {/* Top bar */}
                 <div className="su-topbar">
                     <Link href="/" className="su-logo">
                         <div className="su-logo-mark">
@@ -231,12 +232,10 @@ export default function SignUpPage() {
                     </Link>
                 </div>
 
-                {/* Main */}
                 <div className="su-main">
-                    <div className="su-card">
-                        <div className="su-top-line"/>
 
-                        {/* Step progress */}
+                    {/* Step progress — above the card */}
+                    <div className="su-steps-outer">
                         <div className="su-steps">
                             {STEP_LABELS.map((lbl, i) => {
                                 const state = i < step ? 'done' : i === step ? 'curr' : 'idle';
@@ -253,6 +252,10 @@ export default function SignUpPage() {
                                 );
                             })}
                         </div>
+                    </div>
+
+                    <div className="su-card">
+                        <div className="su-top-line"/>
 
                         {/* ── STEP 0: Personal Info ── */}
                         {step === 0 && (
@@ -264,7 +267,7 @@ export default function SignUpPage() {
                                 <div className="su-fields">
                                     <div className="su-g2">
                                         <div className="su-field">
-                                            <label className="su-label">First Name</label>
+                                            <label className="su-label">First name</label>
                                             <div className="su-iw">
                                                 <span className="su-iw-icon">
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -273,7 +276,7 @@ export default function SignUpPage() {
                                             </div>
                                         </div>
                                         <div className="su-field">
-                                            <label className="su-label">Last Name</label>
+                                            <label className="su-label">Last name</label>
                                             <div className="su-iw">
                                                 <span className="su-iw-icon">
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -284,7 +287,7 @@ export default function SignUpPage() {
                                     </div>
 
                                     <div className="su-field">
-                                        <label className="su-label">Email Address</label>
+                                        <label className="su-label">Email address</label>
                                         <div className="su-iw">
                                             <span className="su-iw-icon">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
@@ -295,7 +298,7 @@ export default function SignUpPage() {
 
                                     <div className="su-g2">
                                         <div className="su-field">
-                                            <label className="su-label">Phone Number</label>
+                                            <label className="su-label">Phone number</label>
                                             <div className="su-iw">
                                                 <span className="su-iw-icon">
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7A2 2 0 0 1 22 16.9z"/></svg>
@@ -304,7 +307,7 @@ export default function SignUpPage() {
                                             </div>
                                         </div>
                                         <div className="su-field">
-                                            <label className="su-label">ID Number</label>
+                                            <label className="su-label">ID number</label>
                                             <div className="su-iw">
                                                 <span className="su-iw-icon">
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
@@ -372,7 +375,7 @@ export default function SignUpPage() {
                                                 <div className="su-pw-bars">
                                                     {[1,2,3,4].map(i => (
                                                         <div key={i} className="su-pw-bar"
-                                                            style={{background: i <= pwStr ? pwMeta[pwStr]!.c : '#E2E8F0'}}/>
+                                                            style={{background: i <= pwStr ? pwMeta[pwStr]!.c : 'rgba(0,0,0,0.08)'}}/>
                                                     ))}
                                                 </div>
                                                 <span className="su-pw-lbl" style={{color: pwMeta[pwStr]?.c}}>
@@ -383,7 +386,7 @@ export default function SignUpPage() {
                                     </div>
 
                                     <div className="su-field">
-                                        <label className="su-label">Confirm Password</label>
+                                        <label className="su-label">Confirm password</label>
                                         <div className="su-iw">
                                             <span className="su-iw-icon">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -394,7 +397,7 @@ export default function SignUpPage() {
                                                 placeholder="Repeat your password"
                                                 value={form.confirm}
                                                 onChange={set('confirm')}
-                                                style={form.confirm ? {borderColor: form.confirm === form.password ? '#0D9488' : '#EF4444'} : {}}
+                                                style={form.confirm ? {borderColor: form.confirm === form.password ? '#1D9E75' : '#EF4444'} : {}}
                                             />
                                         </div>
                                         {form.confirm && form.confirm === form.password && (
@@ -442,13 +445,13 @@ export default function SignUpPage() {
                                     >
                                         <div className="su-verify-icon">
                                             {sending === 'sms'
-                                                ? <Loader2 size={20} style={{animation:'suSpin .75s linear infinite',color:'#0D9488'}}/>
-                                                : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="1.8" strokeLinecap="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                                                ? <Loader2 size={20} style={{animation:'suSpin .75s linear infinite',color:'#1D9E75'}}/>
+                                                : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="1.8" strokeLinecap="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
                                             }
                                         </div>
                                         <div>
-                                            <div style={{fontWeight:700,fontSize:14,color:'#0F172A',marginBottom:3}}>Verify with Phone</div>
-                                            <div style={{fontSize:12,color:'#64748B',lineHeight:1.4}}>Send a 6-digit SMS to your registered number</div>
+                                            <div style={{fontWeight:700,fontSize:14,color:'#111827',marginBottom:3}}>Verify with Phone</div>
+                                            <div style={{fontSize:12,color:'#6B7280',lineHeight:1.4}}>Send a 6-digit SMS to your registered number</div>
                                         </div>
                                     </button>
 
@@ -461,13 +464,13 @@ export default function SignUpPage() {
                                     >
                                         <div className="su-verify-icon">
                                             {sending === 'email'
-                                                ? <Loader2 size={20} style={{animation:'suSpin .75s linear infinite',color:'#0D9488'}}/>
-                                                : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="3"/><polyline points="2,4 12,13 22,4"/></svg>
+                                                ? <Loader2 size={20} style={{animation:'suSpin .75s linear infinite',color:'#1D9E75'}}/>
+                                                : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="3"/><polyline points="2,4 12,13 22,4"/></svg>
                                             }
                                         </div>
                                         <div>
-                                            <div style={{fontWeight:700,fontSize:14,color:'#0F172A',marginBottom:3}}>Verify with Email</div>
-                                            <div style={{fontSize:12,color:'#64748B',lineHeight:1.4}}>Send a 6-digit code to your registered email</div>
+                                            <div style={{fontWeight:700,fontSize:14,color:'#111827',marginBottom:3}}>Verify with Email</div>
+                                            <div style={{fontSize:12,color:'#6B7280',lineHeight:1.4}}>Send a 6-digit code to your registered email</div>
                                         </div>
                                     </button>
 
@@ -483,7 +486,6 @@ export default function SignUpPage() {
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="su-footer">
                     <p className="su-footer-text">Protected by JWT authentication · Role-based access control</p>
                     <div className="su-footer-badges">
