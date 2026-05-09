@@ -69,7 +69,7 @@ export default function DoctorDashboard() {
         return () => cancelAnimationFrame(rafId);
     }, [loading, stats]);
 
-    const firstName = user?.firstName ?? user?.first_name ?? user?.name?.split(' ')[0] ?? 'Doctor';
+    const firstName = user?.firstName ?? user?.name?.split(' ')[0] ?? 'Doctor';
     const hour      = new Date().getHours();
     const greeting  = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
