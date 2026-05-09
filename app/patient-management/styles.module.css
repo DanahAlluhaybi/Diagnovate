@@ -298,10 +298,21 @@
 .inactive { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
 
 .viewBtn {
-    width: 34px; height: 34px; border-radius: 9px;
-    border: 1.5px solid var(--border); background: white;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--muted); cursor: pointer; transition: all .18s;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 9px;
+    border: 1.5px solid var(--border);
+    background: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .18s;
+    white-space: nowrap;
 }
 .viewBtn:hover { border-color: var(--teal-ring); background: var(--teal-light); color: var(--teal); transform: scale(1.06); }
 
