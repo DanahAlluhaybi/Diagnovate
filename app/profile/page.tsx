@@ -209,57 +209,60 @@ export default function ProfilePage() {
         .pf-wrap {
           min-height: 100vh; position: relative;
           background:
-            radial-gradient(ellipse 80% 50% at 50% -5%, rgba(29,158,117,0.07) 0%, transparent 65%),
-            radial-gradient(ellipse 50% 40% at 85% 90%, rgba(13,148,136,0.05) 0%, transparent 55%),
+            radial-gradient(ellipse 80% 50% at 50% -10%, rgba(29,158,117,0.09) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 40% at 90% 90%, rgba(8,80,65,0.05) 0%, transparent 50%),
             #FFFFFF;
         }
-        .pf-wrap::before {
-          content: ''; position: fixed; inset: 0;
-          background-image: radial-gradient(circle, #CBD5E1 1px, transparent 1px);
-          background-size: 28px 28px; opacity: 0.4; pointer-events: none; z-index: 0;
-        }
-        .pf-blob1 {
-          position: fixed; width: 600px; height: 600px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(13,148,136,0.08) 0%, transparent 65%);
-          top: -200px; right: -150px; pointer-events: none; z-index: 0;
-        }
 
-        .pf-main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: calc(68px + 48px) 48px 80px; }
-
-        .pf-page-head {
-          margin-bottom: 40px;
-          opacity: 0; transform: translateY(20px);
-          transition: all 0.6s cubic-bezier(0.16,1,0.3,1);
+        /* Hero */
+        .pf-hero {
+          background: linear-gradient(135deg,#0D1B17 0%,#0F3028 60%,#082018 100%);
+          padding: 52px 52px 48px; position: relative; overflow: hidden;
         }
-        .pf-page-head.visible { opacity: 1; transform: translateY(0); }
+        .pf-hero-dots {
+          position: absolute; inset: 0; pointer-events: none;
+          background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+          background-size: 20px 20px;
+        }
+        .pf-hero-blob-right {
+          position: absolute; width: 300px; height: 300px; border-radius: 50%;
+          background: rgba(29,158,117,0.15); filter: blur(40px);
+          right: -60px; top: -60px; pointer-events: none;
+        }
+        .pf-hero-inner { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
         .pf-back {
           display: inline-flex; align-items: center; gap: 6px;
-          font-size: 12.5px; font-weight: 600; color: var(--muted);
-          text-decoration: none; margin-bottom: 20px;
-          padding: 7px 13px; background: white; border: 1px solid var(--border);
-          border-radius: 9px; transition: all 0.15s;
+          font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,0.7);
+          text-decoration: none; margin-bottom: 22px;
+          padding: 7px 14px; border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.06);
+          border-radius: 8px; transition: all 0.15s;
         }
-        .pf-back:hover { color: #0D9488; border-color: #CCFBF1; background: #F0FDFA; }
+        .pf-back:hover { color: #fff; background: rgba(255,255,255,0.1); }
         .pf-badge {
           display: inline-flex; align-items: center; gap: 7px;
-          background: #F0FDFA; border: 1px solid #99F6E4; color: #0D9488;
-          font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+          background: rgba(29,158,117,0.12); border: 1px solid rgba(29,158,117,0.4); color: #6EE7B7;
+          font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
           padding: 5px 12px; border-radius: 100px; margin-bottom: 14px;
         }
-        .pf-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: #0D9488; animation: pulse 2s ease-in-out infinite; }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-        .pf-h1 { font-family: var(--display); font-size: 36px; color: var(--text); letter-spacing: -0.3px; margin-bottom: 6px; }
-        .pf-sub { font-size: 14px; color: var(--muted); }
+        .pf-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: #1D9E75; animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        .pf-h1 { font-family: var(--display); font-size: clamp(28px,3.5vw,44px); color: #fff; letter-spacing: -0.5px; margin-bottom: 6px; }
+        .pf-h1 em { font-style: italic; color: #6EE7B7; }
+        .pf-sub { font-size: 14px; color: rgba(255,255,255,0.55); }
+        .pf-hero-pills { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+        .pf-hero-pill { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); }
+        .pf-pill-val { font-size: 15px; font-weight: 800; color: #fff; }
+        .pf-pill-lbl { font-size: 11px; color: rgba(255,255,255,0.55); font-weight: 500; }
+
+        .pf-main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 44px 52px 80px; }
 
         .pf-success { background: #F0FDFA; border: 1px solid #99F6E4; color: #0D9488; padding: 13px 16px; border-radius: 12px; font-size: 13.5px; font-weight: 600; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
         .pf-error   { background: #FFF1F2; border: 1px solid #FECDD3; color: #E11D48; padding: 13px 16px; border-radius: 12px; font-size: 13.5px; font-weight: 600; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
 
         .pf-grid {
           display: grid; grid-template-columns: 300px 1fr; gap: 24px;
-          opacity: 0; transform: translateY(20px);
-          transition: all 0.6s 0.1s cubic-bezier(0.16,1,0.3,1);
         }
-        .pf-grid.visible { opacity: 1; transform: translateY(0); }
 
         .pf-card {
           background: white; border: 1px solid rgba(0,0,0,0.06); border-radius: 20px;
@@ -418,15 +421,45 @@ export default function ProfilePage() {
         .pf-toggle input:checked + .pf-toggle-sl::before { transform: translateX(18px); }
 
         @media (max-width: 900px) {
-          .pf-main { padding: 32px 20px 60px; }
+          .pf-hero { padding: 40px 24px 36px; }
+          .pf-main { padding: 32px 24px 60px; }
           .pf-grid { grid-template-columns: 1fr; }
           .pf-form-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 640px) {
+          .pf-hero { padding: 28px 16px 24px; }
+          .pf-main { padding: 24px 16px 60px; }
         }
       `}</style>
 
             <div className="pf-wrap">
-                <div className="pf-blob1" />
                 <Navbar />
+
+                {/* Dark hero */}
+                <div className="pf-hero">
+                    <div className="pf-hero-dots" />
+                    <div className="pf-hero-blob-right" />
+                    <div className="pf-hero-inner">
+                        <Link href="/dashboard" className="pf-back">
+                            <ArrowLeft size={13} /> Dashboard
+                        </Link>
+                        <div className="pf-badge"><span className="pf-badge-dot" /> My Account</div>
+                        <h1 className="pf-h1">My <em>Profile</em></h1>
+                        <p className="pf-sub">Manage your personal information and account settings</p>
+                        <div className="pf-hero-pills">
+                            {[
+                                { val:'Personal Info',  lbl:'Edit Anytime' },
+                                { val:'Secure',         lbl:'Password Protected' },
+                                { val:'Notifications',  lbl:'Customizable' },
+                            ].map(p => (
+                                <div key={p.val} className="pf-hero-pill">
+                                    <span className="pf-pill-val">{p.val}</span>
+                                    <span className="pf-pill-lbl">{p.lbl}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
 
                 {loading ? (
                     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:16 }}>
@@ -437,19 +470,10 @@ export default function ProfilePage() {
                 ) : (
                     <div className="pf-main">
 
-                        <div className={`pf-page-head${visible ? ' visible' : ''}`}>
-                            <Link href="/dashboard" className="pf-back">
-                                <ArrowLeft size={13} /> Dashboard
-                            </Link>
-                            <div className="pf-badge"><span className="pf-badge-dot" /> My Account</div>
-                            <h1 className="pf-h1">My Profile</h1>
-                            <p className="pf-sub">Manage your personal information and account settings</p>
-                        </div>
-
                         {success && <div className="pf-success">✓ {success}</div>}
                         {error   && <div className="pf-error">⚠ {error}</div>}
 
-                        <div className={`pf-grid${visible ? ' visible' : ''}`}>
+                        <div className="pf-grid">
 
                             {/* LEFT */}
                             <div>
