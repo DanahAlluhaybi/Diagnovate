@@ -192,7 +192,7 @@ export default function ProfilePage() {
     return (
         <>
             <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..900;1,9..40,300..900&family=DM+Serif+Display:ital@0;1&display=swap');
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -200,13 +200,19 @@ export default function ProfilePage() {
           --bg: #F0F4F8; --surface: #fff; --teal: #0D9488;
           --text: #0F172A; --text2: #334155; --muted: #64748B;
           --border: #E2E8F0;
-          --body: 'Plus Jakarta Sans', sans-serif;
+          --body: 'DM Sans', sans-serif;
           --display: 'DM Serif Display', serif;
         }
 
         body { background: var(--bg); font-family: var(--body); -webkit-font-smoothing: antialiased; }
 
-        .pf-wrap { min-height: 100vh; background: var(--bg); position: relative; }
+        .pf-wrap {
+          min-height: 100vh; position: relative;
+          background:
+            radial-gradient(ellipse 80% 50% at 50% -5%, rgba(29,158,117,0.07) 0%, transparent 65%),
+            radial-gradient(ellipse 50% 40% at 85% 90%, rgba(13,148,136,0.05) 0%, transparent 55%),
+            #FFFFFF;
+        }
         .pf-wrap::before {
           content: ''; position: fixed; inset: 0;
           background-image: radial-gradient(circle, #CBD5E1 1px, transparent 1px);
@@ -256,8 +262,9 @@ export default function ProfilePage() {
         .pf-grid.visible { opacity: 1; transform: translateY(0); }
 
         .pf-card {
-          background: white; border: 1px solid var(--border); border-radius: 20px;
-          overflow: hidden; box-shadow: 0 2px 16px rgba(15,23,42,0.05);
+          background: white; border: 1px solid rgba(0,0,0,0.06); border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06), 0 0 40px rgba(13,148,136,0.06);
           margin-bottom: 20px;
         }
         .pf-card:last-child { margin-bottom: 0; }
@@ -269,15 +276,15 @@ export default function ProfilePage() {
         }
         .pf-avatar-card::before {
           content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-          background: linear-gradient(90deg, #0D9488, #0891B2);
+          background: linear-gradient(90deg, #1D9E75, #0D9488, #0F6E56);
         }
         .pf-av {
           width: 80px; height: 80px; border-radius: 22px;
-          background: linear-gradient(135deg, #0D9488, #0891B2);
+          background: linear-gradient(135deg, #1D9E75, #0D9488);
           display: flex; align-items: center; justify-content: center;
           font-size: 26px; font-weight: 800; color: white;
           margin: 0 auto 16px;
-          box-shadow: 0 8px 28px rgba(13,148,136,0.3);
+          box-shadow: 0 8px 28px rgba(29,158,117,0.3);
         }
         .pf-av-name { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
         .pf-av-spec { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
@@ -326,7 +333,7 @@ export default function ProfilePage() {
         .pf-form-group.full { grid-column: 1 / -1; }
         .pf-label { font-size: 11.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: var(--text2); }
         .pf-input {
-          height: 46px; background: #F8FAFC; border: 1.5px solid var(--border);
+          height: 46px; background: #FAFAFA; border: 1.5px solid rgba(0,0,0,0.12);
           border-radius: 11px; padding: 0 14px;
           font-family: var(--body); font-size: 14px; color: var(--text);
           outline: none; transition: all 0.2s;
@@ -337,12 +344,12 @@ export default function ProfilePage() {
         .pf-save-btn {
           display: inline-flex; align-items: center; gap: 8px;
           height: 46px; padding: 0 28px;
-          background: linear-gradient(135deg, #0D9488, #0891B2);
+          background: linear-gradient(135deg, #1D9E75 0%, #0D9488 50%, #0F6E56 100%);
           color: white; font-family: var(--body); font-size: 14px; font-weight: 700;
           border: none; border-radius: 12px; cursor: pointer;
-          box-shadow: 0 6px 20px rgba(13,148,136,0.3); transition: all 0.2s;
+          box-shadow: 0 4px 16px rgba(29,158,117,0.28), inset 0 1px 0 rgba(255,255,255,0.15); transition: all 0.2s;
         }
-        .pf-save-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(13,148,136,0.4); }
+        .pf-save-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(29,158,117,0.4), inset 0 1px 0 rgba(255,255,255,0.15); }
         .pf-save-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
 
         .pf-modal-overlay {

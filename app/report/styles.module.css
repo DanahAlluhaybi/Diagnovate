@@ -6,9 +6,12 @@
 /* ── Layout ── */
 .wrap {
     min-height: 100vh;
-    background: var(--bg);
     position: relative;
     z-index: 1;
+    background:
+        radial-gradient(ellipse 80% 50% at 50% -5%, rgba(29,158,117,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 85% 90%, rgba(13,148,136,0.05) 0%, transparent 55%),
+        #FFFFFF;
 }
 
 .main {
@@ -129,25 +132,25 @@
     font-size: 13px;
     font-weight: 700;
     color: #fff;
-    background: var(--grad-brand);
+    background: linear-gradient(135deg, #1D9E75 0%, #0D9488 50%, #0F6E56 100%);
     border: none;
     border-radius: var(--r-sm);
     cursor: pointer;
-    box-shadow: var(--shadow-brand);
+    box-shadow: 0 4px 16px rgba(29,158,117,.28), inset 0 1px 0 rgba(255,255,255,.15);
     transition: all 0.18s;
 }
 .submitBtn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(13,148,136,.38);
+    box-shadow: 0 8px 24px rgba(29,158,117,.38), inset 0 1px 0 rgba(255,255,255,.15);
 }
 
 
 /* ── Cards ── */
 .card {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1px solid rgba(0,0,0,0.06);
     border-radius: var(--r-xl);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06), 0 0 40px rgba(13,148,136,0.06);
     padding: 22px 24px;
     margin-bottom: 16px;
     overflow: visible;
@@ -233,12 +236,12 @@
 .fSelect {
     height: 42px;
     padding: 0 12px;
-    border: 1.5px solid var(--border);
+    border: 1.5px solid rgba(0,0,0,0.12);
     border-radius: var(--r-md);
     font-family: var(--font-body);
     font-size: 14px;
     color: var(--text);
-    background: var(--surface2);
+    background: #FAFAFA;
     outline: none;
     transition: all 0.2s;
     width: 100%;
@@ -300,9 +303,9 @@
 }
 
 .tabActive {
-    background: var(--grad-brand) !important;
+    background: linear-gradient(135deg, #1D9E75 0%, #0D9488 50%, #0F6E56 100%) !important;
     color: #fff !important;
-    box-shadow: var(--shadow-brand);
+    box-shadow: 0 4px 16px rgba(29,158,117,.28), inset 0 1px 0 rgba(255,255,255,.15);
 }
 
 /* ── Radio & Check groups ── */
@@ -415,16 +418,16 @@
     font-size: 14px;
     font-weight: 700;
     color: #fff;
-    background: var(--grad-brand);
+    background: linear-gradient(135deg, #1D9E75 0%, #0D9488 50%, #0F6E56 100%);
     border: none;
     border-radius: var(--r-sm);
     cursor: pointer;
-    box-shadow: var(--shadow-brand);
+    box-shadow: 0 4px 16px rgba(29,158,117,.28), inset 0 1px 0 rgba(255,255,255,.15);
     transition: all 0.18s;
 }
 .finalizeFinal:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(13,148,136,.38);
+    box-shadow: 0 8px 24px rgba(29,158,117,.38), inset 0 1px 0 rgba(255,255,255,.15);
 }
 
 /* ── AI PDF Button ── */

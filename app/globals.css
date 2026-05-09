@@ -55,6 +55,8 @@
   --grad-brand:   linear-gradient(135deg, #0D9488, #0891B2);
   --grad-brand-v: linear-gradient(160deg, #0D9488 0%, #0891B2 60%, #0369A1 100%);
   --grad-full:    linear-gradient(120deg, #0D9488 0%, #7C3AED 55%, #F59E0B 100%);
+  --grad-btn:     linear-gradient(135deg, #1D9E75 0%, #0D9488 50%, #0F6E56 100%);
+  --shadow-card:  0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06), 0 0 40px rgba(13,148,136,0.06);
 
   /* Shadows */
   --shadow-sm:  0 2px 8px rgba(15,23,42,0.05);
