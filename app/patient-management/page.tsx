@@ -533,7 +533,7 @@ function PatientManagementPage() {
             <div className={styles.pageContent}>
                 <div className={styles.featureHeader}>
                     <div className={styles.eyebrow}><span className={styles.eyebrowDot} />Patient Records</div>
-                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
                         <h1 className={styles.pageTitle}>Patient <em>Management</em></h1>
                         <button className={styles.addBtn} onClick={() => { setForm(EMPTY_FORM); setShowModal(true); setFormError(''); }}>
                             <UserPlus size={15} /> Add Patient
