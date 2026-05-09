@@ -8,7 +8,6 @@ import {
     AlertTriangle, CheckCircle2,
     Info, User, Check, Zap, FileText, Activity
 } from 'lucide-react';
-import s from './styles.module.css';
 import Navbar from '@/components/Navbar';
 import { BASE } from '@/lib/api';
 import { saveDiagnosis } from '@/lib/diagnosisStorage';
@@ -17,7 +16,6 @@ import type { DiagnosisRecord } from '@/lib/diagnosisStorage';
 type InputMode  = 'image' | 'lab' | 'both';
 type DiagStage  = 'idle' | 'uploading' | 'analyzing' | 'done';
 type Severity   = 'Low' | 'Moderate' | 'High';
-type RiskLevel  = 'low' | 'intermediate' | 'high';
 
 interface LabValues {
     tsh: string; t3: string; tt4: string;
@@ -44,7 +42,6 @@ interface DiagResult {
     bbox?           : number[];
 }
 
-// ── Typed API responses ──
 interface LabApiResponse {
     success      : boolean;
     diagnosis    : string;
@@ -76,10 +73,10 @@ const PROCESS_STEPS = [
     { label: 'Done',       threshold: 100 },
 ];
 
-const SEVERITY_META: Record<Severity, { color: string; bg: string; border: string; icon: string }> = {
-    Low:      { color: '#059669', bg: '#F0FDF4', border: '#BBF7D0', icon: '●' },
-    Moderate: { color: '#D97706', bg: '#FFFBEB', border: '#FDE68A', icon: '◆' },
-    High:     { color: '#DC2626', bg: '#FFF1F2', border: '#FECDD3', icon: '▲' },
+const SEVERITY_META: Record<Severity, { color: string; bg: string; border: string }> = {
+    Low:      { color: '#059669', bg: '#F0FDF4', border: '#BBF7D0' },
+    Moderate: { color: '#D97706', bg: '#FFFBEB', border: '#FDE68A' },
+    High:     { color: '#DC2626', bg: '#FFF1F2', border: '#FECDD3' },
 };
 
 const fmtSize = (b: number) =>
@@ -105,9 +102,7 @@ function majorityVote(models: ModelResult[]): { result: string; confidence: numb
 }
 
 function buildLabPayload(lab: LabValues, selectedModel: string) {
-    const modelName =
-        selectedModel === 'majority' ? 'majority voting' : selectedModel;
-
+    const modelName = selectedModel === 'majority' ? 'majority voting' : selectedModel;
     return {
         model:             modelName,
         age:               lab.age  ? Number(lab.age)  : null,
@@ -138,7 +133,6 @@ export default function AIDiagnosisPage() {
     const [dragOver,     setDragOver]     = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
 
-    // Patient autocomplete
     const [patientInput,    setPatientInput]    = useState('');
     const [selectedPatient, setSelectedPatient] = useState<{ id: string; mrn: string; name: string } | null>(null);
     const [allPatients,     setAllPatients]     = useState<{ id: string; mrn: string; name: string }[]>([]);
@@ -150,10 +144,8 @@ export default function AIDiagnosisPage() {
     });
 
     const [selectedModel, setSelectedModel] = useState<string>('majority');
-
     const timerIds = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-    // Fetch patients list + auth guard
     useEffect(() => {
         if (!localStorage.getItem('token')) { router.push('/log-in?role=doctor'); return; }
         const token = localStorage.getItem('token');
@@ -169,10 +161,8 @@ export default function AIDiagnosisPage() {
                 }
             })
             .catch(() => {});
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Cleanup timers on unmount — FIXED: was missing
     useEffect(() => { return () => clearTimers(); }, []);
 
     const handleFile = (file: File) => {
@@ -206,7 +196,7 @@ export default function AIDiagnosisPage() {
     const hasInput =
         inputMode === 'image' ? !!imageFile :
             inputMode === 'lab'   ? !!(lab.tsh || lab.t3 || lab.tt4) :
-                /* both */              !!imageFile || !!(lab.tsh || lab.t3 || lab.tt4);
+                                    !!imageFile || !!(lab.tsh || lab.t3 || lab.tt4);
 
     const runDiagnosis = async () => {
         if (!hasInput) return;
@@ -220,12 +210,10 @@ export default function AIDiagnosisPage() {
 
             let diagResult: DiagResult;
 
-            // ── IMAGE ONLY ──
             if (inputMode === 'image') {
                 const formData = new FormData();
                 formData.append('image', imageFile!);
                 formData.append('model', selectedModel === 'majority' ? 'majority' : selectedModel);
-
                 const res  = await fetch(`${BASE}/api/diagnosis/predict-image`, {
                     method: 'POST',
                     headers: { Authorization: `Bearer ${token}` },
@@ -233,33 +221,14 @@ export default function AIDiagnosisPage() {
                 });
                 const data = await res.json() as UltrasoundApiResponse;
                 if (!res.ok || !data.success) throw new Error(data.error ?? 'Ultrasound analysis failed');
-
-                console.log('IMAGE RESPONSE:', JSON.stringify(data));
-
                 const models      = data.models || (data as any).models_detail || [];
                 const effResult   = models[0];
                 const swinResult  = models[1];
                 const denseResult = models[2];
-
                 const topModels: ModelResult[] = [
-                    {
-                        name: 'EfficientNet+YOLO',
-                        result: effResult ? (effResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
-                        confidence: effResult?.confidence ? Math.round(effResult.confidence * 100) : 0,
-                        available: !!(effResult),
-                    },
-                    {
-                        name: 'Swin Transformer',
-                        result: swinResult ? (swinResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
-                        confidence: swinResult?.confidence ? Math.round(swinResult.confidence * 100) : 0,
-                        available: !!(swinResult),
-                    },
-                    {
-                        name: 'DenseNet-121',
-                        result: denseResult ? (denseResult.vote === 1 ? 'Malignant' : 'Benign') : '—',
-                        confidence: denseResult?.confidence ? Math.round(denseResult.confidence * 100) : 0,
-                        available: !!(denseResult),
-                    },
+                    { name: 'EfficientNet+YOLO', result: effResult ? (effResult.vote === 1 ? 'Malignant' : 'Benign') : '—', confidence: effResult?.confidence ? Math.round(effResult.confidence * 100) : 0, available: !!(effResult) },
+                    { name: 'Swin Transformer',  result: swinResult ? (swinResult.vote === 1 ? 'Malignant' : 'Benign') : '—', confidence: swinResult?.confidence ? Math.round(swinResult.confidence * 100) : 0, available: !!(swinResult) },
+                    { name: 'DenseNet-121',       result: denseResult ? (denseResult.vote === 1 ? 'Malignant' : 'Benign') : '—', confidence: denseResult?.confidence ? Math.round(denseResult.confidence * 100) : 0, available: !!(denseResult) },
                 ];
                 const isSingleImgModel = selectedModel !== 'majority';
                 const chosenImgModel   = isSingleImgModel ? topModels.find(m => m.name === selectedModel) : null;
@@ -267,28 +236,15 @@ export default function AIDiagnosisPage() {
                 const votingConfidence = chosenImgModel?.confidence ?? Math.round(data.confidence);
                 const malignancyScore  = votingResult === 'Malignant' ? votingConfidence : Math.round(100 - votingConfidence);
                 const severity: Severity = data.severity === 'high' ? 'High' : 'Low';
-
-                const filteredImgModels = isSingleImgModel
-                    ? topModels.filter(m => m.name === selectedModel)
-                    : topModels;
-
+                const filteredImgModels = isSingleImgModel ? topModels.filter(m => m.name === selectedModel) : topModels;
                 diagResult = {
-                    malignancyScore,
-                    severity,
+                    malignancyScore, severity,
                     recommendation  : data.recommendation,
                     confidence      : votingConfidence,
-                    findings: [
-                        `Final Diagnosis: ${votingResult}`,
-                        `Vote Summary: ${data.vote_summary}`,
-                        `Unanimous: ${data.unanimous ? 'Yes' : 'No'}`,
-                        `Confidence: ${votingConfidence}%`,
-                    ],
-                    topModels       : filteredImgModels,
-                    votingResult,
-                    votingConfidence,
+                    findings: [`Final Diagnosis: ${votingResult}`, `Vote Summary: ${data.vote_summary}`, `Unanimous: ${data.unanimous ? 'Yes' : 'No'}`, `Confidence: ${votingConfidence}%`],
+                    topModels: filteredImgModels, votingResult, votingConfidence,
                 };
 
-            // ── LAB ONLY ──
             } else if (inputMode === 'lab') {
                 const res  = await fetch(`${BASE}/api/diagnosis/predict`, {
                     method: 'POST',
@@ -297,113 +253,58 @@ export default function AIDiagnosisPage() {
                 });
                 const data = await res.json() as LabApiResponse;
                 if (!res.ok || !data.success) throw new Error(data.error ?? 'Lab prediction failed');
-
-                console.log('LAB RESPONSE:', JSON.stringify(data));
-                console.log('LAB DATA:', JSON.stringify(data));
-
                 const severityMap: Record<string, Severity> = { high: 'High', medium: 'Moderate', low: 'Low' };
                 const allLabModels: ModelResult[] = [
-                    {
-                        name: 'XGBoost',
-                        result: data.models?.['XGBoost']?.result ?? data.diagnosis,
-                        confidence: Math.round(data.models?.['XGBoost']?.confidence ?? 0),
-                        available: !!data.models?.['XGBoost'],
-                    },
-                    {
-                        name: 'CatBoost',
-                        result: data.models?.['CatBoost']?.result ?? data.diagnosis,
-                        confidence: Math.round(data.models?.['CatBoost']?.confidence ?? 0),
-                        available: !!data.models?.['CatBoost'],
-                    },
-                    {
-                        name: 'Random Forest',
-                        result: data.models?.['Random Forest']?.result ?? data.diagnosis,
-                        confidence: Math.round(data.models?.['Random Forest']?.confidence ?? 0),
-                        available: !!data.models?.['Random Forest'],
-                    },
+                    { name: 'XGBoost',       result: data.models?.['XGBoost']?.result ?? data.diagnosis,       confidence: Math.round(data.models?.['XGBoost']?.confidence ?? 0),       available: !!data.models?.['XGBoost'] },
+                    { name: 'CatBoost',      result: data.models?.['CatBoost']?.result ?? data.diagnosis,      confidence: Math.round(data.models?.['CatBoost']?.confidence ?? 0),      available: !!data.models?.['CatBoost'] },
+                    { name: 'Random Forest', result: data.models?.['Random Forest']?.result ?? data.diagnosis, confidence: Math.round(data.models?.['Random Forest']?.confidence ?? 0), available: !!data.models?.['Random Forest'] },
                 ];
                 const topModels = allLabModels.filter(m => m.available);
                 const votingResult     = data.majority_result ?? data.diagnosis;
                 const votingConfidence = Math.round(data.confidence);
-
                 diagResult = {
                     malignancyScore : votingResult === 'Malignant' ? votingConfidence : Math.round(100 - votingConfidence),
                     severity        : severityMap[data.severity] ?? 'Moderate',
                     recommendation  : `Diagnosis: ${votingResult}. Please consult a specialist.`,
                     confidence      : votingConfidence,
-                    findings: [
-                        `Primary Diagnosis: ${votingResult}`,
-                        ...(lab.tsh  ? [`TSH: ${lab.tsh} mIU/L`]  : []),
-                        ...(lab.t3   ? [`T3: ${lab.t3} nmol/L`]   : []),
-                        ...(lab.tt4  ? [`TT4: ${lab.tt4} nmol/L`] : []),
-                        ...(lab.t4u  ? [`T4U: ${lab.t4u} ratio`]  : []),
-                        ...(lab.fti  ? [`FTI: ${lab.fti} index`]  : []),
-                        ...Object.entries(data.probabilities || {}).map(([k, v]) => `${k}: ${v}% probability`),
-                    ],
-                    topModels,
-                    votingResult,
-                    votingConfidence,
+                    findings: [`Primary Diagnosis: ${votingResult}`, ...(lab.tsh ? [`TSH: ${lab.tsh} mIU/L`] : []), ...(lab.t3 ? [`T3: ${lab.t3} nmol/L`] : []), ...(lab.tt4 ? [`TT4: ${lab.tt4} nmol/L`] : []), ...(lab.t4u ? [`T4U: ${lab.t4u} ratio`] : []), ...(lab.fti ? [`FTI: ${lab.fti} index`] : []), ...Object.entries(data.probabilities || {}).map(([k, v]) => `${k}: ${v}% probability`)],
+                    topModels, votingResult, votingConfidence,
                 };
 
-            // ── BOTH ──
             } else {
                 const fetchLab = async (): Promise<LabApiResponse> => {
-                    const r = await fetch(`${BASE}/api/diagnosis/predict`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                        body: JSON.stringify(buildLabPayload(lab, selectedModel)),
-                    });
+                    const r = await fetch(`${BASE}/api/diagnosis/predict`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(buildLabPayload(lab, selectedModel)) });
                     return r.json() as Promise<LabApiResponse>;
                 };
                 const fetchImg = async (): Promise<UltrasoundApiResponse | null> => {
                     if (!imageFile) return null;
                     const fd = new FormData();
                     fd.append('image', imageFile);
-                    const r = await fetch(`${BASE}/api/diagnosis/predict-image`, {
-                        method: 'POST',
-                        headers: { Authorization: `Bearer ${token}` },
-                        body: fd,
-                    });
+                    const r = await fetch(`${BASE}/api/diagnosis/predict-image`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd });
                     return r.json() as Promise<UltrasoundApiResponse>;
                 };
-
                 const [labData, imgData] = await Promise.all([fetchLab(), fetchImg()]);
                 if (!labData.success) throw new Error(labData.error ?? 'Lab prediction failed');
-
                 const severityMap: Record<string, Severity> = { high: 'High', medium: 'Moderate', low: 'Low' };
                 const labConfidence = Math.round(labData.confidence);
                 const imgOk = !!(imgData?.success && imgData?.models);
-
                 const topModels: ModelResult[] = [
                     { name: 'XGBoost (Lab)',              result: labData.models?.XGBoost?.result ?? labData.diagnosis,        confidence: Math.round(labData.models?.XGBoost?.confidence ?? labData.confidence), available: true },
-                    imgOk
-                        ? { name: 'EfficientNet+YOLO (Image)', result: imgData!.models[0].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round((imgData!.models[0].confidence ?? 0) * 100), available: true }
-                        : { name: 'EfficientNet+YOLO (Image)', result: '—', confidence: 0, available: false },
-                    imgOk
-                        ? { name: 'Swin Transformer (Image)',   result: imgData!.models[1].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round((imgData!.models[1].confidence ?? 0) * 100), available: true }
-                        : { name: 'Swin Transformer (Image)',   result: '—', confidence: 0, available: false },
-                    imgOk
-                        ? { name: 'DenseNet-121 (Image)',       result: imgData!.models[2].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round((imgData!.models[2].confidence ?? 0) * 100), available: true }
-                        : { name: 'DenseNet-121 (Image)',       result: '—', confidence: 0, available: false },
+                    imgOk ? { name: 'EfficientNet+YOLO (Image)', result: imgData!.models[0].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round((imgData!.models[0].confidence ?? 0) * 100), available: true }
+                          : { name: 'EfficientNet+YOLO (Image)', result: '—', confidence: 0, available: false },
+                    imgOk ? { name: 'Swin Transformer (Image)',   result: imgData!.models[1].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round((imgData!.models[1].confidence ?? 0) * 100), available: true }
+                          : { name: 'Swin Transformer (Image)',   result: '—', confidence: 0, available: false },
+                    imgOk ? { name: 'DenseNet-121 (Image)',       result: imgData!.models[2].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round((imgData!.models[2].confidence ?? 0) * 100), available: true }
+                          : { name: 'DenseNet-121 (Image)',       result: '—', confidence: 0, available: false },
                 ];
-
                 const { result: votingResult, confidence: votingConf } = majorityVote(topModels);
-
                 diagResult = {
                     malignancyScore : labConfidence,
                     severity        : severityMap[labData.severity] ?? 'Moderate',
                     recommendation  : `Lab Diagnosis: ${labData.majority_result ?? labData.diagnosis}. ${imgData?.recommendation ?? ''} Please consult a specialist.`.trim(),
                     confidence      : labConfidence,
-                    findings: [
-                        `Primary Diagnosis: ${labData.majority_result ?? labData.diagnosis}`,
-                        ...(lab.tsh  ? [`TSH: ${lab.tsh} mIU/L`]  : []),
-                        ...(lab.t3   ? [`T3: ${lab.t3} nmol/L`]   : []),
-                        ...(lab.tt4  ? [`TT4: ${lab.tt4} nmol/L`] : []),
-                        ...(imgOk    ? [`Image Diagnosis: ${imgData!.diagnosis}`, `Vote Summary: ${imgData!.vote_summary}`] : []),
-                    ],
-                    topModels,
-                    votingResult,
-                    votingConfidence: votingConf,
+                    findings: [`Primary Diagnosis: ${labData.majority_result ?? labData.diagnosis}`, ...(lab.tsh ? [`TSH: ${lab.tsh} mIU/L`] : []), ...(lab.t3 ? [`T3: ${lab.t3} nmol/L`] : []), ...(lab.tt4 ? [`TT4: ${lab.tt4} nmol/L`] : []), ...(imgOk ? [`Image Diagnosis: ${imgData!.diagnosis}`, `Vote Summary: ${imgData!.vote_summary}`] : [])],
+                    topModels, votingResult, votingConfidence: votingConf,
                 };
             }
 
@@ -412,7 +313,6 @@ export default function AIDiagnosisPage() {
             setResult(diagResult!);
             setStage('done');
 
-            // ── Auto-save to patient IndexedDB — FIXED: actual save logic ──
             if (selectedPatient && diagResult) {
                 const record: DiagnosisRecord = {
                     id             : `dx-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -455,7 +355,6 @@ export default function AIDiagnosisPage() {
         stage === 'uploading' ? 'Uploading scan...' :
             stage === 'analyzing' ? 'Running AI models...' : '';
 
-    // Filtered patient suggestions
     const patientSuggestions = (() => {
         if (!showSuggest || !patientInput.trim()) return [];
         const q = patientInput.toLowerCase();
@@ -465,459 +364,543 @@ export default function AIDiagnosisPage() {
     })();
 
     return (
-        <div className={s.wrap}>
-            <Navbar />
-            <main className={s.main}>
+        <>
+            <style>{`
+                @keyframes dxSpin{to{transform:rotate(360deg)}}
+                @keyframes dxRing{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+                @keyframes dxShimmer{0%{left:-100%}100%{left:200%}}
+                @keyframes dxBlink{0%,100%{opacity:1}50%{opacity:.3}}
 
-                <div className={s.featureHeader}>
-                    <Link href="/dashboard" className={s.backBtn}>
-                        <ArrowLeft size={14} /><span>Back</span>
-                    </Link>
-                    <div className={s.eyebrow}>
-                        <span className={s.eyebrowDot} />
-                        AI-Powered Diagnosis
-                    </div>
-                    <h1 className={s.pageTitle}>
-                        Thyroid Cancer<br />
-                        <em>AI Diagnosis</em>
-                    </h1>
-                </div>
+                .dx-page{min-height:100vh;background:radial-gradient(ellipse 80% 50% at 50% -10%, rgba(29,158,117,0.09) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 90% 90%, rgba(8,80,65,0.05) 0%, transparent 50%), #FFFFFF;font-family:"DM Sans",sans-serif}
+                .dx-main{max-width:1240px;margin:0 auto;padding:calc(64px + 28px) 40px 64px}
+                @media(max-width:768px){.dx-main{padding:calc(64px + 16px) 16px 48px}}
 
-                <div className={s.contentGrid}>
+                /* Dark Hero */
+                .dx-hero{background:linear-gradient(135deg,#0D1B17 0%,#0F3028 60%,#082018 100%);border-radius:20px;padding:36px 44px;margin-bottom:28px;overflow:hidden;position:relative}
+                .dx-hero-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.06) 1px,transparent 1px);background-size:20px 20px;pointer-events:none}
+                .dx-hero-blob{position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(29,158,117,0.15);pointer-events:none;filter:blur(40px)}
+                .dx-hero-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+                .dx-hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(29,158,117,0.15);border:1px solid rgba(29,158,117,0.3);color:#4ADE80;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:100px;margin-bottom:12px}
+                .dx-hero-dot{width:6px;height:6px;border-radius:50%;background:#4ADE80;animation:dxBlink 2s ease-in-out infinite}
+                .dx-hero-h1{font-family:"DM Serif Display",serif;font-size:38px;color:white;letter-spacing:-1px;line-height:1.1;margin-bottom:6px}
+                .dx-hero-sub{font-size:13px;color:rgba(255,255,255,0.45)}
+                .dx-hero-pills{display:flex;gap:10px;flex-wrap:wrap}
+                .dx-hero-pill{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 18px;text-align:center;min-width:100px}
+                .dx-hero-pill-val{font-family:"DM Serif Display",serif;font-size:22px;color:white;line-height:1}
+                .dx-hero-pill-lbl{font-size:10px;color:rgba(255,255,255,0.4);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-top:4px}
 
-                    {/* ════ LEFT ════ */}
-                    <div>
+                /* Layout */
+                .dx-grid{display:grid;grid-template-columns:1fr 360px;gap:20px}
+                @media(max-width:960px){.dx-grid{grid-template-columns:1fr}}
 
-                        {/* Patient */}
-                        <div className={s.card} style={{ marginBottom: 16 }}>
-                            <div className={s.cardHead}>
-                                <div className={s.cardIcon} style={{ background: 'linear-gradient(135deg,#0F766E,#0D9488)' }}>
-                                    <User size={18} color="white" />
-                                </div>
-                                <span className={s.cardTitle}>Patient</span>
-                                <span className={s.optionalBadge}>Optional</span>
+                /* Cards */
+                .dx-card{background:white;border:1px solid rgba(0,0,0,0.07);border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 24px rgba(0,0,0,0.05);margin-bottom:16px}
+                .dx-card-head{padding:16px 20px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:10px}
+                .dx-card-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#1D9E75,#0D9488);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+                .dx-card-title{font-size:13.5px;font-weight:700;color:#0F172A;flex:1}
+                .dx-opt-badge{font-size:10px;font-weight:700;letter-spacing:0.5px;background:#F0FDFA;color:#0D9488;border:1px solid rgba(13,148,136,0.2);padding:3px 9px;border-radius:100px}
+                .dx-mode-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;border:1px solid}
+                .dx-card-body{padding:20px}
+
+                /* Fields */
+                .dx-field{margin-bottom:16px;position:relative}
+                .dx-field:last-child{margin-bottom:0}
+                .dx-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1D9E75;margin-bottom:8px;display:block}
+                .dx-input{width:100%;height:46px;background:#F9FAFB;border:1px solid rgba(0,0,0,0.1);border-radius:10px;padding:0 14px;font-family:"DM Sans",sans-serif;font-size:14px;color:#0F172A;outline:none;transition:all .2s;box-sizing:border-box}
+                .dx-input:focus{border-color:rgba(29,158,117,0.5);box-shadow:0 0 0 4px rgba(29,158,117,0.08);background:white}
+                .dx-hint{font-size:11.5px;color:#0D9488;margin-top:6px;display:flex;align-items:center;gap:5px}
+
+                /* Suggest dropdown */
+                .dx-suggest{position:absolute;top:calc(100% + 4px);left:0;right:0;background:white;border:1px solid rgba(0,0,0,0.08);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.1);z-index:100;overflow:hidden}
+                .dx-suggest-item{width:100%;padding:11px 14px;background:none;border:none;cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;transition:background .12s;font-family:"DM Sans",sans-serif}
+                .dx-suggest-item:hover{background:#F0FDFA}
+                .dx-suggest-name{font-size:13.5px;font-weight:600;color:#0F172A}
+                .dx-suggest-mrn{font-size:11px;color:#94A3B8;background:#F1F5F9;padding:2px 7px;border-radius:6px}
+
+                /* Mode / Model buttons */
+                .dx-btn-row{display:flex;flex-wrap:wrap;gap:8px}
+                .dx-btn-pill{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.1);background:#F9FAFB;font-family:"DM Sans",sans-serif;font-size:12.5px;font-weight:600;color:#64748B;cursor:pointer;transition:all .18s}
+                .dx-btn-pill:hover{border-color:rgba(29,158,117,0.3);color:#0D9488;background:#F0FDFA}
+                .dx-btn-pill-active{border-color:rgba(29,158,117,0.5)!important;background:#F0FDFA!important;color:#0D9488!important}
+
+                /* Upload zone */
+                .dx-upload{border:2px dashed rgba(0,0,0,0.12);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;background:#FAFAFA}
+                .dx-upload:hover,.dx-upload-over{border-color:rgba(29,158,117,0.4);background:#F0FDFA}
+                .dx-upload-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,rgba(29,158,117,0.1),rgba(13,148,136,0.1));display:flex;align-items:center;justify-content:center;color:#0D9488;margin:0 auto 12px}
+                .dx-upload-title{font-size:14px;font-weight:600;color:#334155;margin-bottom:4px}
+                .dx-upload-sub{font-size:12px;color:#94A3B8}
+                .dx-preview{width:100%;max-height:160px;object-fit:contain;border-radius:8px;margin-bottom:8px}
+                .dx-file-name{font-size:13px;font-weight:600;color:#334155}
+                .dx-file-size{font-size:11.5px;color:#94A3B8;margin-top:2px}
+
+                /* Lab grid */
+                .dx-lab-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+                .dx-lab-cell{background:#F9FAFB;border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:10px 12px}
+                .dx-lab-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+                .dx-lab-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#64748B}
+                .dx-lab-norm{font-size:9px;color:#94A3B8}
+                .dx-lab-wrap{display:flex;align-items:center;gap:6px}
+                .dx-lab-input{flex:1;min-width:0;height:32px;background:white;border:1px solid rgba(0,0,0,0.1);border-radius:7px;padding:0 8px;font-family:"DM Sans",sans-serif;font-size:13px;color:#0F172A;outline:none;transition:border-color .2s}
+                .dx-lab-input:focus{border-color:rgba(29,158,117,0.5)}
+                .dx-lab-unit{font-size:10px;color:#94A3B8;white-space:nowrap;font-weight:600}
+                .dx-sex-row{display:flex;align-items:center;gap:12px;margin-top:8px}
+
+                /* Submit button */
+                .dx-run-btn{width:100%;height:48px;border-radius:11px;border:none;background:linear-gradient(135deg,#1D9E75,#0D9488,#0F6E56);color:white;font-family:"DM Sans",sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 12px rgba(29,158,117,0.25);transition:all .2s;position:relative;overflow:hidden;margin-bottom:12px}
+                .dx-run-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px rgba(29,158,117,0.35)}
+                .dx-run-btn:disabled{opacity:.65;cursor:not-allowed;transform:none}
+                .dx-spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.35);border-top-color:white;border-radius:50%;animation:dxSpin .7s linear infinite;flex-shrink:0}
+
+                /* Progress */
+                .dx-progress{margin-bottom:12px}
+                .dx-progress-track{height:4px;background:rgba(29,158,117,0.12);border-radius:100px;overflow:hidden;margin-bottom:8px}
+                .dx-progress-fill{height:100%;background:linear-gradient(90deg,#1D9E75,#0D9488);border-radius:100px;transition:width .4s ease}
+                .dx-progress-steps{display:flex;gap:16px}
+                .dx-progress-step{font-size:11px;color:#94A3B8;font-weight:600}
+                .dx-progress-step-done{color:#0D9488}
+
+                /* Error / saved */
+                .dx-error{display:flex;align-items:center;gap:8px;background:#FFF1F2;border:1px solid #FECDD3;color:#DC2626;border-radius:10px;padding:11px 14px;font-size:13px;font-weight:600;margin-bottom:12px}
+                .dx-saved{display:flex;align-items:center;gap:8px;background:#F0FDFA;border:1px solid rgba(13,148,136,0.2);color:#0D9488;border-radius:10px;padding:11px 14px;font-size:13px;font-weight:600;margin-bottom:12px;flex-wrap:wrap}
+                .dx-saved-link{margin-left:auto;font-size:12px;font-weight:700;color:#0D9488;text-decoration:none;background:rgba(13,148,136,0.1);padding:4px 10px;border-radius:7px}
+                .dx-saved-link:hover{background:rgba(13,148,136,0.18)}
+
+                /* Results */
+                .dx-result-card{background:white;border:1px solid rgba(0,0,0,0.07);border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 24px rgba(0,0,0,0.05);margin-bottom:14px}
+                .dx-result-strip{padding:20px;display:flex;align-items:center;justify-content:space-between}
+                .dx-result-lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+                .dx-result-score{font-family:"DM Serif Display",serif;font-size:48px;font-weight:700;line-height:1}
+                .dx-result-max{font-size:14px;color:#94A3B8;font-weight:500;margin-left:2px}
+                .dx-result-conf{font-size:12px;color:#94A3B8;margin-top:4px}
+                .dx-result-badge{font-size:12px;font-weight:700;padding:6px 14px;border-radius:100px;border:1px solid}
+                .dx-result-bar{height:6px;background:rgba(0,0,0,0.05);position:relative;overflow:hidden}
+                .dx-result-bar-fill{height:100%;border-radius:0;transition:width .6s ease}
+                .dx-result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+                @media(max-width:500px){.dx-result-grid{grid-template-columns:1fr}}
+                .dx-models-card{background:white;border:1px solid rgba(0,0,0,0.07);border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 24px rgba(0,0,0,0.05)}
+                .dx-models-head{padding:14px 18px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:8px}
+                .dx-model-row{padding:12px 18px;border-bottom:1px solid #F8FAFC;display:flex;align-items:center;justify-content:space-between}
+                .dx-model-row:last-child{border-bottom:none}
+                .dx-model-name{font-size:13px;font-weight:600;color:#334155;margin-bottom:2px}
+                .dx-model-sub{font-size:11px;color:#94A3B8}
+                .dx-model-conf{font-size:20px;font-weight:700;font-family:"DM Serif Display",serif;line-height:1}
+                .dx-model-conf-lbl{font-size:10px;color:#94A3B8;text-align:right}
+                .dx-voting-card{border-radius:16px;overflow:hidden}
+                .dx-voting-head{padding:12px 16px;display:flex;align-items:center;gap:7px}
+                .dx-voting-title{font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase}
+                .dx-voting-body{padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+                .dx-voting-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+                .dx-voting-val{font-family:"DM Serif Display",serif;font-size:22px;font-weight:700}
+                .dx-findings-card{background:white;border:1px solid rgba(0,0,0,0.07);border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 24px rgba(0,0,0,0.05);margin-bottom:14px}
+                .dx-findings-head{padding:14px 18px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:8px}
+                .dx-findings-title{font-size:13.5px;font-weight:700;color:#0F172A}
+                .dx-findings-grid{padding:14px 18px;display:flex;flex-direction:column;gap:8px}
+                .dx-finding-item{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:#334155}
+                .dx-finding-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0}
+                .dx-rec-card{border-radius:16px;overflow:hidden;margin-bottom:14px}
+                .dx-rec-head{padding:12px 16px;display:flex;align-items:center;gap:7px;border-bottom:1px solid}
+                .dx-rec-title{font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase}
+                .dx-rec-body{padding:14px 16px}
+                .dx-rec-text{font-size:13.5px;line-height:1.65;font-weight:500}
+                .dx-disclaimer{display:flex;align-items:flex-start;gap:10px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:14px 16px;margin-bottom:14px}
+                .dx-disclaimer-text{font-size:12.5px;color:#92400E;line-height:1.6}
+
+                /* Sidebar */
+                .dx-info-card{background:white;border:1px solid rgba(0,0,0,0.07);border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 24px rgba(0,0,0,0.05);margin-bottom:16px}
+                .dx-info-head{padding:14px 18px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:8px}
+                .dx-info-ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+                .dx-info-title{font-size:13.5px;font-weight:700;color:#0F172A}
+                .dx-info-body{padding:16px 18px}
+                .dx-how-item{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+                .dx-how-item:last-child{margin-bottom:0}
+                .dx-how-num{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#1D9E75,#0D9488);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;flex-shrink:0}
+                .dx-how-text{font-size:13px;color:#334155;line-height:1.55}
+                .dx-how-bold{font-weight:700;color:#0F172A}
+                .dx-analyzing{padding:32px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+                .dx-analyzing-ring{width:60px;height:60px;border:3px solid rgba(29,158,117,0.15);border-top-color:#0D9488;border-radius:50%;animation:dxSpin .9s linear infinite;display:flex;align-items:center;justify-content:center}
+                .dx-analyzing-text{font-size:14px;font-weight:700;color:#0F172A}
+                .dx-analyzing-sub{font-size:12px;color:#94A3B8}
+                .dx-empty{padding:36px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+                .dx-empty-ic{width:56px;height:56px;border-radius:16px;background:#F0FDFA;border:1px solid rgba(13,148,136,0.15);display:flex;align-items:center;justify-content:center;color:#0D9488}
+                .dx-empty-text{font-size:13.5px;color:#64748B;line-height:1.55;max-width:220px}
+            `}</style>
+
+            <div className="dx-page">
+                <Navbar />
+                <main className="dx-main">
+
+                    {/* ── DARK HERO ── */}
+                    <div className="dx-hero">
+                        <div className="dx-hero-dots"/>
+                        <div className="dx-hero-blob"/>
+                        <div className="dx-hero-inner">
+                            <div>
+                                <div className="dx-hero-badge"><span className="dx-hero-dot"/>AI-Powered Diagnosis</div>
+                                <h1 className="dx-hero-h1">Thyroid Cancer<br/><em style={{ fontStyle:'italic', color:'rgba(255,255,255,0.7)' }}>AI Diagnosis</em></h1>
+                                <p className="dx-hero-sub">Ensemble deep learning · Multi-modal analysis · Majority voting</p>
                             </div>
-                            <div className={s.cardBody}>
-                                <div className={s.fieldGroup} style={{ position: 'relative', marginBottom: 0 }}>
-                                    <label className={s.fieldLabel}>Patient ID / MRN</label>
-                                    <input
-                                        className={s.fieldInput}
-                                        type="text"
-                                        placeholder="Search by name or MRN..."
-                                        value={patientInput}
-                                        autoComplete="off"
-                                        onChange={e => {
-                                            setPatientInput(e.target.value);
-                                            setSelectedPatient(null);
-                                            setShowSuggest(true);
-                                            setSavedOk(false);
-                                        }}
-                                        onFocus={() => setShowSuggest(true)}
-                                        onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
-                                    />
-                                    {patientSuggestions.length > 0 && (
-                                        <div className={s.suggestDropdown}>
-                                            {patientSuggestions.map(p => (
-                                                <button key={p.id} className={s.suggestItem}
-                                                        onMouseDown={() => {
-                                                            setPatientInput(p.name);
-                                                            setSelectedPatient(p);
-                                                            setShowSuggest(false);
-                                                        }}>
-                                                    <span className={s.suggestName}>{p.name}</span>
-                                                    <span className={s.suggestMrn}>{p.mrn}</span>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                    {selectedPatient && (
-                                        <p className={s.fieldHint}>
-                                            ✓ Diagnosis will be auto-saved to <strong>{selectedPatient.name}</strong>&apos;s record.
-                                        </p>
-                                    )}
-                                </div>
+                            <div className="dx-hero-pills">
+                                {[{val:'3', lbl:'AI Models'},{val:'95%', lbl:'Accuracy'},{val:'<2s', lbl:'Analysis'}].map(p => (
+                                    <div key={p.lbl} className="dx-hero-pill">
+                                        <div className="dx-hero-pill-val">{p.val}</div>
+                                        <div className="dx-hero-pill-lbl">{p.lbl}</div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
+                    </div>
 
-                        {/* Input Data */}
-                        <div className={s.card} style={{ marginBottom: 16 }}>
-                            <div className={s.cardHead}>
-                                <div className={s.cardIcon}>
-                                    <Layers size={18} color="white" />
+                    <div className="dx-grid">
+
+                        {/* ── LEFT ── */}
+                        <div>
+
+                            {/* Patient */}
+                            <div className="dx-card">
+                                <div className="dx-card-head">
+                                    <div className="dx-card-icon"><User size={16} color="white"/></div>
+                                    <span className="dx-card-title">Patient</span>
+                                    <span className="dx-opt-badge">Optional</span>
                                 </div>
-                                <span className={s.cardTitle}>Input Data</span>
-                                <span className={s.scanTypePill} style={
-                                    inputMode === 'both'  ? { background: '#EEF2FF', color: '#4F46E5', borderColor: '#C7D2FE' } :
-                                    inputMode === 'image' ? { background: '#F0F9FF', color: '#0891B2', borderColor: '#BAE6FD' } :
-                                                            { background: '#F0FDFA', color: '#0D9488', borderColor: '#99F6E4' }
-                                }>
-                                    {inputMode === 'both' ? 'Multi-Modal' : inputMode === 'image' ? 'Image Only' : 'Lab Only'}
-                                </span>
-                            </div>
-                            <div className={s.cardBody}>
-                                <div className={s.fieldGroup}>
-                                    <label className={s.fieldLabel}>Diagnosis Mode</label>
-                                    <div className={s.modeGrid}>
-                                        {([
-                                            { v: 'image', icon: <Upload size={13} />,      label: 'Image Only'  },
-                                            { v: 'lab',   icon: <FlaskConical size={13} />, label: 'Lab Only'    },
-                                            { v: 'both',  icon: <Zap size={13} />,          label: 'Both (Best)' },
-                                        ] as const).map(m => (
-                                            <button key={m.v}
-                                                    className={`${s.typeBtn} ${inputMode === m.v ? s.typeBtnActive : ''}`}
-                                                    style={inputMode === m.v ? { background: 'white', borderColor: '#0D9488', color: '#0D9488', borderWidth: '2px' } : {}}
-                                                    onClick={() => { setInputMode(m.v); setSelectedModel('majority'); }}
-                                            >
-                                                {inputMode === m.v && <Check size={11} />}
-                                                {m.icon}{m.label}
-                                            </button>
-                                        ))}
+                                <div className="dx-card-body">
+                                    <div className="dx-field">
+                                        <label className="dx-label">Patient ID / MRN</label>
+                                        <input className="dx-input" type="text" placeholder="Search by name or MRN..."
+                                               value={patientInput} autoComplete="off"
+                                               onChange={e => { setPatientInput(e.target.value); setSelectedPatient(null); setShowSuggest(true); setSavedOk(false); }}
+                                               onFocus={() => setShowSuggest(true)}
+                                               onBlur={() => setTimeout(() => setShowSuggest(false), 150)} />
+                                        {patientSuggestions.length > 0 && (
+                                            <div className="dx-suggest">
+                                                {patientSuggestions.map(p => (
+                                                    <button key={p.id} className="dx-suggest-item"
+                                                            onMouseDown={() => { setPatientInput(p.name); setSelectedPatient(p); setShowSuggest(false); }}>
+                                                        <span className="dx-suggest-name">{p.name}</span>
+                                                        <span className="dx-suggest-mrn">{p.mrn}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {selectedPatient && (
+                                            <p className="dx-hint"><Check size={12}/>Diagnosis will be saved to <strong>{selectedPatient.name}</strong></p>
+                                        )}
                                     </div>
                                 </div>
+                            </div>
 
-                                {inputMode !== 'both' && (
-                                    <div className={s.fieldGroup}>
-                                        <label className={s.fieldLabel}>Model Selection</label>
-                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                                            <button
-                                                className={`${s.typeBtn} ${selectedModel === 'majority' ? s.typeBtnActive : ''}`}
-                                                style={selectedModel === 'majority' ? { background: 'rgba(13,148,136,0.1)', borderColor: '#0D9488', color: '#0D9488' } : {}}
-                                                onClick={() => setSelectedModel('majority')}
-                                            >
-                                                {selectedModel === 'majority' && <Check size={11} />}
-                                                <Zap size={12} />Majority Voting
-                                            </button>
-                                            {modelOptions.map(opt => (
-                                                <button key={opt.value}
-                                                    className={`${s.typeBtn} ${selectedModel === opt.value ? s.typeBtnActive : ''}`}
-                                                    style={selectedModel === opt.value ? { background: 'rgba(13,148,136,0.1)', borderColor: '#0D9488', color: '#0D9488' } : {}}
-                                                    onClick={() => setSelectedModel(opt.value)}
-                                                >
-                                                    {selectedModel === opt.value && <Check size={11} />}
-                                                    {opt.label}
+                            {/* Input Data */}
+                            <div className="dx-card">
+                                <div className="dx-card-head">
+                                    <div className="dx-card-icon"><Layers size={16} color="white"/></div>
+                                    <span className="dx-card-title">Input Data</span>
+                                    <span className="dx-mode-badge" style={
+                                        inputMode === 'both'  ? { background:'#EEF2FF', color:'#4F46E5', borderColor:'#C7D2FE' } :
+                                        inputMode === 'image' ? { background:'#F0F9FF', color:'#0891B2', borderColor:'#BAE6FD' } :
+                                                                { background:'#F0FDFA', color:'#0D9488', borderColor:'#99F6E4' }
+                                    }>
+                                        {inputMode === 'both' ? 'Multi-Modal' : inputMode === 'image' ? 'Image Only' : 'Lab Only'}
+                                    </span>
+                                </div>
+                                <div className="dx-card-body">
+
+                                    <div className="dx-field">
+                                        <label className="dx-label">Diagnosis Mode</label>
+                                        <div className="dx-btn-row">
+                                            {([
+                                                { v: 'image', icon: <Upload size={12}/>,      label: 'Image Only'  },
+                                                { v: 'lab',   icon: <FlaskConical size={12}/>, label: 'Lab Only'    },
+                                                { v: 'both',  icon: <Zap size={12}/>,          label: 'Both (Best)' },
+                                            ] as const).map(m => (
+                                                <button key={m.v}
+                                                        className={`dx-btn-pill${inputMode === m.v ? ' dx-btn-pill-active' : ''}`}
+                                                        onClick={() => { setInputMode(m.v); setSelectedModel('majority'); }}>
+                                                    {inputMode === m.v && <Check size={10}/>}
+                                                    {m.icon}{m.label}
                                                 </button>
                                             ))}
                                         </div>
                                     </div>
-                                )}
 
-                                {(inputMode === 'image' || inputMode === 'both') && (
-                                    <div className={s.fieldGroup}>
-                                        <label className={s.fieldLabel}>
-                                            Medical Scan <span className={s.fieldOptional}>(Ultrasound / CT)</span>
-                                        </label>
-                                        <div
-                                            className={`${s.uploadZone} ${dragOver ? s.dragOver : ''}`}
-                                            style={imagePreview ? { padding: '12px' } : {}}
-                                            onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-                                            onDragLeave={() => setDragOver(false)}
-                                            onDrop={handleDrop}
-                                            onClick={() => fileRef.current?.click()}
-                                        >
-                                            <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
-                                                   onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
-                                            {imagePreview ? (
-                                                <>
-                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                    <img src={imagePreview} className={s.previewThumb} alt="Scan preview" />
-                                                    <div className={s.fileName}>{imageFile?.name}</div>
-                                                    {imageFile && <div className={s.fileSize}>{fmtSize(imageFile.size)}</div>}
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <div className={s.uploadIconWrap}><Upload size={22} /></div>
-                                                    <div className={s.uploadTitle}>Drop thyroid scan here</div>
-                                                    <div className={s.uploadSub}>PNG, JPG, DICOM — max 20 MB</div>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {(inputMode === 'lab' || inputMode === 'both') && (
-                                    <div className={s.fieldGroup} style={{ marginBottom: 0 }}>
-                                        <label className={s.fieldLabel}>Lab Results</label>
-                                        <div className={s.labGrid}>
-                                            {([
-                                                { k: 'tsh', label: 'TSH', unit: 'mIU/L',  normal: '0.4–4.0' },
-                                                { k: 't3',  label: 'T3',  unit: 'nmol/L', normal: '1.2–2.8' },
-                                                { k: 'tt4', label: 'TT4', unit: 'nmol/L', normal: '60–150'  },
-                                                { k: 't4u', label: 'T4U', unit: 'ratio',  normal: '0.8–1.1' },
-                                                { k: 'fti', label: 'FTI', unit: 'index',  normal: '55–160'  },
-                                                { k: 'age', label: 'Age', unit: 'yrs',    normal: ''        },
-                                            ] as const).map(({ k, label, unit, normal }) => (
-                                                <div key={k} className={s.labCell}>
-                                                    <div className={s.labCellHeader}>
-                                                        <span className={s.labCellLabel}>{label}</span>
-                                                        {normal && <span className={s.labCellNormal}>{normal}</span>}
-                                                    </div>
-                                                    <div className={s.labCellInputWrap}>
-                                                        <input
-                                                            type="number" placeholder="—"
-                                                            value={lab[k]}
-                                                            onChange={e => setLab(prev => ({ ...prev, [k]: e.target.value }))}
-                                                            className={s.labCellInput}
-                                                        />
-                                                        <span className={s.labCellUnit}>{unit}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <div className={s.sexRow}>
-                                            <span className={s.fieldLabel} style={{ margin: 0 }}>Sex</span>
-                                            <div className={s.sexBtns}>
-                                                {(['female', 'male'] as const).map(sx => (
-                                                    <button key={sx}
-                                                            className={`${s.typeBtn} ${lab.sex === sx ? s.typeBtnActive : ''}`}
-                                                            style={lab.sex === sx
-                                                                ? { background: '#F0FDFA', borderColor: '#99F6E4', color: '#0D9488' }
-                                                                : {}}
-                                                            onClick={() => setLab(p => ({ ...p, sex: sx }))}
-                                                    >
-                                                        {lab.sex === sx && <Check size={11} />}
-                                                        {sx === 'female' ? '♀ Female' : '♂ Male'}
+                                    {inputMode !== 'both' && (
+                                        <div className="dx-field">
+                                            <label className="dx-label">Model Selection</label>
+                                            <div className="dx-btn-row">
+                                                <button className={`dx-btn-pill${selectedModel === 'majority' ? ' dx-btn-pill-active' : ''}`}
+                                                        onClick={() => setSelectedModel('majority')}>
+                                                    {selectedModel === 'majority' && <Check size={10}/>}
+                                                    <Zap size={11}/>Majority Voting
+                                                </button>
+                                                {modelOptions.map(opt => (
+                                                    <button key={opt.value}
+                                                            className={`dx-btn-pill${selectedModel === opt.value ? ' dx-btn-pill-active' : ''}`}
+                                                            onClick={() => setSelectedModel(opt.value)}>
+                                                        {selectedModel === opt.value && <Check size={10}/>}
+                                                        {opt.label}
                                                     </button>
                                                 ))}
                                             </div>
                                         </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                                    )}
 
-                        {/* Run button */}
-                        <button
-                            className={`${s.enhanceBtn} ${isRunning ? s.enhanceBtnLoading : ''}`}
-                            onClick={stage === 'done' ? reset : runDiagnosis}
-                            disabled={isRunning || (!hasInput && stage === 'idle')}
-                        >
-                            {isRunning ? (
-                                <><span className={s.btnSpinner} />{currentStepLabel}</>
-                            ) : stage === 'done' ? (
-                                <><Brain size={15} />New Diagnosis</>
-                            ) : (
-                                <><Brain size={15} />Run AI Diagnosis</>
-                            )}
-                        </button>
-
-                        {(isRunning || (progress > 0 && stage !== 'done')) && (
-                            <div className={s.progressWrap}>
-                                <div className={s.progressTrack}>
-                                    <div className={s.progressFill} style={{ width: `${progress}%` }} />
-                                </div>
-                                <div className={s.progressSteps}>
-                                    {PROCESS_STEPS.map(st => (
-                                        <span key={st.label}
-                                              className={`${s.progressStep} ${progress >= st.threshold ? s.progressStepDone : ''}`}>
-                                            {st.label}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {error && (
-                            <div className={s.errorBox}>
-                                <AlertTriangle size={14} />{error}
-                            </div>
-                        )}
-
-                        {savedOk && selectedPatient && (
-                            <div className={s.savedBox}>
-                                <Check size={14} />
-                                Saved to <strong>{selectedPatient.name}</strong>
-                                <Link href={`/patient-management?patientId=${selectedPatient.mrn}&tab=diagnosis`} className={s.savedLink}>
-                                    View record →
-                                </Link>
-                            </div>
-                        )}
-
-                        {/* ════ RESULTS ════ */}
-                        {result && sev && (
-                            <div style={{ marginTop: 20 }}>
-
-                                {/* Score */}
-                                <div className={s.resultCard}>
-                                    <div className={s.resultStrip} style={{ borderBottom: `1px solid ${sev.border}`, background: sev.bg }}>
-                                        <div>
-                                            <p className={s.resultStripLabel} style={{ color: sev.color }}>Malignancy Score</p>
-                                            <div className={s.resultScoreRow}>
-                                                <span className={s.resultScore} style={{ color: sev.color }}>{result.malignancyScore}</span>
-                                                <span className={s.resultScoreMax}>/100</span>
-                                            </div>
-                                            <p className={s.resultConfRow}>Confidence: <span className={s.resultConfVal} style={{ color: sev.color }}>{result.confidence}%</span></p>
-                                        </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div className={s.resultBadge} style={{ color: sev.color, borderColor: sev.border, background: sev.color + '14' }}>
-                                                {result.severity} Risk
+                                    {(inputMode === 'image' || inputMode === 'both') && (
+                                        <div className="dx-field">
+                                            <label className="dx-label">Medical Scan <span style={{ color:'#94A3B8', textTransform:'none', letterSpacing:0, fontWeight:500, fontSize:11 }}>(Ultrasound / CT)</span></label>
+                                            <div className={`dx-upload${dragOver ? ' dx-upload-over' : ''}`}
+                                                 onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                                                 onDragLeave={() => setDragOver(false)}
+                                                 onDrop={handleDrop}
+                                                 onClick={() => fileRef.current?.click()}>
+                                                <input ref={fileRef} type="file" accept="image/*" style={{ display:'none' }}
+                                                       onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+                                                {imagePreview ? (
+                                                    <>
+                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                        <img src={imagePreview} className="dx-preview" alt="Scan preview"/>
+                                                        <div className="dx-file-name">{imageFile?.name}</div>
+                                                        {imageFile && <div className="dx-file-size">{fmtSize(imageFile.size)}</div>}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div className="dx-upload-icon"><Upload size={20}/></div>
+                                                        <div className="dx-upload-title">Drop thyroid scan here</div>
+                                                        <div className="dx-upload-sub">PNG, JPG, DICOM — max 20 MB</div>
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className={s.resultBar}>
-                                        <div className={s.resultBarTrack}>
-                                            <div className={s.resultBarFill} style={{ width: `${result.malignancyScore}%`, background: sev.color }} />
-                                        </div>
-                                    </div>
-                                </div>
+                                    )}
 
-                                {/* Models + Voting */}
-                                <div className={s.resultGrid}>
-                                    <div className={s.modelsCard}>
-                                        <div className={s.modelsCardHead}>
-                                            <div className={s.infoCardIcon} style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-                                                <Activity size={13} color="var(--teal)" />
-                                            </div>
-                                            <span className={s.modelsCardTitle}>Model Results</span>
-                                        </div>
-                                        {result.topModels.map((m: any, i: number) => (
-                                            <div key={i} className={s.modelRow} style={{ opacity: m.available ? 1 : 0.35 }}>
-                                                <div>
-                                                    <div className={s.modelRowName}>{m.name}</div>
-                                                    <div className={s.modelRowSub}>{m.available ? m.result : 'Not run'}</div>
-                                                </div>
-                                                <div style={{ textAlign: 'right' }}>
-                                                    <div className={s.modelRowConf} style={{ color: m.available ? sev.color : 'var(--muted)' }}>
-                                                        {m.available ? `${m.confidence}%` : '—'}
+                                    {(inputMode === 'lab' || inputMode === 'both') && (
+                                        <div className="dx-field">
+                                            <label className="dx-label">Lab Results</label>
+                                            <div className="dx-lab-grid">
+                                                {([
+                                                    { k:'tsh', label:'TSH', unit:'mIU/L',  normal:'0.4–4.0' },
+                                                    { k:'t3',  label:'T3',  unit:'nmol/L', normal:'1.2–2.8' },
+                                                    { k:'tt4', label:'TT4', unit:'nmol/L', normal:'60–150'  },
+                                                    { k:'t4u', label:'T4U', unit:'ratio',  normal:'0.8–1.1' },
+                                                    { k:'fti', label:'FTI', unit:'index',  normal:'55–160'  },
+                                                    { k:'age', label:'Age', unit:'yrs',    normal:''        },
+                                                ] as const).map(({ k, label, unit, normal }) => (
+                                                    <div key={k} className="dx-lab-cell">
+                                                        <div className="dx-lab-hd">
+                                                            <span className="dx-lab-lbl">{label}</span>
+                                                            {normal && <span className="dx-lab-norm">{normal}</span>}
+                                                        </div>
+                                                        <div className="dx-lab-wrap">
+                                                            <input type="number" placeholder="—" value={lab[k]}
+                                                                   onChange={e => setLab(prev => ({ ...prev, [k]: e.target.value }))}
+                                                                   className="dx-lab-input"/>
+                                                            <span className="dx-lab-unit">{unit}</span>
+                                                        </div>
                                                     </div>
-                                                    {m.available && <div className={s.modelRowLabel}>confidence</div>}
+                                                ))}
+                                            </div>
+                                            <div className="dx-sex-row">
+                                                <span className="dx-label" style={{ margin:0 }}>Sex</span>
+                                                <div className="dx-btn-row">
+                                                    {(['female','male'] as const).map(sx => (
+                                                        <button key={sx}
+                                                                className={`dx-btn-pill${lab.sex === sx ? ' dx-btn-pill-active' : ''}`}
+                                                                onClick={() => setLab(p => ({ ...p, sex: sx }))}>
+                                                            {lab.sex === sx && <Check size={10}/>}
+                                                            {sx === 'female' ? '♀ Female' : '♂ Male'}
+                                                        </button>
+                                                    ))}
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-
-                                    <div className={s.votingCard} style={{ background: sev.bg, border: `1px solid ${sev.border}` }}>
-                                        <div className={s.votingCardHead} style={{ background: sev.color + '12', borderColor: sev.border }}>
-                                            <CheckCircle2 size={13} color={sev.color} />
-                                            <span className={s.votingCardTitle} style={{ color: sev.color }}>Final Result</span>
                                         </div>
-                                        <div className={s.votingCardBody}>
-                                            <div>
-                                                <p className={s.votingLabel} style={{ color: sev.color }}>Diagnosis</p>
-                                                <p className={s.votingValue} style={{ color: sev.color }}>{result.votingResult}</p>
-                                            </div>
-                                            <div>
-                                                <p className={s.votingLabel} style={{ color: sev.color }}>Confidence</p>
-                                                <p className={s.votingValue} style={{ color: sev.color }}>{result.votingConfidence}%</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    )}
                                 </div>
+                            </div>
 
-                                {/* Findings */}
-                                <div className={s.findingsCard}>
-                                    <div className={s.findingsHead}>
-                                        <div className={s.infoCardIcon} style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-                                            <FileText size={13} color="var(--teal)" />
-                                        </div>
-                                        <span className={s.findingsTitle}>Key Findings</span>
+                            {/* Run button */}
+                            <button className="dx-run-btn"
+                                    onClick={stage === 'done' ? reset : runDiagnosis}
+                                    disabled={isRunning || (!hasInput && stage === 'idle')}>
+                                {isRunning ? (
+                                    <><span className="dx-spinner"/>{currentStepLabel}</>
+                                ) : stage === 'done' ? (
+                                    <><Brain size={15}/>New Diagnosis</>
+                                ) : (
+                                    <><Brain size={15}/>Run AI Diagnosis</>
+                                )}
+                            </button>
+
+                            {(isRunning || (progress > 0 && stage !== 'done')) && (
+                                <div className="dx-progress">
+                                    <div className="dx-progress-track">
+                                        <div className="dx-progress-fill" style={{ width:`${progress}%` }}/>
                                     </div>
-                                    <div className={s.findingsGrid}>
-                                        {result.findings.map((f: string, i: number) => (
-                                            <div key={i} className={s.findingItem}>
-                                                <div className={s.findingDot} style={{ background: sev.color }} />
-                                                <span className={s.findingText}>{f}</span>
-                                            </div>
+                                    <div className="dx-progress-steps">
+                                        {PROCESS_STEPS.map(st => (
+                                            <span key={st.label} className={`dx-progress-step${progress >= st.threshold ? ' dx-progress-step-done' : ''}`}>{st.label}</span>
                                         ))}
                                     </div>
                                 </div>
+                            )}
 
-                                {/* Recommendation */}
-                                <div className={s.recCard} style={{ background: sev.bg, border: `1px solid ${sev.border}` }}>
-                                    <div className={s.recHead} style={{ borderColor: sev.border, background: sev.color + '10' }}>
-                                        <CheckCircle2 size={13} color={sev.color} />
-                                        <span className={s.recTitle} style={{ color: sev.color }}>Recommendation</span>
+                            {error && <div className="dx-error"><AlertTriangle size={13}/>{error}</div>}
+
+                            {savedOk && selectedPatient && (
+                                <div className="dx-saved">
+                                    <Check size={13}/>
+                                    Saved to <strong>{selectedPatient.name}</strong>
+                                    <Link href={`/patient-management?patientId=${selectedPatient.mrn}&tab=diagnosis`} className="dx-saved-link">View record →</Link>
+                                </div>
+                            )}
+
+                            {/* ── RESULTS ── */}
+                            {result && sev && (
+                                <div style={{ marginTop:20 }}>
+                                    <div className="dx-result-card">
+                                        <div className="dx-result-strip" style={{ borderBottom:`1px solid ${sev.border}`, background:sev.bg }}>
+                                            <div>
+                                                <p className="dx-result-lbl" style={{ color:sev.color }}>Malignancy Score</p>
+                                                <div style={{ display:'flex', alignItems:'baseline', gap:2 }}>
+                                                    <span className="dx-result-score" style={{ color:sev.color }}>{result.malignancyScore}</span>
+                                                    <span className="dx-result-max">/100</span>
+                                                </div>
+                                                <p className="dx-result-conf">Confidence: <span style={{ color:sev.color, fontWeight:700 }}>{result.confidence}%</span></p>
+                                            </div>
+                                            <div style={{ textAlign:'right' }}>
+                                                <div className="dx-result-badge" style={{ color:sev.color, borderColor:sev.border, background:sev.color+'14' }}>{result.severity} Risk</div>
+                                            </div>
+                                        </div>
+                                        <div className="dx-result-bar">
+                                            <div className="dx-result-bar-fill" style={{ width:`${result.malignancyScore}%`, background:sev.color }}/>
+                                        </div>
                                     </div>
-                                    <div className={s.recBody}>
-                                        <p className={s.recText} style={{ color: sev.color === '#059669' ? '#065F46' : '#7F1D1D' }}>{result.recommendation}</p>
+
+                                    <div className="dx-result-grid">
+                                        <div className="dx-models-card">
+                                            <div className="dx-models-head">
+                                                <div className="dx-info-ic" style={{ background:'#F0FDFA', border:'1px solid rgba(13,148,136,0.2)' }}><Activity size={12} color="#0D9488"/></div>
+                                                <span style={{ fontSize:13.5, fontWeight:700, color:'#0F172A' }}>Model Results</span>
+                                            </div>
+                                            {result.topModels.map((m:any, i:number) => (
+                                                <div key={i} className="dx-model-row" style={{ opacity:m.available?1:0.35 }}>
+                                                    <div>
+                                                        <div className="dx-model-name">{m.name}</div>
+                                                        <div className="dx-model-sub">{m.available ? m.result : 'Not run'}</div>
+                                                    </div>
+                                                    <div style={{ textAlign:'right' }}>
+                                                        <div className="dx-model-conf" style={{ color:m.available?sev.color:'#94A3B8' }}>{m.available?`${m.confidence}%`:'—'}</div>
+                                                        {m.available && <div className="dx-model-conf-lbl">confidence</div>}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="dx-voting-card" style={{ background:sev.bg, border:`1px solid ${sev.border}` }}>
+                                            <div className="dx-voting-head" style={{ background:sev.color+'12', borderBottom:`1px solid ${sev.border}` }}>
+                                                <CheckCircle2 size={13} color={sev.color}/>
+                                                <span className="dx-voting-title" style={{ color:sev.color }}>Final Result</span>
+                                            </div>
+                                            <div className="dx-voting-body">
+                                                <div>
+                                                    <p className="dx-voting-lbl" style={{ color:sev.color }}>Diagnosis</p>
+                                                    <p className="dx-voting-val" style={{ color:sev.color }}>{result.votingResult}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="dx-voting-lbl" style={{ color:sev.color }}>Confidence</p>
+                                                    <p className="dx-voting-val" style={{ color:sev.color }}>{result.votingConfidence}%</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="dx-findings-card">
+                                        <div className="dx-findings-head">
+                                            <div className="dx-info-ic" style={{ background:'#F0FDFA', border:'1px solid rgba(13,148,136,0.2)' }}><FileText size={12} color="#0D9488"/></div>
+                                            <span className="dx-findings-title">Key Findings</span>
+                                        </div>
+                                        <div className="dx-findings-grid">
+                                            {result.findings.map((f:string, i:number) => (
+                                                <div key={i} className="dx-finding-item">
+                                                    <div className="dx-finding-dot" style={{ background:sev.color }}/>
+                                                    <span>{f}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="dx-rec-card" style={{ background:sev.bg, border:`1px solid ${sev.border}` }}>
+                                        <div className="dx-rec-head" style={{ borderColor:sev.border, background:sev.color+'10' }}>
+                                            <CheckCircle2 size={13} color={sev.color}/>
+                                            <span className="dx-rec-title" style={{ color:sev.color }}>Recommendation</span>
+                                        </div>
+                                        <div className="dx-rec-body">
+                                            <p className="dx-rec-text" style={{ color:sev.color==='#059669'?'#065F46':'#7F1D1D' }}>{result.recommendation}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="dx-disclaimer">
+                                        <Info size={14} color="#F59E0B" style={{ flexShrink:0, marginTop:1 }}/>
+                                        <p className="dx-disclaimer-text"><strong>Clinical Decision Support Only.</strong> This AI result is intended to assist qualified medical professionals and must be interpreted by a licensed clinician.</p>
                                     </div>
                                 </div>
+                            )}
+                        </div>
 
-                                {/* Disclaimer */}
-                                <div className={s.disclaimerStrip}>
-                                    <Info size={15} className={s.disclaimerIcon} color="#F59E0B" style={{ flexShrink: 0, marginTop: 1 }} />
-                                    <p className={s.disclaimerText}>
-                                        <strong>Clinical Decision Support Only.</strong> This AI result is intended to assist qualified medical professionals and must be interpreted by a licensed clinician. It does not replace histological confirmation or specialist judgment.
-                                    </p>
-                                </div>
-
-                            </div>
-                        )}
-                    </div>
-
-                    {/* ════ RIGHT SIDEBAR ════ */}
-                    <div className={s.sidebar}>
-
-                        {!result && stage === 'idle' && (
-                            <div className={s.infoCard}>
-                                <div className={s.emptyState}>
-                                    <div className={s.emptyIcon}><Brain size={28} /></div>
-                                    <p className={s.emptyText}>
-                                        Submit patient data to begin AI-assisted thyroid cancer diagnosis
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-
-                        {isRunning && (
-                            <div className={s.infoCard}>
-                                <div className={s.analyzingState}>
-                                    <div className={s.analyzingRing}>
-                                        <div className={s.analyzingInner}><Brain size={20} /></div>
+                        {/* ── RIGHT SIDEBAR ── */}
+                        <div>
+                            {!result && stage === 'idle' && (
+                                <div className="dx-info-card">
+                                    <div className="dx-empty">
+                                        <div className="dx-empty-ic"><Brain size={26}/></div>
+                                        <p className="dx-empty-text">Submit patient data to begin AI-assisted thyroid cancer diagnosis</p>
                                     </div>
-                                    <p className={s.analyzingText}>{currentStepLabel}</p>
-                                    <p className={s.analyzingSubtext}>Running AI models...</p>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {/* How it works */}
-                        {!result && (
-                            <div className={s.infoCard}>
-                                <div className={s.infoCardHead}>
-                                    <div className={s.infoCardIcon} style={{ background: 'rgba(13,148,136,.08)', border: '1px solid #CCFBF1' }}>
-                                        <Zap size={14} color="var(--teal)" />
+                            {isRunning && (
+                                <div className="dx-info-card">
+                                    <div className="dx-analyzing">
+                                        <div className="dx-analyzing-ring"/>
+                                        <p className="dx-analyzing-text">{currentStepLabel}</p>
+                                        <p className="dx-analyzing-sub">Running AI models...</p>
                                     </div>
-                                    <span className={s.infoCardTitle}>How it works</span>
                                 </div>
-                                <div className={s.infoCardBody}>
-                                    <div className={s.howList}>
+                            )}
+
+                            {!result && (
+                                <div className="dx-info-card">
+                                    <div className="dx-info-head">
+                                        <div className="dx-info-ic" style={{ background:'rgba(29,158,117,0.08)', border:'1px solid #CCFBF1' }}><Zap size={13} color="#0D9488"/></div>
+                                        <span className="dx-info-title">How it works</span>
+                                    </div>
+                                    <div className="dx-info-body">
                                         {[
-                                            { n: '1', t: 'Patient',       d: 'Select patient to auto-save results to their record' },
-                                            { n: '2', t: 'Input',         d: 'Upload a scan, enter lab values, or both' },
-                                            { n: '3', t: 'Multi-Model',   d: 'Multiple AI models analyze your input' },
-                                            { n: '4', t: 'Majority Vote', d: 'Models vote to produce a final diagnosis' },
+                                            { n:'1', t:'Patient',       d:'Select patient to auto-save results' },
+                                            { n:'2', t:'Input',         d:'Upload scan, enter lab values, or both' },
+                                            { n:'3', t:'Multi-Model',   d:'Multiple AI models analyze your input' },
+                                            { n:'4', t:'Majority Vote', d:'Models vote to produce a final diagnosis' },
                                         ].map(st => (
-                                            <div key={st.n} className={s.howItem}>
-                                                <div className={s.howNum}>{st.n}</div>
-                                                <div className={s.howText}>
-                                                    <span className={s.howBold}>{st.t} — </span>{st.d}
-                                                </div>
+                                            <div key={st.n} className="dx-how-item">
+                                                <div className="dx-how-num">{st.n}</div>
+                                                <div className="dx-how-text"><span className="dx-how-bold">{st.t} — </span>{st.d}</div>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        <div className={s.infoCard}>
-                            <div className={s.infoCardHead}>
-                                <div className={s.infoCardIcon} style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}>
-                                    <Info size={14} color="#D97706" />
+                            <div className="dx-info-card">
+                                <div className="dx-info-head">
+                                    <div className="dx-info-ic" style={{ background:'#FFFBEB', border:'1px solid #FDE68A' }}><Info size={13} color="#D97706"/></div>
+                                    <span className="dx-info-title">Clinical Disclaimer</span>
                                 </div>
-                                <span className={s.infoCardTitle}>Clinical Disclaimer</span>
-                            </div>
-                            <div className={s.infoCardBody}>
-                                <p className={s.disclaimerText}>
-                                    This AI system is a <strong>clinical decision support tool</strong> intended
-                                    to assist qualified medical professionals. Results must be interpreted by
-                                    a licensed clinician and should not replace histological confirmation or
-                                    specialist judgment.
-                                </p>
+                                <div className="dx-info-body">
+                                    <p style={{ fontSize:13, color:'#64748B', lineHeight:1.65, margin:0 }}>
+                                        This AI system is a <strong>clinical decision support tool</strong> intended to assist qualified medical professionals. Results must be interpreted by a licensed clinician.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </main>
-        </div>
+                </main>
+            </div>
+        </>
     );
 }
