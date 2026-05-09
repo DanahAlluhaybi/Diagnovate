@@ -236,22 +236,23 @@ export default function AdminPage() {
         router.push('/log-in?role=admin');
     };
 
+    // ── FIX: handle null/undefined institution to prevent crash on search ──
     const filteredPending = pendingUsers.filter(u =>
-        u.full_name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase()) ||
-        u.institution.toLowerCase().includes(search.toLowerCase())
+        u.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+        u.email?.toLowerCase().includes(search.toLowerCase()) ||
+        (u.institution ?? '').toLowerCase().includes(search.toLowerCase())
     );
     const filteredActive = activeUsers.filter(u =>
-        u.full_name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase()) ||
-        u.institution.toLowerCase().includes(search.toLowerCase())
+        u.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+        u.email?.toLowerCase().includes(search.toLowerCase()) ||
+        (u.institution ?? '').toLowerCase().includes(search.toLowerCase())
     );
 
     const hour = new Date().getHours();
     const loadingGreeting = hour >= 5 && hour < 12 ? 'Good morning, Admin'
         : hour >= 12 && hour < 17 ? 'Good afternoon, Admin'
-        : hour >= 17 && hour < 21 ? 'Good evening, Admin'
-        : 'Good night, Admin';
+            : hour >= 17 && hour < 21 ? 'Good evening, Admin'
+                : 'Good night, Admin';
 
     if (loading) return (
         <>
