@@ -80,10 +80,11 @@ export default function SignUpPage() {
         setError(''); setSending(method);
         const identifier = method === 'sms' ? signupPhone : signupEmail;
         try {
-            await auth.sendOtp(identifier, method);
             if (method === 'sms') {
+                await auth.resendOtp(identifier);
                 router.push(`/phone-verification?identifier=${encodeURIComponent(identifier)}`);
             } else {
+                await auth.resendEmailOtp(identifier);
                 router.push(`/email-verification?identifier=${encodeURIComponent(identifier)}`);
             }
         } catch (err: unknown) {
