@@ -234,18 +234,41 @@ const TABS = [
 type ToastType = 'success' | 'error' | 'info';
 interface ToastState { msg: string; type: ToastType; }
 
+interface PatientRef { id: string; mrn: string; name: string; age: string; gender: string; }
+
 
 export default function ThyroidCancerReport() {
     const router = useRouter();
 
+    // ════════════════════════════════
     useEffect(() => {
-        if (!localStorage.getItem('token')) { router.push('/log-in?role=doctor'); }
+        if (!localStorage.getItem('token')) { router.push('/log-in?role=doctor'); return; }
+        const token = localStorage.getItem('token');
+        fetch(`${BASE}/api/patients`, {
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        }).then(r => r.json()).then(data => {
+            if (data.success && Array.isArray(data.data)) {
+                setAllPatients(data.data.map((p: any) => ({
+                    id    : p.id,
+                    mrn   : p.mrn,
+                    name  : `${p.firstName} ${p.lastName}`,
+                    age   : String(p.age ?? ''),
+                    gender: p.gender ?? '',
+                })));
+            }
+        }).catch(() => {});
     }, []);
 
     const [activeTab, setActiveTab] = useState('tumor');
     const [loading,   setLoading]   = useState(false);
     const [toast,     setToast]     = useState<ToastState | null>(null);
     const [reportId,  setReportId]  = useState<string | null>(null);
+
+    // ══ 2. States ـ autocomplete ══════════════════════════════════
+    const [allPatients,        setAllPatients]        = useState<PatientRef[]>([]);
+    const [selectedPatientRef, setSelectedPatientRef] = useState<PatientRef | null>(null);
+    const [showSuggest,        setShowSuggest]        = useState(false);
+    const [patientSearch,      setPatientSearch]      = useState('');
 
     const [patientName,   setPatientName]   = useState('');
     const [patientId,     setPatientId]     = useState('');
@@ -414,10 +437,77 @@ export default function ThyroidCancerReport() {
                         <span className={styles.cardTitle}>Patient Information</span>
                     </div>
                     <div className={styles.patientGrid}>
-                        <div className={styles.fGroup}>
+
+                        {/* ══ 3. Patient Name field with autocomplete ══ */}
+                        <div className={styles.fGroup} style={{ position: 'relative' }}>
                             <label className={styles.fLabel}>Patient Name *</label>
-                            <input className={styles.fInput} type="text" placeholder="Enter patient name" value={patientName} onChange={e => setPatientName(e.target.value)} />
+                            <input
+                                className={styles.fInput}
+                                type="text"
+                                placeholder="Search by name or MRN..."
+                                value={patientSearch}
+                                autoComplete="off"
+                                onChange={e => {
+                                    setPatientSearch(e.target.value);
+                                    setSelectedPatientRef(null);
+                                    setPatientName('');
+                                    setPatientId('');
+                                    setAge('');
+                                    setGender('');
+                                    setShowSuggest(true);
+                                }}
+                                onFocus={() => setShowSuggest(true)}
+                                onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
+                            />
+                            {/* Dropdown list*/}
+                            {showSuggest && patientSearch.trim() && (() => {
+                                const q = patientSearch.toLowerCase();
+                                const matches = allPatients.filter(p =>
+                                    p.name.toLowerCase().includes(q) || p.mrn.toLowerCase().includes(q)
+                                ).slice(0, 5);
+                                return matches.length > 0 ? (
+                                    <div style={{
+                                        position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
+                                        background: 'var(--surface)', border: '1.5px solid var(--border)',
+                                        borderRadius: 12, boxShadow: 'var(--shadow-lg)',
+                                        zIndex: 999, overflow: 'hidden',
+                                    }}>
+                                        {matches.map(p => (
+                                            <button key={p.id}
+                                                    style={{
+                                                        width: '100%', padding: '10px 14px', border: 'none',
+                                                        background: 'none', cursor: 'pointer',
+                                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                                        borderBottom: '1px solid var(--border3)',
+                                                        fontFamily: 'var(--font-body)',
+                                                    }}
+                                                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--teal-light)')}
+                                                    onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                                                    onMouseDown={() => {
+                                                        setPatientSearch(p.name);
+                                                        setPatientName(p.name);
+                                                        setPatientId(p.mrn);
+                                                        setAge(p.age);
+                                                        setGender(p.gender);
+                                                        setSelectedPatientRef(p);
+                                                        setShowSuggest(false);
+                                                    }}>
+                                                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{p.name}</span>
+                                                <span style={{ fontSize: 12, color: 'var(--muted)' }}>{p.mrn}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : null;
+                            })()}
+                            {/* Selection confirmation*/}
+                            {selectedPatientRef && (
+                                <p style={{ fontSize: 12, color: 'var(--teal)', marginTop: 6, fontWeight: 600 }}>
+                                    ✓ {selectedPatientRef.name} — MRN: {selectedPatientRef.mrn}
+                                </p>
+                            )}
                         </div>
+
+                        {/* Remaining fields - no changes */}
                         <div className={styles.fGroup}>
                             <label className={styles.fLabel}>Patient ID *</label>
                             <input className={styles.fInput} type="text" placeholder="Enter patient ID" value={patientId} onChange={e => setPatientId(e.target.value)} />
