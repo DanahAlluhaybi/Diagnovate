@@ -10,7 +10,7 @@ export default function PublicNavbar() {
     const pathname = usePathname();
 
     useEffect(() => {
-        const handler = () => setScrolled(window.scrollY > 4);
+        const handler = () => setScrolled(window.scrollY > 80);
         window.addEventListener('scroll', handler, { passive: true });
         handler();
         return () => window.removeEventListener('scroll', handler);
@@ -18,72 +18,41 @@ export default function PublicNavbar() {
 
     const isActive = (href: string) => pathname === href;
 
-    const linkStyle = (href: string): React.CSSProperties => ({
-        display: 'inline-flex',
-        alignItems: 'center',
-        textDecoration: 'none',
-        fontSize: 14,
-        fontWeight: 500,
-        fontFamily: 'var(--font-dm-sans, sans-serif)',
-        color: isActive(href) ? '#0F6E56' : '#64748B',
-        background: isActive(href) ? '#F0FDFA' : 'transparent',
-        borderRadius: isActive(href) ? 8 : 8,
-        padding: '6px 14px',
-        transition: 'all 0.18s',
-        letterSpacing: '0.01em',
-    });
-
-    const navStyle: React.CSSProperties = {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 200,
-        height: 72,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 48px',
-        background: 'rgba(244,249,247,0.88)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(13,148,136,0.12)',
-        boxShadow: scrolled ? '0 4px 32px rgba(15,23,42,0.08)' : 'none',
-        transition: 'box-shadow 0.25s',
-    };
-
-    const ctaStyle: React.CSSProperties = {
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 8,
-        textDecoration: 'none',
-        fontSize: 14,
-        fontWeight: 700,
-        fontFamily: 'var(--font-dm-sans, sans-serif)',
-        color: '#fff',
-        background: '#0D9488',
-        borderRadius: 10,
-        padding: '8px 20px',
-        transition: 'all 0.2s',
-        letterSpacing: '0.01em',
-        border: 'none',
-        cursor: 'pointer',
-    };
+    const wordColor  = scrolled ? '#0D1B17' : '#fff';
+    const emColor    = scrolled ? '#1D9E75' : '#5DCAA5';
+    const linkColor  = scrolled ? '#8A9E97' : 'rgba(255,255,255,0.7)';
+    const loginBord  = scrolled ? '1.5px solid #D1E5DC' : '1.5px solid rgba(255,255,255,0.3)';
+    const loginColor = scrolled ? '#0D1B17' : '#fff';
 
     return (
         <>
-            <nav style={navStyle}>
+            <nav style={{
+                position: 'fixed',
+                top: 0, left: 0, right: 0,
+                zIndex: 200,
+                height: 72,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0 48px',
+                background: scrolled ? 'rgba(255,255,255,0.92)' : 'transparent',
+                backdropFilter: scrolled ? 'blur(20px)' : 'none',
+                WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
+                borderBottom: scrolled ? '1px solid rgba(29,158,117,0.1)' : 'none',
+                boxShadow: scrolled ? '0 4px 24px rgba(13,27,23,0.06)' : 'none',
+                transition: 'all 0.3s ease',
+            }}>
                 {/* Logo */}
                 <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
                     <div style={{
                         width: 44, height: 44, borderRadius: 13,
-                        background: 'linear-gradient(145deg,#0D9488,#0D9488)',
+                        background: 'linear-gradient(145deg,#1D9E75,#0D9488)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 6px 20px rgba(13,148,136,0.4)',
+                        boxShadow: '0 6px 20px rgba(29,158,117,0.35)',
                         flexShrink: 0,
                     }}>
                         <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
-                            <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/>
+                            <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.65)" strokeWidth="1.5"/>
                             <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
                             <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
                             <circle cx="20" cy="20" r="3.5" fill="white"/>
@@ -93,17 +62,37 @@ export default function PublicNavbar() {
                         fontFamily: 'var(--font-dm-serif, "DM Serif Display", serif)',
                         fontSize: 20,
                         letterSpacing: '-0.3px',
-                        color: '#0F172A',
+                        color: wordColor,
+                        transition: 'color 0.3s ease',
                     }}>
-                        Diagn<em style={{ fontStyle: 'italic', color: '#0D9488' }}>ovate</em>
+                        Diagn<em style={{ fontStyle: 'italic', color: emColor, transition: 'color 0.3s ease' }}>ovate</em>
                     </span>
                 </Link>
 
-                {/* Desktop nav links */}
+                {/* Desktop nav */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="pub-nav-links">
-                    <Link href="/" style={linkStyle('/')}>Home</Link>
-                    <Link href="/about" style={linkStyle('/about')}>About</Link>
-                    <Link href="/contact" style={linkStyle('/contact')}>Contact</Link>
+                    {[
+                        { href: '/', label: 'Home' },
+                        { href: '/about', label: 'About' },
+                        { href: '/contact', label: 'Contact' },
+                    ].map(({ href, label }) => (
+                        <Link key={href} href={href} style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            textDecoration: 'none',
+                            fontSize: 14,
+                            fontWeight: 500,
+                            fontFamily: 'var(--font-dm-sans, sans-serif)',
+                            color: isActive(href) ? (scrolled ? '#0D1B17' : '#fff') : linkColor,
+                            padding: '6px 14px',
+                            borderRadius: 8,
+                            transition: 'all 0.3s ease',
+                        }}>
+                            {label}
+                        </Link>
+                    ))}
+
+                    {/* Log In — ghost button */}
                     <Link
                         href="/role"
                         style={{
@@ -113,41 +102,68 @@ export default function PublicNavbar() {
                             fontSize: 14,
                             fontWeight: 600,
                             fontFamily: 'var(--font-dm-sans, sans-serif)',
-                            color: isActive('/role') ? '#0F6E56' : '#0D9488',
-                            background: isActive('/role') ? '#F0FDFA' : 'transparent',
-                            border: '1.5px solid',
-                            borderColor: isActive('/role') ? '#0D9488' : 'rgba(13,148,136,0.35)',
+                            color: loginColor,
+                            background: 'transparent',
+                            border: loginBord,
                             borderRadius: 9,
                             padding: '6px 16px',
-                            transition: 'all 0.18s',
+                            transition: 'all 0.3s ease',
                             marginLeft: 4,
                         }}
                         onMouseEnter={e => {
                             const el = e.currentTarget as HTMLAnchorElement;
-                            el.style.background = '#F0FDFA';
-                            el.style.borderColor = '#0D9488';
+                            if (scrolled) {
+                                el.style.borderColor = '#1D9E75';
+                                el.style.color = '#1D9E75';
+                                el.style.background = '#E1F5EE';
+                            } else {
+                                el.style.background = 'rgba(255,255,255,0.1)';
+                            }
                         }}
                         onMouseLeave={e => {
                             const el = e.currentTarget as HTMLAnchorElement;
-                            el.style.background = isActive('/role') ? '#F0FDFA' : 'transparent';
-                            el.style.borderColor = isActive('/role') ? '#0D9488' : 'rgba(13,148,136,0.35)';
+                            el.style.borderColor = scrolled ? '#D1E5DC' : 'rgba(255,255,255,0.3)';
+                            el.style.color = loginColor;
+                            el.style.background = 'transparent';
                         }}
                     >
                         Log In
                     </Link>
-                    <div style={{ width: 1, height: 20, background: 'rgba(13,148,136,0.2)', margin: '0 4px' }} />
+
+                    <div style={{
+                        width: 1, height: 20,
+                        background: scrolled ? 'rgba(209,229,220,0.8)' : 'rgba(255,255,255,0.2)',
+                        margin: '0 4px',
+                        transition: 'background 0.3s ease',
+                    }} />
+
+                    {/* Request Demo — teal always */}
                     <Link
                         href="/contact"
-                        style={ctaStyle}
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            textDecoration: 'none',
+                            fontSize: 14,
+                            fontWeight: 700,
+                            fontFamily: 'var(--font-dm-sans, sans-serif)',
+                            color: '#fff',
+                            background: 'linear-gradient(135deg,#1D9E75,#0D9488)',
+                            borderRadius: 10,
+                            padding: '8px 20px',
+                            transition: 'all 0.2s',
+                            border: 'none',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 16px rgba(29,158,117,0.3)',
+                        }}
                         onMouseEnter={e => {
-                            (e.currentTarget as HTMLAnchorElement).style.background = '#0F6E56';
                             (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-1px)';
-                            (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 6px 20px rgba(13,148,136,0.35)';
+                            (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 8px 24px rgba(29,158,117,0.4)';
                         }}
                         onMouseLeave={e => {
-                            (e.currentTarget as HTMLAnchorElement).style.background = '#0D9488';
                             (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(0)';
-                            (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'none';
+                            (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 4px 16px rgba(29,158,117,0.3)';
                         }}
                     >
                         Request Demo
@@ -160,26 +176,27 @@ export default function PublicNavbar() {
                         style={{
                             display: 'none',
                             background: 'none',
-                            border: '1px solid rgba(13,148,136,0.25)',
+                            border: scrolled ? '1px solid rgba(29,158,117,0.25)' : '1px solid rgba(255,255,255,0.3)',
                             borderRadius: 8,
                             padding: '6px 10px',
                             cursor: 'pointer',
-                            color: '#0D9488',
+                            color: scrolled ? '#1D9E75' : '#fff',
                             marginLeft: 8,
+                            transition: 'all 0.3s ease',
                         }}
                         aria-label="Toggle menu"
                     >
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                             {menuOpen ? (
                                 <>
-                                    <line x1="4" y1="4" x2="16" y2="16" stroke="#0D9488" strokeWidth="2" strokeLinecap="round"/>
-                                    <line x1="16" y1="4" x2="4" y2="16" stroke="#0D9488" strokeWidth="2" strokeLinecap="round"/>
+                                    <line x1="4" y1="4" x2="16" y2="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                    <line x1="16" y1="4" x2="4" y2="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                 </>
                             ) : (
                                 <>
-                                    <line x1="3" y1="6" x2="17" y2="6" stroke="#0D9488" strokeWidth="2" strokeLinecap="round"/>
-                                    <line x1="3" y1="10" x2="17" y2="10" stroke="#0D9488" strokeWidth="2" strokeLinecap="round"/>
-                                    <line x1="3" y1="14" x2="17" y2="14" stroke="#0D9488" strokeWidth="2" strokeLinecap="round"/>
+                                    <line x1="3" y1="6" x2="17" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                    <line x1="3" y1="10" x2="17" y2="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                    <line x1="3" y1="14" x2="17" y2="14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                 </>
                             )}
                         </svg>
@@ -191,18 +208,16 @@ export default function PublicNavbar() {
             {menuOpen && (
                 <div style={{
                     position: 'fixed',
-                    top: 72,
-                    left: 0,
-                    right: 0,
+                    top: 72, left: 0, right: 0,
                     zIndex: 199,
-                    background: 'rgba(244,249,247,0.97)',
+                    background: 'rgba(255,255,255,0.97)',
                     backdropFilter: 'blur(20px)',
-                    borderBottom: '1px solid rgba(13,148,136,0.15)',
+                    borderBottom: '1px solid rgba(29,158,117,0.15)',
                     padding: '16px 24px 20px',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 8,
-                    boxShadow: '0 8px 32px rgba(15,23,42,0.1)',
+                    boxShadow: '0 8px 32px rgba(13,27,23,0.1)',
                 }}>
                     {[
                         { href: '/', label: 'Home' },
@@ -222,8 +237,8 @@ export default function PublicNavbar() {
                                 fontFamily: 'var(--font-dm-sans, sans-serif)',
                                 fontSize: 15,
                                 fontWeight: isActive(href) ? 700 : 500,
-                                color: isActive(href) ? '#0F6E56' : '#0F172A',
-                                background: isActive(href) ? '#F0FDFA' : 'transparent',
+                                color: isActive(href) ? '#1D9E75' : '#0D1B17',
+                                background: isActive(href) ? '#E1F5EE' : 'transparent',
                             }}
                         >
                             {label}
@@ -242,7 +257,7 @@ export default function PublicNavbar() {
                             fontSize: 15,
                             fontWeight: 700,
                             color: '#fff',
-                            background: '#0D9488',
+                            background: 'linear-gradient(135deg,#1D9E75,#0D9488)',
                             marginTop: 4,
                         }}
                     >

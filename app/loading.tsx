@@ -2,7 +2,7 @@ export default function Loading() {
     return (
         <div style={{
             minHeight: '100vh',
-            background: '#F8FAFC',
+            background: '#F4F9F7',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -11,121 +11,97 @@ export default function Loading() {
             overflow: 'hidden',
             fontFamily: 'var(--font-body, "DM Sans", sans-serif)',
         }}>
-            {/* Hex grid background */}
+            {/* Hex grid pattern */}
             <svg
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.18, pointerEvents: 'none' }}
+                style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', opacity: 0.04, pointerEvents: 'none' }}
                 xmlns="http://www.w3.org/2000/svg"
             >
                 <defs>
-                    <pattern id="hexLoad" x="0" y="0" width="56" height="48" patternUnits="userSpaceOnUse">
-                        <polygon
-                            points="28,2 52,14 52,38 28,50 4,38 4,14"
-                            fill="none" stroke="#0D9488" strokeWidth="0.8"
-                        />
+                    <pattern id="ldHex" x="0" y="0" width="56" height="48" patternUnits="userSpaceOnUse">
+                        <polygon points="28,2 52,14 52,38 28,50 4,38 4,14" fill="none" stroke="#1D9E75" strokeWidth="1"/>
                     </pattern>
                 </defs>
-                <rect width="100%" height="100%" fill="url(#hexLoad)" />
+                <rect width="100%" height="100%" fill="url(#ldHex)" />
             </svg>
 
-            {/* Ambient glow */}
+            {/* Soft blob — top right */}
             <div style={{
-                position: 'absolute', width: 500, height: 500, borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(13,148,136,0.12) 0%, transparent 65%)',
-                top: -150, left: '50%', transform: 'translateX(-50%)', pointerEvents: 'none',
+                position: 'fixed',
+                width: 600, height: 600, borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(29,158,117,0.07) 0%, transparent 65%)',
+                top: -200, right: -200, pointerEvents: 'none',
+            }} />
+
+            {/* Soft blob — bottom left */}
+            <div style={{
+                position: 'fixed',
+                width: 400, height: 400, borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(8,80,65,0.05) 0%, transparent 65%)',
+                bottom: -150, left: -100, pointerEvents: 'none',
             }} />
 
             {/* Animated hex logo mark */}
-            <div style={{ position: 'relative', marginBottom: 24 }}>
-                {/* Outer pulsing ring */}
-                <svg
-                    width="96" height="108"
-                    viewBox="0 0 96 108"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    style={{ animation: 'hexPulse 2.5s ease-in-out infinite' }}
-                >
-                    <polygon
-                        points="48,4 90,26 90,80 48,104 6,80 6,26"
-                        fill="rgba(13,148,136,0.08)"
-                        stroke="#0D9488"
-                        strokeWidth="1.5"
-                    />
-                    <polygon
-                        points="48,16 78,32 78,72 48,88 18,72 18,32"
-                        fill="rgba(13,148,136,0.05)"
-                        stroke="#0D9488"
-                        strokeWidth="1"
-                        strokeDasharray="4 3"
-                        opacity="0.6"
-                    />
+            <div style={{
+                width: 56, height: 56, borderRadius: 13,
+                background: 'linear-gradient(145deg,#1D9E75,#0D9488)',
+                boxShadow: '0 8px 28px rgba(29,158,117,0.35)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 20,
+                animation: 'ldPulse 2.5s ease-in-out infinite',
+            }}>
+                <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
+                    <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.65)" strokeWidth="1.5"/>
+                    <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                    <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                    <circle cx="20" cy="20" r="3.5" fill="white"/>
                 </svg>
-                {/* Inner rotating ring */}
-                <svg
-                    width="96" height="108"
-                    viewBox="0 0 96 108"
-                    fill="none"
-                    style={{
-                        position: 'absolute', top: 0, left: 0,
-                        animation: 'hexRotate 3s linear infinite',
-                        transformOrigin: '48px 54px',
-                    }}
-                >
-                    <circle cx="48" cy="4" r="3.5" fill="#0D9488" opacity="0.7" />
-                    <circle cx="90" cy="26" r="3.5" fill="#0D9488" opacity="0.5" />
-                    <circle cx="90" cy="80" r="3.5" fill="#0D9488" opacity="0.3" />
-                </svg>
-                {/* Center mark */}
-                <div style={{
-                    position: 'absolute', top: '50%', left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 36, height: 36, borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #0D9488, #0F6E56)',
-                    boxShadow: '0 0 0 8px rgba(13,148,136,0.12), 0 8px 24px rgba(13,148,136,0.35)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 3C10.5 3 9 4 9 6V9H6C4 9 3 10.5 3 12C3 13.5 4 15 6 15H9V18C9 20 10.5 21 12 21C13.5 21 15 20 15 18V15H18C20 15 21 13.5 21 12C21 10.5 20 9 18 9H15V6C15 4 13.5 3 12 3Z" fill="white" />
-                    </svg>
-                </div>
             </div>
 
             {/* Wordmark */}
             <div style={{
-                fontFamily: 'var(--font-display, "DM Serif Display", serif)',
-                fontSize: 28,
+                fontFamily: '"DM Serif Display", serif',
+                fontSize: 26,
                 letterSpacing: '-0.5px',
-                color: '#0F172A',
+                color: '#0D1B17',
                 marginBottom: 6,
             }}>
-                Diagn<em style={{ fontStyle: 'italic', color: '#0D9488' }}>ovate</em>
+                Diagn<em style={{ fontStyle: 'italic', color: '#1D9E75' }}>ovate</em>
             </div>
 
+            {/* Subtitle */}
             <div style={{
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 600,
                 letterSpacing: '2px',
                 textTransform: 'uppercase',
-                color: '#64748B',
-                marginBottom: 32,
+                color: '#8A9E97',
+                marginBottom: 28,
             }}>
-                Medical AI Diagnostics
+                Clinical AI Platform
             </div>
 
-            {/* Staggered loading dots */}
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', marginTop: 28 }}>
+            {/* Staggered dots */}
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                 {[0, 0.22, 0.44].map((delay, i) => (
                     <div key={i} style={{
-                        width: 9, height: 9, borderRadius: '50%',
-                        background: '#0D9488',
+                        width: 6, height: 6, borderRadius: '50%',
+                        background: '#1D9E75',
                         animation: `dotBlink 1.4s ease-in-out ${delay}s infinite`,
                     }} />
                 ))}
             </div>
 
+            {/* Progress bar — fixed at bottom */}
+            <div style={{
+                position: 'fixed',
+                bottom: 0, left: 0,
+                height: 3,
+                background: '#1D9E75',
+                animation: 'loadBar 1.8s ease-in-out infinite',
+            }} />
+
             <style>{`
-                @keyframes hexPulse { 0%,100%{opacity:0.2;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.06)} }
-                @keyframes hexRotate { to { transform: rotate(360deg); } }
-                @keyframes dotBlink { 0%,100%{opacity:1} 50%{opacity:0.18} }
+                @keyframes ldPulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.06);opacity:0.88} }
             `}</style>
         </div>
     );
