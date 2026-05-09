@@ -140,10 +140,11 @@ export const auth = {
 
         if (!token) throw new Error('No token received from server.');
 
+        const userData = raw?.user ?? raw?.doctor;
         localStorage.setItem('token', token);
-        if (raw?.doctor) localStorage.setItem('user', JSON.stringify(raw.doctor));
+        if (userData) localStorage.setItem('user', JSON.stringify(userData));
 
-        return { token, user: raw?.doctor ?? null };
+        return { token, user: (userData ?? null) as Doctor | null };
     },
 
     signup: async (payload: Record<string, unknown>): Promise<RawResponse> => {
@@ -167,17 +168,19 @@ export const auth = {
 
         if (raw?.next_step === 'verify_email') {
             const pendingToken = raw?.token ?? raw?.access_token ?? raw?.jwt ?? null;
-            if (pendingToken && raw?.doctor) localStorage.setItem('user', JSON.stringify(raw.doctor));
+            const pendingUser = raw?.user ?? raw?.doctor;
+            if (pendingToken && pendingUser) localStorage.setItem('user', JSON.stringify(pendingUser));
             return { next_step: 'verify_email', email: raw.email ?? '', token: pendingToken ?? null };
         }
 
         const token = raw?.token ?? raw?.access_token ?? raw?.jwt;
         if (!token) throw new Error('OTP verification failed.');
 
+        const userData = raw?.user ?? raw?.doctor;
         localStorage.setItem('token', token);
-        if (raw?.doctor) localStorage.setItem('user', JSON.stringify(raw.doctor));
+        if (userData) localStorage.setItem('user', JSON.stringify(userData));
 
-        return { token, user: raw?.doctor ?? null };
+        return { token, user: (userData ?? null) as Doctor | null };
     },
 
     adminLogin: async (email: string, password: string): Promise<LoginResult> => {
