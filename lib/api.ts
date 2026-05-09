@@ -215,11 +215,12 @@ export const auth = {
         });
     },
 
-    resendEmailOtp: async (email: string): Promise<RawResponse> => {
-        return await request<RawResponse>('/api/auth/send-email-otp', {
-            method: 'POST',
-            body: JSON.stringify({ email }),
-        });
+        resendEmailOtp: async (email: string): Promise<RawResponse> => {
+            return await request<RawResponse>('/api/auth/send-email-otp', {
+                method: 'POST',
+                body: JSON.stringify({ identifier: email }), // ← identifier بدل email
+            });
+
     },
 
     checkStatus: async (): Promise<RawResponse> => {
