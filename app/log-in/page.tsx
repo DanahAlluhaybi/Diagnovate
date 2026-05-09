@@ -35,6 +35,7 @@ function LoginForm() {
             }
             const { token, user } = result as { token: string; user: unknown };
             localStorage.setItem(isAdmin ? 'admin_token' : 'token', token);
+            console.log('Storing user:', user);
             if (user) localStorage.setItem(isAdmin ? 'admin_user' : 'user', JSON.stringify(user));
             router.push(isAdmin ? '/admin' : '/dashboard');
         } catch (err: unknown) {
@@ -51,6 +52,7 @@ function LoginForm() {
         try {
             const { token, user } = await auth.verifyOtp(identifier, otp);
             localStorage.setItem(isAdmin ? 'admin_token' : 'token', token);
+            console.log('Storing user:', user);
             if (user) localStorage.setItem(isAdmin ? 'admin_user' : 'user', JSON.stringify(user));
             router.push(isAdmin ? '/admin' : '/dashboard');
         } catch (err: unknown) {
