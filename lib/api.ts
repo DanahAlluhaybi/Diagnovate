@@ -141,7 +141,7 @@ export const auth = {
         if (!token) throw new Error('No token received from server.');
 
         localStorage.setItem('token', token);
-        if (raw?.doctor) localStorage.setItem('user', JSON.stringify(raw.doctor));
+        if (raw?.user) localStorage.setItem('user', JSON.stringify(raw.user));
 
         return { token, user: raw?.doctor ?? null };
     },
