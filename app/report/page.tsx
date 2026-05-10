@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import {
@@ -36,11 +37,16 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
     const [open,  setOpen]  = useState(false);
     const [month, setMonth] = useState(selected ? selected.getMonth()    : today.getMonth());
     const [year,  setYear]  = useState(selected ? selected.getFullYear() : today.getFullYear());
-    const ref = useRef<HTMLDivElement>(null);
+    const [pos,   setPos]   = useState({ top: 0, left: 0, width: 0 });
+    const btnRef = useRef<HTMLButtonElement>(null);
+    const ref    = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const h = (e: MouseEvent) => {
-            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+            if (ref.current && !ref.current.contains(e.target as Node) &&
+                btnRef.current && !btnRef.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
         };
         document.addEventListener('mousedown', h);
         return () => document.removeEventListener('mousedown', h);
@@ -50,14 +56,26 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
         if (selected) { setMonth(selected.getMonth()); setYear(selected.getFullYear()); }
     }, [value]);
 
+    const openCalendar = () => {
+        if (btnRef.current) {
+            const rect = btnRef.current.getBoundingClientRect();
+            setPos({
+                top:   rect.bottom + window.scrollY + 6,
+                left:  rect.left   + window.scrollX,
+                width: rect.width,
+            });
+        }
+        setOpen(o => !o);
+    };
+
     const firstDay    = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const prevDays    = new Date(year, month, 0).getDate();
 
     const cells: { day: number; cur: boolean }[] = [];
     for (let i = firstDay - 1; i >= 0; i--) cells.push({ day: prevDays - i, cur: false });
-    for (let i = 1; i <= daysInMonth; i++)  cells.push({ day: i,            cur: true  });
-    while (cells.length % 7 !== 0)          cells.push({ day: cells.length - firstDay - daysInMonth + 1, cur: false });
+    for (let i = 1; i <= daysInMonth; i++)  cells.push({ day: i, cur: true });
+    while (cells.length % 7 !== 0) cells.push({ day: cells.length - firstDay - daysInMonth + 1, cur: false });
 
     const prevMonth = () => { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); };
     const nextMonth = () => { if (month === 11){ setMonth(0);  setYear(y => y + 1); } else setMonth(m => m + 1); };
@@ -75,8 +93,8 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
         today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
 
     return (
-        <div style={{ position: 'relative', width: '100%' }} ref={ref}>
-            <button type="button" onClick={() => setOpen(o => !o)} style={{
+        <div style={{ position: 'relative', width: '100%' }}>
+            <button ref={btnRef} type="button" onClick={openCalendar} style={{
                 display:'flex', alignItems:'center', gap:8, width:'100%', height:46, padding:'0 14px',
                 border:`1.5px solid ${open ? '#0D9488' : 'rgba(0,0,0,0.1)'}`, borderRadius:10,
                 background: open ? '#fff' : '#F9FAFB',
@@ -89,33 +107,30 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
                 <ChevronDown size={13} style={{ color:'#9CA3AF', transform: open ? 'rotate(180deg)' : 'none', transition:'transform .2s' }} />
             </button>
 
-            {open && (
-                <div style={{
-                    position:'absolute', top:'calc(100% + 6px)', left:0, zIndex:9999,
+            {open && typeof window !== 'undefined' && createPortal(
+                <div ref={ref} style={{
+                    position:'absolute',
+                    top: pos.top,
+                    left: pos.left,
+                    width: Math.max(pos.width, 280),
+                    zIndex: 999999,
                     background:'#fff', border:'1.5px solid rgba(0,0,0,0.1)',
-                    borderRadius:14, boxShadow:'0 20px 60px rgba(0,0,0,0.15)', padding:16, width:280,
-                    animation:'rp-fadeUp .18s cubic-bezier(.16,1,.3,1) both',
+                    borderRadius:14, boxShadow:'0 20px 60px rgba(0,0,0,0.15)', padding:16,
                 }}>
                     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
                         <button type="button" onClick={prevMonth} style={{
                             width:28, height:28, border:'1.5px solid rgba(0,0,0,0.1)', borderRadius:8,
                             background:'#F9FAFB', cursor:'pointer', display:'flex', alignItems:'center',
-                            justifyContent:'center', color:'#9CA3AF', transition:'all .15s',
-                        }}
-                                onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background='#F0FDFA'; b.style.color='#0D9488'; }}
-                                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background='#F9FAFB'; b.style.color='#9CA3AF'; }}
-                        ><ChevronLeft size={14}/></button>
+                            justifyContent:'center', color:'#9CA3AF',
+                        }}><ChevronLeft size={14}/></button>
                         <span style={{ fontFamily:'"DM Sans",sans-serif', fontWeight:700, fontSize:14, color:'#111827' }}>
                             {MONTHS[month]} {year}
                         </span>
                         <button type="button" onClick={nextMonth} style={{
                             width:28, height:28, border:'1.5px solid rgba(0,0,0,0.1)', borderRadius:8,
                             background:'#F9FAFB', cursor:'pointer', display:'flex', alignItems:'center',
-                            justifyContent:'center', color:'#9CA3AF', transition:'all .15s',
-                        }}
-                                onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background='#F0FDFA'; b.style.color='#0D9488'; }}
-                                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background='#F9FAFB'; b.style.color='#9CA3AF'; }}
-                        ><ChevronRight size={14}/></button>
+                            justifyContent:'center', color:'#9CA3AF',
+                        }}><ChevronRight size={14}/></button>
                     </div>
                     <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:2, marginBottom:4 }}>
                         {DAYS.map(d => (
@@ -133,13 +148,10 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
                                     color: sel ? '#fff' : tod ? '#0D9488' : cell.cur ? '#111827' : '#D1D5DB',
                                     fontFamily:'"DM Sans",sans-serif', fontSize:13,
                                     fontWeight: sel || tod ? 700 : 500,
-                                    cursor: cell.cur ? 'pointer' : 'default', transition:'all .12s',
+                                    cursor: cell.cur ? 'pointer' : 'default',
                                     outline: tod && !sel ? '1.5px solid rgba(13,148,136,0.3)' : 'none',
                                     outlineOffset:'-1px',
-                                }}
-                                        onMouseEnter={e => { if (cell.cur && !sel) { const b = e.currentTarget as HTMLButtonElement; b.style.background='#F0FDFA'; b.style.color='#0D9488'; } }}
-                                        onMouseLeave={e => { if (cell.cur && !sel) { const b = e.currentTarget as HTMLButtonElement; b.style.background=tod?'#F0FDFA':'transparent'; b.style.color=tod?'#0D9488':'#111827'; } }}
-                                >{cell.day}</button>
+                                }}>{cell.day}</button>
                             );
                         })}
                     </div>
@@ -152,13 +164,11 @@ function DatePicker({ value, onChange, placeholder = 'Select date' }: DatePicker
                         }} style={{
                             width:'100%', height:30, border:'1.5px solid rgba(0,0,0,0.1)',
                             borderRadius:8, background:'#F9FAFB', fontFamily:'"DM Sans",sans-serif',
-                            fontSize:12, fontWeight:600, color:'#9CA3AF', cursor:'pointer', transition:'all .15s',
-                        }}
-                                onMouseEnter={e => { const b=e.currentTarget as HTMLButtonElement; b.style.background='#F0FDFA'; b.style.color='#0D9488'; b.style.borderColor='rgba(13,148,136,0.3)'; }}
-                                onMouseLeave={e => { const b=e.currentTarget as HTMLButtonElement; b.style.background='#F9FAFB'; b.style.color='#9CA3AF'; b.style.borderColor='rgba(0,0,0,0.1)'; }}
-                        >Today</button>
+                            fontSize:12, fontWeight:600, color:'#9CA3AF', cursor:'pointer',
+                        }}>Today</button>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
@@ -353,12 +363,11 @@ export default function ThyroidCancerReport() {
                     #FFFFFF;
             }
 
-            /* ── Hero — متطابق مع ai-diagnosis ── */
             .rp-hero {
                 background:linear-gradient(135deg,#0D1B17 0%,#0F3028 60%,#082018 100%);
                 border-radius:20px;
                 padding:36px 44px;
-                margin-bottom:28px;
+                margin-bottom:16px;
                 overflow:hidden;
                 position:relative;
             }
@@ -372,18 +381,8 @@ export default function ThyroidCancerReport() {
                 width:300px;height:300px;border-radius:50%;
                 background:rgba(29,158,117,0.15);pointer-events:none;filter:blur(40px);
             }
-            .rp-hero-inner {
-                position:relative;z-index:1;
-            }
-            /* ✅ FIX: flex row بين العنوان والـ pills */
-            .rp-hero-flex {
-                display:flex;
-                align-items:center;
-                justify-content:space-between;
-                gap:24px;
-                flex-wrap:wrap;
-                margin-top:18px;
-            }
+            .rp-hero-inner { position:relative;z-index:1; }
+
             .rp-hero-back {
                 display:inline-flex;align-items:center;gap:6px;
                 padding:7px 14px;border-radius:8px;
@@ -393,9 +392,17 @@ export default function ThyroidCancerReport() {
                 font-size:12.5px;font-weight:500;
                 cursor:pointer;text-decoration:none;
                 transition:all .18s;font-family:"DM Sans",sans-serif;
-                width:fit-content;
+                margin-bottom:16px;
             }
             .rp-hero-back:hover { background:rgba(255,255,255,0.1);color:#fff; }
+
+            .rp-hero-row {
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:24px;
+                flex-wrap:wrap;
+            }
             .rp-hero-badge {
                 display:inline-flex;align-items:center;gap:7px;
                 background:rgba(29,158,117,0.15);
@@ -403,7 +410,7 @@ export default function ThyroidCancerReport() {
                 color:#4ADE80;font-size:10px;font-weight:700;
                 letter-spacing:1.5px;text-transform:uppercase;
                 padding:5px 12px;border-radius:100px;
-                margin-bottom:12px;width:fit-content;
+                margin-bottom:12px;
             }
             .rp-badge-dot {
                 width:6px;height:6px;border-radius:50%;
@@ -418,7 +425,6 @@ export default function ThyroidCancerReport() {
             .rp-hero-title em { font-style:italic;color:rgba(255,255,255,0.7); }
             .rp-hero-sub { font-size:13px;color:rgba(255,255,255,0.45);margin:0; }
 
-            /* ✅ FIX: pills متطابقة مع dx-hero-pills */
             .rp-hero-pills { display:flex;gap:10px;flex-wrap:wrap; }
             .rp-hero-pill {
                 background:rgba(255,255,255,0.06);
@@ -428,7 +434,7 @@ export default function ThyroidCancerReport() {
             }
             .rp-pill-val {
                 font-family:"DM Serif Display",serif;
-                font-size:18px;color:white;line-height:1;display:block;
+                font-size:22px;color:white;line-height:1;display:block;
             }
             .rp-pill-lbl {
                 font-size:10px;color:rgba(255,255,255,0.4);
@@ -436,10 +442,9 @@ export default function ThyroidCancerReport() {
                 text-transform:uppercase;margin-top:4px;display:block;
             }
 
-            /* ── Main ── */
-            .rp-main { max-width:900px;margin:0 auto;padding:28px 52px 120px; }
+            .rp-main { max-width:1240px;margin:0 auto;padding:0 40px 120px; }
+            .rp-hero-wrap { max-width:1240px;margin:0 auto;padding:calc(64px + 28px) 40px 0; }
 
-            /* ── Card ── */
             .rp-card {
                 background:#fff;border:1px solid rgba(0,0,0,0.07);
                 border-radius:16px;overflow:hidden;margin-bottom:16px;
@@ -465,10 +470,8 @@ export default function ThyroidCancerReport() {
             }
             .rp-card-title { font-size:14px;font-weight:700;color:#111827;letter-spacing:-0.1px; }
 
-            /* ── Patient grid ── */
-            .rp-patient-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:24px; }
+            .rp-patient-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:24px;overflow:visible; }
 
-            /* ── Tab bar ── */
             .rp-tabs {
                 display:flex;gap:4px;padding:6px;
                 background:#F1F5F9;border-radius:14px;
@@ -488,10 +491,8 @@ export default function ThyroidCancerReport() {
                 box-shadow:0 2px 8px rgba(0,0,0,0.1),0 1px 2px rgba(0,0,0,0.06);
             }
 
-            /* ── Section ── */
             .rp-section { display:flex;flex-direction:column;gap:16px;animation:rp-fadeUp .4s cubic-bezier(.16,1,.3,1) both; }
 
-            /* ── Form ── */
             .rp-fgroup { display:flex;flex-direction:column;gap:6px;position:relative; }
             .rp-label  { font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#6B7280; }
             .rp-input, .rp-select {
@@ -504,7 +505,6 @@ export default function ThyroidCancerReport() {
             .rp-input::placeholder { color:#9CA3AF; }
             .rp-input:focus,.rp-select:focus { border-color:#0D9488;background:#fff;box-shadow:0 0 0 4px rgba(13,148,136,0.08); }
 
-            /* ── Patient suggest dropdown ── */
             .rp-suggest {
                 position:absolute;top:calc(100% - 2px);left:0;right:0;
                 background:#fff;border:1.5px solid rgba(13,148,136,0.3);
@@ -523,7 +523,6 @@ export default function ThyroidCancerReport() {
             .rp-suggest-mrn  { font-size:11.5px;color:#6B7280;font-weight:600;background:#F1F5F9;padding:2px 8px;border-radius:6px; }
             .rp-hint { font-size:12px;color:#0D9488;font-weight:600;margin-top:6px;display:flex;align-items:center;gap:5px; }
 
-            /* ── Grids ── */
             .rp-grid3    { display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:24px; }
             .rp-grid5    { display:grid;grid-template-columns:repeat(5,1fr);gap:16px;padding:24px; }
             .rp-grid2    { display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:24px; }
@@ -532,11 +531,9 @@ export default function ThyroidCancerReport() {
             .rp-grid-mol { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:24px; }
 
             .rp-tnm-cat-label { font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#6B7280;margin:0 0 8px; }
-
             .rp-mut-card  { background:#F9FAFB;border:1px solid rgba(0,0,0,0.07);border-radius:12px;padding:16px; }
             .rp-mut-label { font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#6B7280;margin:0 0 8px; }
 
-            /* ── Radio / Checkbox ── */
             .rp-radio-group,.rp-check-group { display:flex;flex-direction:column;gap:10px; }
             .rp-radio-opt,.rp-check-opt {
                 display:flex;align-items:center;gap:10px;cursor:pointer;
@@ -547,7 +544,6 @@ export default function ThyroidCancerReport() {
             .rp-radio-opt:hover,.rp-check-opt:hover { border-color:rgba(13,148,136,0.3);background:#F0FDFA;color:#0D9488; }
             .rp-radio-opt input,.rp-check-opt input { accent-color:#0D9488;width:16px;height:16px;flex-shrink:0; }
 
-            /* ── Action bar ── */
             .rp-actions {
                 position:fixed;bottom:0;left:0;right:0;z-index:100;
                 background:rgba(255,255,255,0.95);backdrop-filter:blur(16px);
@@ -581,7 +577,6 @@ export default function ThyroidCancerReport() {
             .rp-btn-submit:hover:not(:disabled) { transform:translateY(-1px);box-shadow:0 8px 24px rgba(13,148,136,.4); }
             .rp-btn-submit:disabled { opacity:.5;cursor:not-allowed;transform:none;box-shadow:none; }
 
-            /* ── Toast ── */
             .rp-toast {
                 position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
                 padding:13px 22px;border-radius:12px;font-size:13.5px;font-weight:700;
@@ -595,17 +590,19 @@ export default function ThyroidCancerReport() {
 
             @media(max-width:900px) {
                 .rp-hero { padding:28px 24px; }
-                .rp-main { padding:32px 24px 120px; }
+                .rp-hero-wrap { padding:calc(64px + 16px) 24px 0; }
+                .rp-main { padding:0 24px 120px; }
                 .rp-patient-grid,.rp-grid3,.rp-grid5 { grid-template-columns:repeat(2,1fr); }
                 .rp-grid-mol { grid-template-columns:repeat(2,1fr); }
                 .rp-grid-tnm { grid-template-columns:1fr; }
                 .rp-actions  { padding:14px 24px; }
                 .rp-hero-title { font-size:28px; }
-                .rp-hero-flex  { flex-direction:column; align-items:flex-start; }
+                .rp-hero-row { flex-direction:column; align-items:flex-start; }
             }
             @media(max-width:600px) {
                 .rp-hero { padding:24px 20px; }
-                .rp-main { padding:24px 16px 120px; }
+                .rp-hero-wrap { padding:calc(64px + 12px) 16px 0; }
+                .rp-main { padding:0 16px 120px; }
                 .rp-patient-grid,.rp-grid3,.rp-grid2,.rp-grid5,.rp-grid-mol { grid-template-columns:1fr; }
                 .rp-tabs { gap:2px; }
                 .rp-tab  { padding:8px 12px;font-size:12px; }
@@ -618,19 +615,20 @@ export default function ThyroidCancerReport() {
             <div className="rp-wrap">
                 <Navbar />
 
-                {/* ── Hero —  ai-diagnosis ── */}
-                <div className="rp-main" style={{ paddingBottom:0, paddingTop:'calc(64px + 28px)' }}>
+                {/* ── Hero ── */}
+                <div className="rp-hero-wrap">
                     <div className="rp-hero">
                         <div className="rp-hero-dots" />
                         <div className="rp-hero-blob" />
                         <div className="rp-hero-inner">
-                            {/* Back button */}
+
+                            {/* Back button — فوق الـ row */}
                             <button className="rp-hero-back" onClick={() => router.push('/dashboard')}>
                                 <ArrowLeft size={13} /> Dashboard
                             </button>
 
-                            {/* ✅ FIX: flex row بين العنوان والـ pills */}
-                            <div className="rp-hero-flex">
+                            {/* العنوان والـ pills على نفس السطر */}
+                            <div className="rp-hero-row">
                                 <div>
                                     <div className="rp-hero-badge">
                                         <span className="rp-badge-dot" />
@@ -641,9 +639,9 @@ export default function ThyroidCancerReport() {
                                 </div>
                                 <div className="rp-hero-pills">
                                     {[
-                                        { val:'5', lbl:'Sections'  },
-                                        { val:'TNM', lbl:'AJCC 8th' },
-                                        { val:'Auto', lbl:'Draft'   },
+                                        { val:'5',    lbl:'Sections' },
+                                        { val:'TNM',  lbl:'AJCC 8th' },
+                                        { val:'Auto', lbl:'Draft'    },
                                     ].map(p => (
                                         <div key={p.lbl} className="rp-hero-pill">
                                             <span className="rp-pill-val">{p.val}</span>
@@ -652,6 +650,7 @@ export default function ThyroidCancerReport() {
                                     ))}
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -665,7 +664,6 @@ export default function ThyroidCancerReport() {
                             <span className="rp-card-title">Patient Information</span>
                         </div>
                         <div className="rp-patient-grid">
-
                             <div className="rp-fgroup">
                                 <label className="rp-label">Patient Name *</label>
                                 <input
@@ -704,7 +702,6 @@ export default function ThyroidCancerReport() {
                                     <p className="rp-hint"><Check size={12}/> {selectedPatientRef.name} — MRN: {selectedPatientRef.mrn}</p>
                                 )}
                             </div>
-
                             <div className="rp-fgroup">
                                 <label className="rp-label">Patient ID *</label>
                                 <input className="rp-input" type="text" placeholder="Auto-filled from search" value={patientId} onChange={e => setPatientId(e.target.value)} />
@@ -809,11 +806,11 @@ export default function ThyroidCancerReport() {
                                 <div className="rp-grid1">
                                     <div className="rp-check-group">
                                         {[
-                                            {label:'Capsular invasion',      state:capsularInvasion,  set:setCapsularInvasion},
-                                            {label:'Vascular invasion',      state:vascularInvasion,  set:setVascularInvasion},
-                                            {label:'Lymphatic invasion',     state:lymphaticInvasion, set:setLymphaticInvasion},
-                                            {label:'Extrathyroidal extension',state:extrathyroidalExt,set:setExtrathyroidalExt},
-                                            {label:'Multifocality',          state:multifocality,     set:setMultifocality},
+                                            {label:'Capsular invasion',       state:capsularInvasion,  set:setCapsularInvasion},
+                                            {label:'Vascular invasion',       state:vascularInvasion,  set:setVascularInvasion},
+                                            {label:'Lymphatic invasion',      state:lymphaticInvasion, set:setLymphaticInvasion},
+                                            {label:'Extrathyroidal extension',state:extrathyroidalExt, set:setExtrathyroidalExt},
+                                            {label:'Multifocality',           state:multifocality,     set:setMultifocality},
                                         ].map(({label,state,set}) => (
                                             <label key={label} className="rp-check-opt">
                                                 <input type="checkbox" checked={state} onChange={e => set(e.target.checked)}/> {label}
