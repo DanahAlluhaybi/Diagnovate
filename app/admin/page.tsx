@@ -58,12 +58,24 @@ const REJECTION_REASONS = [
     'Other',
 ];
 
-const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-const formatTime = (d: string) =>
-    new Date(d).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+//  FIX 1: null-safe formatDate
+const formatDate = (d: string) => {
+    if (!d) return '—';
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return '—';
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
+//  FIX 2: null-safe formatTime
+const formatTime = (d: string) => {
+    if (!d) return '';
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+};
+
 const getInitials = (name: string) =>
-    name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+    (name ?? '').split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
 
 const AD_STYLES = `
     @keyframes ad-fadeUp  { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
@@ -436,15 +448,18 @@ export default function AdminPage() {
         router.push('/log-in?role=admin');
     };
 
+    // ✅ FIX 3: null-safe search filters using ?? ''
     const filteredPending = pendingUsers.filter(u =>
-        u.full_name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase()) ||
-        u.institution.toLowerCase().includes(search.toLowerCase())
+        (u.full_name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+        (u.email ?? '').toLowerCase().includes(search.toLowerCase()) ||
+        (u.institution ?? '').toLowerCase().includes(search.toLowerCase())
     );
+
+    // ✅ FIX 4: null-safe search filters for active users
     const filteredActive = activeUsers.filter(u =>
-        u.full_name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase()) ||
-        u.institution.toLowerCase().includes(search.toLowerCase())
+        (u.full_name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+        (u.email ?? '').toLowerCase().includes(search.toLowerCase()) ||
+        (u.institution ?? '').toLowerCase().includes(search.toLowerCase())
     );
 
     const hour = new Date().getHours();
@@ -452,7 +467,7 @@ export default function AdminPage() {
 
     if (loading) return (
         <>
-        <style>{AD_STYLES}{`
+            <style>{AD_STYLES}{`
             @keyframes ad-spin-l { to{transform:rotate(360deg)} }
             .ad-loading { min-height:100vh; display:flex; align-items:center; justify-content:center;
                 background:radial-gradient(ellipse 80% 50% at 50% -10%, rgba(29,158,117,0.09) 0%, transparent 60%), #fff; }
@@ -466,355 +481,359 @@ export default function AdminPage() {
             .ad-loading-title { font-family:"DM Serif Display",serif; font-size:22px; color:#111827; margin:0 0 6px; }
             .ad-loading-sub   { font-size:13px; color:#9CA3AF; margin:0; }
         `}</style>
-        <div className="ad-loading">
-            <div className="ad-loading-card">
-                <div className="ad-loading-logo">
-                    <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
-                        <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5"/>
-                        <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
-                        <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
-                        <circle cx="20" cy="20" r="3.5" fill="white"/>
-                    </svg>
+            <div className="ad-loading">
+                <div className="ad-loading-card">
+                    <div className="ad-loading-logo">
+                        <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
+                            <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5"/>
+                            <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                            <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
+                            <circle cx="20" cy="20" r="3.5" fill="white"/>
+                        </svg>
+                    </div>
+                    <div className="ad-loading-spinner" />
+                    <p className="ad-loading-title">{greeting}, Admin</p>
+                    <p className="ad-loading-sub">Preparing your workspace…</p>
                 </div>
-                <div className="ad-loading-spinner" />
-                <p className="ad-loading-title">{greeting}, Admin</p>
-                <p className="ad-loading-sub">Preparing your workspace…</p>
             </div>
-        </div>
         </>
     );
 
     return (
         <>
-        <style>{AD_STYLES}</style>
-        <div className="ad-wrap">
-            {/* NAVBAR */}
-            <nav className="ad-nav">
-                <Link href="/admin" className="ad-nav-logo">
-                    <div className="ad-nav-logo-mark">
-                        <svg width="18" height="18" viewBox="0 0 40 40" fill="none">
-                            <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5"/>
-                            <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-                            <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-                            <circle cx="20" cy="20" r="3" fill="white"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div className="ad-nav-logo-name">Diagno<span className="ad-nav-logo-accent">vate</span></div>
-                        <div className="ad-nav-logo-sub">Admin Console</div>
-                    </div>
-                </Link>
-
-                <div className="ad-nav-links">
-                    <Link href="/admin" className="ad-nav-link ad-nav-link-active">Admin Panel</Link>
-                </div>
-
-                <div className="ad-nav-right">
-                    <div style={{ position:'relative' }} ref={notifRef}>
-                        <button className="ad-nav-icon-btn" onClick={() => setNotifOpen(p => !p)} title="Notifications">
-                            <Bell size={15} />
-                        </button>
-                        {notifOpen && (
-                            <div className="ad-notif-dropdown">
-                                <div className="ad-notif-head"><Bell size={13} /> Notifications</div>
-                                <div className="ad-notif-empty">
-                                    <Bell size={28} color="#CBD5E1" style={{ margin:'0 auto 12px', display:'block' }} />
-                                    <p style={{ fontSize:14, fontWeight:700, color:'#111827', margin:'0 0 4px' }}>All clear</p>
-                                    <p style={{ fontSize:12, color:'#9CA3AF', margin:0 }}>No new notifications</p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                    <div className="ad-nav-divider" />
-                    <div style={{ position:'relative' }} ref={profileRef}>
-                        <div className="ad-nav-profile" onClick={() => setProfileOpen(p => !p)}>
-                            <div className="ad-nav-avatar"><Shield size={13} /></div>
-                            <div>
-                                <div className="ad-nav-pname">{admin?.name ?? 'Admin'}</div>
-                                <div className="ad-nav-prole">System Administrator</div>
-                            </div>
-                            <ChevronDown size={12} color="#9CA3AF" />
+            <style>{AD_STYLES}</style>
+            <div className="ad-wrap">
+                {/* NAVBAR */}
+                <nav className="ad-nav">
+                    <Link href="/admin" className="ad-nav-logo">
+                        <div className="ad-nav-logo-mark">
+                            <svg width="18" height="18" viewBox="0 0 40 40" fill="none">
+                                <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5"/>
+                                <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                                <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                                <circle cx="20" cy="20" r="3" fill="white"/>
+                            </svg>
                         </div>
-                        {profileOpen && (
-                            <div className="ad-nav-dropdown">
-                                <div className="ad-nav-prof-head">
-                                    <div className="ad-nav-prof-av"><Shield size={18} /></div>
-                                    <div>
-                                        <div className="ad-nav-prof-name">{admin?.name ?? 'Admin'}</div>
-                                        <div className="ad-nav-prof-spec">{admin?.email ?? ''}</div>
+                        <div>
+                            <div className="ad-nav-logo-name">Diagno<span className="ad-nav-logo-accent">vate</span></div>
+                            <div className="ad-nav-logo-sub">Admin Console</div>
+                        </div>
+                    </Link>
+
+                    <div className="ad-nav-links">
+                        <Link href="/admin" className="ad-nav-link ad-nav-link-active">Admin Panel</Link>
+                    </div>
+
+                    <div className="ad-nav-right">
+                        <div style={{ position:'relative' }} ref={notifRef}>
+                            <button className="ad-nav-icon-btn" onClick={() => setNotifOpen(p => !p)} title="Notifications">
+                                <Bell size={15} />
+                            </button>
+                            {notifOpen && (
+                                <div className="ad-notif-dropdown">
+                                    <div className="ad-notif-head"><Bell size={13} /> Notifications</div>
+                                    <div className="ad-notif-empty">
+                                        <Bell size={28} color="#CBD5E1" style={{ margin:'0 auto 12px', display:'block' }} />
+                                        <p style={{ fontSize:14, fontWeight:700, color:'#111827', margin:'0 0 4px' }}>All clear</p>
+                                        <p style={{ fontSize:12, color:'#9CA3AF', margin:0 }}>No new notifications</p>
                                     </div>
                                 </div>
-                                <div style={{ padding:'6px 0' }}>
-                                    <Link href="/admin/profile" className="ad-nav-menu-item">
-                                        <User size={14} /> My Profile
-                                    </Link>
-                                    <div className="ad-nav-sep" />
-                                    <button className="ad-nav-menu-item ad-nav-menu-item-danger" onClick={handleLogout}>
-                                        <LogOut size={14} /> Sign out
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </nav>
-
-            {/* HERO */}
-            <div className="ad-hero">
-                <div className="ad-hero-dots" />
-                <div className="ad-hero-blob" />
-                <div className="ad-hero-left">
-                    <div className="ad-hero-badge">
-                        <span className="ad-hero-badge-dot" /> Admin Control Panel
-                    </div>
-                    <h1 className="ad-hero-h1">User<br /><em>Management</em></h1>
-                    <p className="ad-hero-date">
-                        {new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}
-                    </p>
-                </div>
-                <div className="ad-hero-stats">
-                    {[
-                        { icon:<Clock size={17}/>,     label:'Pending Approval', val:stats?.pending_approvals ?? 0, hc:'#F59E0B', hbg:'rgba(245,158,11,0.12)' },
-                        { icon:<UserCheck size={17}/>, label:'Active Users',     val:stats?.active_users ?? 0,      hc:'#1D9E75', hbg:'rgba(29,158,117,0.12)' },
-                        { icon:<Users size={17}/>,     label:'Total Users',      val:stats?.total_users ?? 0,       hc:'#7C3AED', hbg:'rgba(124,58,237,0.12)'  },
-                        { icon:<UserX size={17}/>,     label:'Rejected Today',   val:stats?.rejected_today ?? 0,    hc:'#E11D48', hbg:'rgba(225,29,72,0.12)'   },
-                    ].map((st, i) => (
-                        <div key={i} className="ad-hero-stat">
-                            <div className="ad-hstat-ic" style={{ background:st.hbg }}>
-                                <span style={{ color:st.hc }}>{st.icon}</span>
-                            </div>
-                            <div className="ad-hstat-val">{st.val}</div>
-                            <div className="ad-hstat-lbl">{st.label}</div>
+                            )}
                         </div>
-                    ))}
-                </div>
-            </div>
+                        <div className="ad-nav-divider" />
+                        <div style={{ position:'relative' }} ref={profileRef}>
+                            <div className="ad-nav-profile" onClick={() => setProfileOpen(p => !p)}>
+                                <div className="ad-nav-avatar"><Shield size={13} /></div>
+                                <div>
+                                    <div className="ad-nav-pname">{admin?.name ?? 'Admin'}</div>
+                                    <div className="ad-nav-prole">System Administrator</div>
+                                </div>
+                                <ChevronDown size={12} color="#9CA3AF" />
+                            </div>
+                            {profileOpen && (
+                                <div className="ad-nav-dropdown">
+                                    <div className="ad-nav-prof-head">
+                                        <div className="ad-nav-prof-av"><Shield size={18} /></div>
+                                        <div>
+                                            <div className="ad-nav-prof-name">{admin?.name ?? 'Admin'}</div>
+                                            <div className="ad-nav-prof-spec">{admin?.email ?? ''}</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ padding:'6px 0' }}>
+                                        <Link href="/admin/profile" className="ad-nav-menu-item">
+                                            <User size={14} /> My Profile
+                                        </Link>
+                                        <div className="ad-nav-sep" />
+                                        <button className="ad-nav-menu-item ad-nav-menu-item-danger" onClick={handleLogout}>
+                                            <LogOut size={14} /> Sign out
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </nav>
 
-            <main className="ad-main">
-                <div className="ad-sec-head">
-                    <span className="ad-sec-label">User Accounts</span>
-                    <div className="ad-sec-line" />
-                </div>
-
-                <div className="ad-toolbar">
-                    <div className="ad-tabs">
-                        {([
-                            { key:'pending', label:'Pending',  count:pendingUsers.length },
-                            { key:'active',  label:'Active',   count:activeUsers.filter(u => u.status === 'active').length },
-                            { key:'all',     label:'All Users', count:activeUsers.length },
-                        ] as { key:TabType; label:string; count:number }[]).map(t => (
-                            <button key={t.key}
-                                    className={`ad-tab${tab === t.key ? ' ad-tab-active' : ''}`}
-                                    onClick={() => setTab(t.key)}>
-                                {t.label}
-                                <span className={`ad-tab-badge${tab === t.key ? ' ad-tab-badge-active' : ''}`}>
-                                    {t.count}
-                                </span>
-                            </button>
+                {/* HERO */}
+                <div className="ad-hero">
+                    <div className="ad-hero-dots" />
+                    <div className="ad-hero-blob" />
+                    <div className="ad-hero-left">
+                        <div className="ad-hero-badge">
+                            <span className="ad-hero-badge-dot" /> Admin Control Panel
+                        </div>
+                        <h1 className="ad-hero-h1">User<br /><em>Management</em></h1>
+                        <p className="ad-hero-date">
+                            {new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}
+                        </p>
+                    </div>
+                    <div className="ad-hero-stats">
+                        {[
+                            { icon:<Clock size={17}/>,     label:'Pending Approval', val:stats?.pending_approvals ?? 0, hc:'#F59E0B', hbg:'rgba(245,158,11,0.12)' },
+                            { icon:<UserCheck size={17}/>, label:'Active Users',     val:stats?.active_users ?? 0,      hc:'#1D9E75', hbg:'rgba(29,158,117,0.12)' },
+                            { icon:<Users size={17}/>,     label:'Total Users',      val:stats?.total_users ?? 0,       hc:'#7C3AED', hbg:'rgba(124,58,237,0.12)'  },
+                            { icon:<UserX size={17}/>,     label:'Rejected Today',   val:stats?.rejected_today ?? 0,    hc:'#E11D48', hbg:'rgba(225,29,72,0.12)'   },
+                        ].map((st, i) => (
+                            <div key={i} className="ad-hero-stat">
+                                <div className="ad-hstat-ic" style={{ background:st.hbg }}>
+                                    <span style={{ color:st.hc }}>{st.icon}</span>
+                                </div>
+                                <div className="ad-hstat-val">{st.val}</div>
+                                <div className="ad-hstat-lbl">{st.label}</div>
+                            </div>
                         ))}
                     </div>
-                    <div className="ad-search-wrap">
-                        <Search size={14} className="ad-search-ic" />
-                        <input className="ad-search-input" placeholder="Search by name, email, institution…"
-                               value={search} onChange={e => setSearch(e.target.value)} />
-                    </div>
                 </div>
 
-                {/* PENDING TAB */}
-                {tab === 'pending' && (
-                    <div className="ad-table-wrap">
-                        {filteredPending.length === 0 ? (
-                            <div className="ad-empty">
-                                <div className="ad-empty-ic"><CheckCircle size={26} color="#0D9488" /></div>
-                                <p className="ad-empty-title">All caught up!</p>
-                                <p className="ad-empty-sub">No pending registration requests at this time.</p>
-                            </div>
-                        ) : (
-                            <table className="ad-table">
-                                <thead>
-                                <tr>
-                                    <th>Clinician</th><th>Specialty</th><th>Mobile</th><th>Registered</th><th>Actions</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {filteredPending.map(u => (
-                                    <tr key={u.id} className="ad-table-row">
-                                        <td>
-                                            <div className="ad-user-cell">
-                                                <div className="ad-user-avatar" style={{ background:'linear-gradient(135deg,#0D9488,#0891B2)' }}>
-                                                    {getInitials(u.full_name)}
-                                                </div>
-                                                <div>
-                                                    <div className="ad-user-name">{u.full_name}</div>
-                                                    <div className="ad-user-email">{u.email}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td style={{ fontSize:13, color:'#374151' }}>{u.specialty || '—'}</td>
-                                        <td><span className="ad-license-tag">{u.mobile}</span></td>
-                                        <td>
-                                            <div className="ad-date-cell">
-                                                <span>{formatDate(u.registered_at)}</span>
-                                                <span className="ad-time-label">{formatTime(u.registered_at)}</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div className="ad-action-btns">
-                                                <button className="ad-approve-btn" onClick={() => setActionModal({ user:u, type:'approve' })}>
-                                                    <CheckCircle size={13} /> Approve
-                                                </button>
-                                                <button className="ad-reject-btn" onClick={() => { setRejectReason(REJECTION_REASONS[0]); setCustomReason(''); setActionModal({ user:u, type:'reject' }); }}>
-                                                    <XCircle size={13} /> Reject
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                </tbody>
-                            </table>
-                        )}
+                <main className="ad-main">
+                    <div className="ad-sec-head">
+                        <span className="ad-sec-label">User Accounts</span>
+                        <div className="ad-sec-line" />
                     </div>
-                )}
 
-                {/* ACTIVE / ALL TABS */}
-                {(tab === 'active' || tab === 'all') && (
-                    <div className="ad-table-wrap">
-                        {filteredActive.length === 0 ? (
-                            <div className="ad-empty">
-                                <div className="ad-empty-ic"><Users size={26} color="#94A3B8" /></div>
-                                <p className="ad-empty-title">No users found</p>
-                                <p className="ad-empty-sub">Try adjusting your search.</p>
-                            </div>
-                        ) : (
-                            <table className="ad-table">
-                                <thead>
-                                <tr>
-                                    <th>Clinician</th><th>Specialty</th><th>Status</th><th>Last Login</th><th>Joined</th><th>Actions</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {(tab === 'active' ? filteredActive.filter(u => u.status === 'active') : filteredActive).map(u => (
-                                    <tr key={u.id} className="ad-table-row">
-                                        <td>
-                                            <div className="ad-user-cell">
-                                                <div className="ad-user-avatar" style={{
-                                                    background: u.status === 'active'
-                                                        ? 'linear-gradient(135deg,#10B981,#059669)'
-                                                        : 'linear-gradient(135deg,#94A3B8,#CBD5E1)'
-                                                }}>
-                                                    {getInitials(u.full_name)}
+                    <div className="ad-toolbar">
+                        <div className="ad-tabs">
+                            {([
+                                { key:'pending', label:'Pending',  count:pendingUsers.length },
+                                { key:'active',  label:'Active',   count:activeUsers.filter(u => u.status === 'active').length },
+                                { key:'all',     label:'All Users', count:activeUsers.length },
+                            ] as { key:TabType; label:string; count:number }[]).map(t => (
+                                <button key={t.key}
+                                        className={`ad-tab${tab === t.key ? ' ad-tab-active' : ''}`}
+                                        onClick={() => { setTab(t.key); setSearch(''); }}>
+                                    {t.label}
+                                    <span className={`ad-tab-badge${tab === t.key ? ' ad-tab-badge-active' : ''}`}>
+                                    {t.count}
+                                </span>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="ad-search-wrap">
+                            <Search size={14} className="ad-search-ic" />
+                            <input
+                                className="ad-search-input"
+                                placeholder="Search by name, email, institution…"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    {/* PENDING TAB */}
+                    {tab === 'pending' && (
+                        <div className="ad-table-wrap">
+                            {filteredPending.length === 0 ? (
+                                <div className="ad-empty">
+                                    <div className="ad-empty-ic"><CheckCircle size={26} color="#0D9488" /></div>
+                                    <p className="ad-empty-title">All caught up!</p>
+                                    <p className="ad-empty-sub">No pending registration requests at this time.</p>
+                                </div>
+                            ) : (
+                                <table className="ad-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Clinician</th><th>Specialty</th><th>Mobile</th><th>Registered</th><th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {filteredPending.map(u => (
+                                        <tr key={u.id} className="ad-table-row">
+                                            <td>
+                                                <div className="ad-user-cell">
+                                                    <div className="ad-user-avatar" style={{ background:'linear-gradient(135deg,#0D9488,#0891B2)' }}>
+                                                        {getInitials(u.full_name)}
+                                                    </div>
+                                                    <div>
+                                                        <div className="ad-user-name">{u.full_name}</div>
+                                                        <div className="ad-user-email">{u.email}</div>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <div className="ad-user-name">{u.full_name}</div>
-                                                    <div className="ad-user-email">{u.email}</div>
+                                            </td>
+                                            <td style={{ fontSize:13, color:'#374151' }}>{u.specialty || '—'}</td>
+                                            <td><span className="ad-license-tag">{u.mobile || '—'}</span></td>
+                                            <td>
+                                                <div className="ad-date-cell">
+                                                    <span>{formatDate(u.registered_at)}</span>
+                                                    <span className="ad-time-label">{formatTime(u.registered_at)}</span>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td style={{ fontSize:13, color:'#374151' }}>{u.specialty || '—'}</td>
-                                        <td>
+                                            </td>
+                                            <td>
+                                                <div className="ad-action-btns">
+                                                    <button className="ad-approve-btn" onClick={() => setActionModal({ user:u, type:'approve' })}>
+                                                        <CheckCircle size={13} /> Approve
+                                                    </button>
+                                                    <button className="ad-reject-btn" onClick={() => { setRejectReason(REJECTION_REASONS[0]); setCustomReason(''); setActionModal({ user:u, type:'reject' }); }}>
+                                                        <XCircle size={13} /> Reject
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    )}
+
+                    {/* ACTIVE / ALL TABS */}
+                    {(tab === 'active' || tab === 'all') && (
+                        <div className="ad-table-wrap">
+                            {filteredActive.length === 0 ? (
+                                <div className="ad-empty">
+                                    <div className="ad-empty-ic"><Users size={26} color="#94A3B8" /></div>
+                                    <p className="ad-empty-title">No users found</p>
+                                    <p className="ad-empty-sub">Try adjusting your search.</p>
+                                </div>
+                            ) : (
+                                <table className="ad-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Clinician</th><th>Specialty</th><th>Status</th><th>Last Login</th><th>Joined</th><th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {(tab === 'active' ? filteredActive.filter(u => u.status === 'active') : filteredActive).map(u => (
+                                        <tr key={u.id} className="ad-table-row">
+                                            <td>
+                                                <div className="ad-user-cell">
+                                                    <div className="ad-user-avatar" style={{
+                                                        background: u.status === 'active'
+                                                            ? 'linear-gradient(135deg,#10B981,#059669)'
+                                                            : 'linear-gradient(135deg,#94A3B8,#CBD5E1)'
+                                                    }}>
+                                                        {getInitials(u.full_name)}
+                                                    </div>
+                                                    <div>
+                                                        <div className="ad-user-name">{u.full_name}</div>
+                                                        <div className="ad-user-email">{u.email}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style={{ fontSize:13, color:'#374151' }}>{u.specialty || '—'}</td>
+                                            <td>
                                             <span className={`ad-status-tag ${u.status === 'active' ? 'ad-status-active' : 'ad-status-inactive'}`}>
                                                 <span className="ad-status-dot" />
                                                 {u.status === 'active' ? 'Active' : 'Inactive'}
                                             </span>
-                                        </td>
-                                        <td>
-                                            <div className="ad-date-cell">
-                                                <span>{formatDate(u.last_login)}</span>
-                                                <span className="ad-time-label">{formatTime(u.last_login)}</span>
-                                            </div>
-                                        </td>
-                                        <td>{formatDate(u.created_at)}</td>
-                                        <td>
-                                            <button
-                                                className={u.status === 'active' ? 'ad-deactivate-btn' : 'ad-activate-btn'}
-                                                onClick={() => handleToggleStatus(u)}
-                                            >
-                                                {u.status === 'active' ? <><UserX size={13}/> Deactivate</> : <><UserCheck size={13}/> Activate</>}
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                                </tbody>
-                            </table>
-                        )}
+                                            </td>
+                                            <td>
+                                                <div className="ad-date-cell">
+                                                    <span>{formatDate(u.last_login)}</span>
+                                                    <span className="ad-time-label">{formatTime(u.last_login)}</span>
+                                                </div>
+                                            </td>
+                                            <td>{formatDate(u.created_at)}</td>
+                                            <td>
+                                                <button
+                                                    className={u.status === 'active' ? 'ad-deactivate-btn' : 'ad-activate-btn'}
+                                                    onClick={() => handleToggleStatus(u)}
+                                                >
+                                                    {u.status === 'active' ? <><UserX size={13}/> Deactivate</> : <><UserCheck size={13}/> Activate</>}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    )}
+                </main>
+
+                {/* ACTION MODAL */}
+                {actionModal && (
+                    <div className="ad-modal-overlay" onClick={() => !actionLoading && setActionModal(null)}>
+                        <div className="ad-modal" onClick={e => e.stopPropagation()}>
+                            <div className={`ad-modal-header ${actionModal.type === 'approve' ? 'ad-modal-header-approve' : 'ad-modal-header-reject'}`}>
+                                {actionModal.type === 'approve'
+                                    ? <><CheckCircle size={20}/> Approve Registration</>
+                                    : <><XCircle size={20}/> Reject Registration</>
+                                }
+                            </div>
+                            <div className="ad-modal-body">
+                                <div className="ad-modal-user-card">
+                                    <div className="ad-user-avatar" style={{ width:44, height:44, fontSize:16, background:'linear-gradient(135deg,#0D9488,#0891B2)', flexShrink:0 }}>
+                                        {getInitials(actionModal.user.full_name)}
+                                    </div>
+                                    <div>
+                                        <div className="ad-user-name" style={{ fontSize:14 }}>{actionModal.user.full_name}</div>
+                                        <div className="ad-user-email">{actionModal.user.email}</div>
+                                        <div className="ad-user-spec">{actionModal.user.institution}</div>
+                                    </div>
+                                </div>
+
+                                {actionModal.type === 'approve' ? (
+                                    <p className="ad-modal-text">
+                                        Approving this account will grant <strong>{actionModal.user.full_name}</strong> full access to the Diagnovate platform.
+                                    </p>
+                                ) : (
+                                    <>
+                                        <p className="ad-modal-text">Select a reason for rejecting this registration request.</p>
+                                        <div className="ad-reason-group">
+                                            {REJECTION_REASONS.map(r => (
+                                                <label key={r} className={`ad-reason-option${rejectReason === r ? ' ad-reason-selected' : ''}`}>
+                                                    <input type="radio" name="reason" value={r} checked={rejectReason === r}
+                                                           onChange={() => setRejectReason(r)} className="ad-reason-radio" />
+                                                    {r}
+                                                </label>
+                                            ))}
+                                        </div>
+                                        {rejectReason === 'Other' && (
+                                            <textarea placeholder="Write the reason here…" value={customReason}
+                                                      onChange={e => setCustomReason(e.target.value)} rows={3}
+                                                      style={{ width:'100%', marginTop:8, padding:'10px 12px', borderRadius:10,
+                                                          border:'1.5px solid rgba(0,0,0,0.1)', fontSize:13, fontFamily:'inherit',
+                                                          resize:'vertical', outline:'none', color:'#374151', boxSizing:'border-box' }} />
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                            <div className="ad-modal-footer">
+                                <button className="ad-modal-cancel" onClick={() => setActionModal(null)} disabled={actionLoading}>Cancel</button>
+                                {actionModal.type === 'approve' ? (
+                                    <button className="ad-modal-approve" onClick={handleApprove} disabled={actionLoading}>
+                                        {actionLoading ? <span className="ad-spinner-sm"/> : <CheckCircle size={14}/>}
+                                        {actionLoading ? 'Approving…' : 'Confirm Approval'}
+                                    </button>
+                                ) : (
+                                    <button className="ad-modal-reject" onClick={handleReject} disabled={actionLoading}>
+                                        {actionLoading ? <span className="ad-spinner-sm"/> : <XCircle size={14}/>}
+                                        {actionLoading ? 'Rejecting…' : 'Confirm Rejection'}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 )}
-            </main>
 
-            {/* ACTION MODAL */}
-            {actionModal && (
-                <div className="ad-modal-overlay" onClick={() => !actionLoading && setActionModal(null)}>
-                    <div className="ad-modal" onClick={e => e.stopPropagation()}>
-                        <div className={`ad-modal-header ${actionModal.type === 'approve' ? 'ad-modal-header-approve' : 'ad-modal-header-reject'}`}>
-                            {actionModal.type === 'approve'
-                                ? <><CheckCircle size={20}/> Approve Registration</>
-                                : <><XCircle size={20}/> Reject Registration</>
-                            }
-                        </div>
-                        <div className="ad-modal-body">
-                            <div className="ad-modal-user-card">
-                                <div className="ad-user-avatar" style={{ width:44, height:44, fontSize:16, background:'linear-gradient(135deg,#0D9488,#0891B2)', flexShrink:0 }}>
-                                    {getInitials(actionModal.user.full_name)}
-                                </div>
-                                <div>
-                                    <div className="ad-user-name" style={{ fontSize:14 }}>{actionModal.user.full_name}</div>
-                                    <div className="ad-user-email">{actionModal.user.email}</div>
-                                    <div className="ad-user-spec">{actionModal.user.institution}</div>
-                                </div>
-                            </div>
-
-                            {actionModal.type === 'approve' ? (
-                                <p className="ad-modal-text">
-                                    Approving this account will grant <strong>{actionModal.user.full_name}</strong> full access to the Diagnovate platform.
-                                </p>
-                            ) : (
-                                <>
-                                    <p className="ad-modal-text">Select a reason for rejecting this registration request.</p>
-                                    <div className="ad-reason-group">
-                                        {REJECTION_REASONS.map(r => (
-                                            <label key={r} className={`ad-reason-option${rejectReason === r ? ' ad-reason-selected' : ''}`}>
-                                                <input type="radio" name="reason" value={r} checked={rejectReason === r}
-                                                       onChange={() => setRejectReason(r)} className="ad-reason-radio" />
-                                                {r}
-                                            </label>
-                                        ))}
-                                    </div>
-                                    {rejectReason === 'Other' && (
-                                        <textarea placeholder="Write the reason here…" value={customReason}
-                                                  onChange={e => setCustomReason(e.target.value)} rows={3}
-                                                  style={{ width:'100%', marginTop:8, padding:'10px 12px', borderRadius:10,
-                                                      border:'1.5px solid rgba(0,0,0,0.1)', fontSize:13, fontFamily:'inherit',
-                                                      resize:'vertical', outline:'none', color:'#374151', boxSizing:'border-box' }} />
-                                    )}
-                                </>
-                            )}
-                        </div>
-                        <div className="ad-modal-footer">
-                            <button className="ad-modal-cancel" onClick={() => setActionModal(null)} disabled={actionLoading}>Cancel</button>
-                            {actionModal.type === 'approve' ? (
-                                <button className="ad-modal-approve" onClick={handleApprove} disabled={actionLoading}>
-                                    {actionLoading ? <span className="ad-spinner-sm"/> : <CheckCircle size={14}/>}
-                                    {actionLoading ? 'Approving…' : 'Confirm Approval'}
-                                </button>
-                            ) : (
-                                <button className="ad-modal-reject" onClick={handleReject} disabled={actionLoading}>
-                                    {actionLoading ? <span className="ad-spinner-sm"/> : <XCircle size={14}/>}
-                                    {actionLoading ? 'Rejecting…' : 'Confirm Rejection'}
-                                </button>
-                            )}
-                        </div>
+                {/* TOAST */}
+                {toast && (
+                    <div className={`ad-toast ${toast.ok ? 'ad-toast-ok' : 'ad-toast-err'}`}>
+                        {toast.ok ? <CheckCircle size={15}/> : <AlertCircle size={15}/>}
+                        {toast.msg}
                     </div>
-                </div>
-            )}
-
-            {/* TOAST */}
-            {toast && (
-                <div className={`ad-toast ${toast.ok ? 'ad-toast-ok' : 'ad-toast-err'}`}>
-                    {toast.ok ? <CheckCircle size={15}/> : <AlertCircle size={15}/>}
-                    {toast.msg}
-                </div>
-            )}
-        </div>
+                )}
+            </div>
         </>
     );
 }
