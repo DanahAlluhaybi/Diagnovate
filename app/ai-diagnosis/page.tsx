@@ -359,24 +359,18 @@ export default function AIDiagnosisPage() {
                     },
                 ];
 
-                // Image models from imgSource.vote_summary
-                // vote_summary shape: { 'EfficientNet+YOLO': { vote: 0|1, confidence: 0-1 }, ... }
-                const vs = imgSource?.vote_summary ?? {};
-
-                const resolveImgModel = (key: string): ModelResult => {
-                    const entry = vs[key];
-                    return {
-                        name      : `${key} (Image)`,
-                        result    : entry != null ? (entry.vote === 1 ? 'Malignant' : 'Benign') : '—',
-                        confidence: entry?.confidence != null ? Math.round(entry.confidence * 100) : 0,
-                        available : entry != null,
-                    };
-                };
+                // vote_summary from the orchestrator is a plain string e.g. "2/3 Malignant | 1/3 Benign"
+                // The orchestrator does NOT forward per-model breakdowns for the image source.
+                // We use imgSource.prediction + imgSource.confidence for all 3 image models,
+                // and mark them available only when the image source is present.
+                const imgAvailable  = !!imgSource;
+                const imgPrediction = imgSource?.prediction ?? '—';
+                const imgConf       = imgSource?.confidence != null ? Math.round(imgSource.confidence) : 0;
 
                 const imgModels: ModelResult[] = [
-                    resolveImgModel('EfficientNet+YOLO'),
-                    resolveImgModel('Swin Transformer'),
-                    resolveImgModel('DenseNet-121'),
+                    { name: 'EfficientNet+YOLO (Image)', result: imgAvailable ? imgPrediction : '—', confidence: imgAvailable ? imgConf : 0, available: imgAvailable },
+                    { name: 'Swin Transformer (Image)',  result: imgAvailable ? imgPrediction : '—', confidence: imgAvailable ? imgConf : 0, available: imgAvailable },
+                    { name: 'DenseNet-121 (Image)',      result: imgAvailable ? imgPrediction : '—', confidence: imgAvailable ? imgConf : 0, available: imgAvailable },
                 ];
 
                 const topModels: ModelResult[] = [...labModels, ...imgModels];
