@@ -357,24 +357,25 @@ export default function ThyroidCancerReport() {
                 background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(29,158,117,0.09) 0%,transparent 60%),
                            radial-gradient(ellipse 50% 40% at 90% 90%,rgba(8,80,65,0.05) 0%,transparent 50%),#FFFFFF; }
 
-            /* ── Hero — full viewport width, inner constrained ── */
-            .rp-hero { background:linear-gradient(135deg,#0D1B17 0%,#0F3028 60%,#082018 100%); padding:0; position:relative; overflow:hidden; }
-            .rp-hero-dots { position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,0.06) 1px,transparent 1px);background-size:20px 20px; }
-            .rp-hero-blob { position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(29,158,117,0.15);filter:blur(40px);right:-60px;top:-60px;pointer-events:none; }
-            .rp-hero-inner { position:relative;z-index:1;max-width:900px;margin:0 auto;padding:52px 52px 48px; }
-            .rp-hero-back { display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:12.5px;font-weight:500;cursor:pointer;text-decoration:none;margin-bottom:22px;transition:all .18s;font-family:"DM Sans",sans-serif; }
+            /* ── Hero — same style as diagnosis (rounded card inside main) ── */
+            .rp-hero { background:linear-gradient(135deg,#0D1B17 0%,#0F3028 60%,#082018 100%); border-radius:20px; padding:36px 44px; margin-bottom:28px; overflow:hidden; position:relative; }
+            .rp-hero-dots { position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.06) 1px,transparent 1px);background-size:20px 20px;pointer-events:none; }
+            .rp-hero-blob { position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(29,158,117,0.15);pointer-events:none;filter:blur(40px); }
+            .rp-hero-inner { position:relative;z-index:1; }
+            .rp-hero-back { display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:12.5px;font-weight:500;cursor:pointer;text-decoration:none;margin-bottom:18px;transition:all .18s;font-family:"DM Sans",sans-serif;width:fit-content; }
             .rp-hero-back:hover { background:rgba(255,255,255,0.1);color:#fff; }
-            .rp-hero-badge { display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;border:1px solid rgba(29,158,117,0.4);background:rgba(29,158,117,0.12);font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#6EE7B7;margin-bottom:14px; }
-            .rp-badge-dot { width:5px;height:5px;border-radius:50%;background:#1D9E75;animation:rp-pulse 2s ease-in-out infinite; }
-            .rp-hero-title { font-family:"DM Serif Display",serif;font-size:clamp(28px,3.5vw,44px);color:#fff;letter-spacing:-0.8px;line-height:1.1;margin:0 0 22px; }
-            .rp-hero-title em { font-style:italic;color:#6EE7B7; }
+            .rp-hero-badge { display:inline-flex;align-items:center;gap:7px;background:rgba(29,158,117,0.15);border:1px solid rgba(29,158,117,0.3);color:#4ADE80;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:100px;margin-bottom:12px;width:fit-content; }
+            .rp-badge-dot { width:6px;height:6px;border-radius:50%;background:#4ADE80;animation:rp-pulse 2s ease-in-out infinite; }
+            .rp-hero-title { font-family:"DM Serif Display",serif;font-size:38px;color:white;letter-spacing:-1px;line-height:1.1;margin:0 0 6px; }
+            .rp-hero-title em { font-style:italic;color:rgba(255,255,255,0.7); }
+            .rp-hero-sub   { font-size:13px;color:rgba(255,255,255,0.45);margin:0; }
             .rp-hero-pills { display:flex;gap:10px;flex-wrap:wrap; }
-            .rp-hero-pill { display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1); }
-            .rp-pill-val { font-size:15px;font-weight:800;color:#fff; }
-            .rp-pill-lbl { font-size:11px;color:rgba(255,255,255,0.55);font-weight:500; }
+            .rp-hero-pill  { background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 18px;text-align:center;min-width:100px; }
+            .rp-pill-val   { font-family:"DM Serif Display",serif;font-size:22px;color:white;line-height:1;display:block; }
+            .rp-pill-lbl   { font-size:10px;color:rgba(255,255,255,0.4);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-top:4px;display:block; }
 
             /* ── Main ── */
-            .rp-main { max-width:900px;margin:0 auto;padding:44px 52px 120px; }
+            .rp-main { max-width:900px;margin:0 auto;padding:28px 52px 120px; }
 
             /* ── Card ── */
             .rp-card { background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.05),0 0 40px rgba(13,148,136,0.05);animation:rp-fadeUp .5s cubic-bezier(.16,1,.3,1) both; }
@@ -486,23 +487,30 @@ export default function ThyroidCancerReport() {
             <div className="rp-wrap">
                 <Navbar />
 
-                {/* ── Dark hero ── */}
-                <div className="rp-hero">
-                    <div className="rp-hero-dots" />
-                    <div className="rp-hero-blob" />
-                    <div className="rp-hero-inner">
-                        <button className="rp-hero-back" onClick={() => router.push('/dashboard')}>
-                            <ArrowLeft size={13} /> Dashboard
-                        </button>
-                        <div className="rp-hero-badge"><span className="rp-badge-dot" />Oncology</div>
-                        <h1 className="rp-hero-title">Thyroid Cancer <em>Report</em></h1>
-                        <div className="rp-hero-pills">
-                            {[{val:'5 Clinical Tabs',lbl:'Sections'},{val:'TNM Staging',lbl:'AJCC 8th Ed'},{val:'Auto Draft',lbl:'Save Anytime'}].map(p => (
-                                <div key={p.val} className="rp-hero-pill">
-                                    <span className="rp-pill-val">{p.val}</span>
-                                    <span className="rp-pill-lbl">{p.lbl}</span>
+                {/* ── Dark hero — same layout as diagnosis ── */}
+                <div className="rp-main" style={{ paddingBottom:0, paddingTop:'calc(64px + 28px)' }}>
+                    <div className="rp-hero">
+                        <div className="rp-hero-dots" />
+                        <div className="rp-hero-blob" />
+                        <div className="rp-hero-inner">
+                            <button className="rp-hero-back" onClick={() => router.push('/dashboard')}>
+                                <ArrowLeft size={13} /> Dashboard
+                            </button>
+                            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:24, flexWrap:'wrap' }}>
+                                <div>
+                                    <div className="rp-hero-badge"><span className="rp-badge-dot" />Oncology</div>
+                                    <h1 className="rp-hero-title">Thyroid Cancer <em>Report</em></h1>
+                                    <p className="rp-hero-sub">5 clinical sections · TNM staging · Auto draft</p>
                                 </div>
-                            ))}
+                                <div className="rp-hero-pills">
+                                    {[{val:'5 Clinical Tabs',lbl:'Sections'},{val:'TNM Staging',lbl:'AJCC 8th Ed'},{val:'Auto Draft',lbl:'Save Anytime'}].map(p => (
+                                        <div key={p.val} className="rp-hero-pill">
+                                            <span className="rp-pill-val">{p.val}</span>
+                                            <span className="rp-pill-lbl">{p.lbl}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
