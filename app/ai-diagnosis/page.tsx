@@ -190,13 +190,13 @@ export default function AIDiagnosisPage() {
         inputMode === 'image'
             ? [{ value: 'EfficientNet+YOLO', label: 'EfficientNet' }, { value: 'Swin Transformer', label: 'Swin' }, { value: 'DenseNet-121', label: 'DenseNet' }]
             : inputMode === 'lab'
-            ? [{ value: 'XGBoost', label: 'XGBoost' }, { value: 'CatBoost', label: 'CatBoost' }, { value: 'Random Forest', label: 'Rand Forest' }]
-            : [];
+                ? [{ value: 'XGBoost', label: 'XGBoost' }, { value: 'CatBoost', label: 'CatBoost' }, { value: 'Random Forest', label: 'Rand Forest' }]
+                : [];
 
     const hasInput =
         inputMode === 'image' ? !!imageFile :
             inputMode === 'lab'   ? !!(lab.tsh || lab.t3 || lab.tt4) :
-                                    !!imageFile || !!(lab.tsh || lab.t3 || lab.tt4);
+                !!imageFile || !!(lab.tsh || lab.t3 || lab.tt4);
 
     const runDiagnosis = async () => {
         if (!hasInput) return;
@@ -210,6 +210,7 @@ export default function AIDiagnosisPage() {
 
             let diagResult: DiagResult;
 
+            // ── IMAGE ONLY ─────────────────────────────────────────────────
             if (inputMode === 'image') {
                 const formData = new FormData();
                 formData.append('image', imageFile!);
@@ -245,6 +246,7 @@ export default function AIDiagnosisPage() {
                     topModels: filteredImgModels, votingResult, votingConfidence,
                 };
 
+                // ── LAB ONLY ───────────────────────────────────────────────────
             } else if (inputMode === 'lab') {
                 const res  = await fetch(`${BASE}/api/diagnosis/predict`, {
                     method: 'POST',
@@ -271,40 +273,159 @@ export default function AIDiagnosisPage() {
                     topModels, votingResult, votingConfidence,
                 };
 
+                // ── BOTH MODE ──────────────────────────────────────────────────
+                // Calls /predict (lab) and /predict-image (ultrasound) in parallel.
+                // Ultrasound models carry higher trust weight (53% vs 47% for lab).
+                // Each model is shown individually with its own confidence score.
             } else {
+                // Run both endpoints simultaneously for speed
                 const fetchLab = async (): Promise<LabApiResponse> => {
-                    const r = await fetch(`${BASE}/api/diagnosis/predict`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(buildLabPayload(lab, selectedModel)) });
+                    const r = await fetch(`${BASE}/api/diagnosis/predict`, {
+                        method : 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body   : JSON.stringify(buildLabPayload(lab, 'majority')),
+                    });
                     return r.json() as Promise<LabApiResponse>;
                 };
+
                 const fetchImg = async (): Promise<UltrasoundApiResponse | null> => {
                     if (!imageFile) return null;
                     const fd = new FormData();
                     fd.append('image', imageFile);
-                    const r = await fetch(`${BASE}/api/diagnosis/predict-image`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd });
+                    const r = await fetch(`${BASE}/api/diagnosis/predict-image`, {
+                        method : 'POST',
+                        headers: { Authorization: `Bearer ${token}` },
+                        body   : fd,
+                    });
                     return r.json() as Promise<UltrasoundApiResponse>;
                 };
+
                 const [labData, imgData] = await Promise.all([fetchLab(), fetchImg()]);
                 if (!labData.success) throw new Error(labData.error ?? 'Lab prediction failed');
+
                 const severityMap: Record<string, Severity> = { high: 'High', medium: 'Moderate', low: 'Low' };
-                const labConfidence = Math.round(labData.confidence);
-                const imgOk = !!(imgData?.success && imgData?.models);
-                const topModels: ModelResult[] = [
-                    { name: 'XGBoost (Lab)',              result: labData.models?.XGBoost?.result ?? labData.diagnosis,        confidence: Math.round(labData.models?.XGBoost?.confidence ?? labData.confidence), available: true },
-                    imgOk ? { name: 'EfficientNet+YOLO (Image)', result: imgData!.models[0].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round((imgData!.models[0].confidence ?? 0) * 100), available: true }
-                          : { name: 'EfficientNet+YOLO (Image)', result: '—', confidence: 0, available: false },
-                    imgOk ? { name: 'Swin Transformer (Image)',   result: imgData!.models[1].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round((imgData!.models[1].confidence ?? 0) * 100), available: true }
-                          : { name: 'Swin Transformer (Image)',   result: '—', confidence: 0, available: false },
-                    imgOk ? { name: 'DenseNet-121 (Image)',       result: imgData!.models[2].vote === 1 ? 'Malignant' : 'Benign', confidence: Math.round((imgData!.models[2].confidence ?? 0) * 100), available: true }
-                          : { name: 'DenseNet-121 (Image)',       result: '—', confidence: 0, available: false },
+
+                // --- Lab models: show each model (XGBoost, CatBoost, Random Forest) separately ---
+                const labModels: ModelResult[] = [
+                    {
+                        name      : 'XGBoost (Lab)',
+                        result    : labData.models?.['XGBoost']?.result ?? labData.diagnosis,
+                        confidence: Math.round(labData.models?.['XGBoost']?.confidence ?? labData.confidence),
+                        available : !!labData.models?.['XGBoost'],
+                    },
+                    {
+                        name      : 'CatBoost (Lab)',
+                        result    : labData.models?.['CatBoost']?.result ?? labData.diagnosis,
+                        confidence: Math.round(labData.models?.['CatBoost']?.confidence ?? labData.confidence),
+                        available : !!labData.models?.['CatBoost'],
+                    },
+                    {
+                        name      : 'Random Forest (Lab)',
+                        result    : labData.models?.['Random Forest']?.result ?? labData.diagnosis,
+                        confidence: Math.round(labData.models?.['Random Forest']?.confidence ?? labData.confidence),
+                        available : !!labData.models?.['Random Forest'],
+                    },
                 ];
-                const { result: votingResult, confidence: votingConf } = majorityVote(topModels);
+
+                // backend returns: [{ model, vote, confidence }, ...] ordered as EfficientNet, Swin, DenseNet
+                const imgOk     = !!(imgData?.success && imgData?.models?.length);
+                const rawModels = imgData?.models ?? [];
+
+                // Helper: find a specific model by name pattern from the response array
+                const findImgModel = (nameHint: string) =>
+                    rawModels.find(m => m.model?.toLowerCase().includes(nameHint.toLowerCase()));
+
+                const effRaw   = findImgModel('efficientnet') ?? rawModels[0];
+                const swinRaw  = findImgModel('swin')         ?? rawModels[1];
+                const denseRaw = findImgModel('densenet')     ?? rawModels[2];
+
+                const imgModels: ModelResult[] = imgOk
+                    ? [
+                        {
+                            name      : 'EfficientNet+YOLO (Image)',
+                            result    : effRaw ? (effRaw.vote === 1 ? 'Malignant' : 'Benign') : '—',
+                            confidence: effRaw?.confidence ? Math.round(effRaw.confidence * 100) : Math.round(imgData!.confidence),
+                            available : !!effRaw,
+                        },
+                        {
+                            name      : 'Swin Transformer (Image)',
+                            result    : swinRaw ? (swinRaw.vote === 1 ? 'Malignant' : 'Benign') : '—',
+                            confidence: swinRaw?.confidence ? Math.round(swinRaw.confidence * 100) : Math.round(imgData!.confidence),
+                            available : !!swinRaw,
+                        },
+                        {
+                            name      : 'DenseNet-121 (Image)',
+                            result    : denseRaw ? (denseRaw.vote === 1 ? 'Malignant' : 'Benign') : '—',
+                            confidence: denseRaw?.confidence ? Math.round(denseRaw.confidence * 100) : Math.round(imgData!.confidence),
+                            available : !!denseRaw,
+                        },
+                    ]
+                    : [
+                        // Image not provided or failed — mark as unavailable
+                        { name: 'EfficientNet+YOLO (Image)', result: '—', confidence: 0, available: false },
+                        { name: 'Swin Transformer (Image)',   result: '—', confidence: 0, available: false },
+                        { name: 'DenseNet-121 (Image)',       result: '—', confidence: 0, available: false },
+                    ];
+
+                // All models combined for display
+                const topModels: ModelResult[] = [...labModels, ...imgModels];
+
+                // --- Weighted final vote: ultrasound (53%) > lab (47%) ---
+                // Use lab majority as lab vote, image diagnosis as image vote
+                const labVoteResult  = labData.majority_result ?? labData.diagnosis;
+                const labVoteConf    = Math.round(labData.confidence);
+                const imgVoteResult  = imgData?.diagnosis ?? 'Benign';
+                const imgVoteConf    = Math.round(imgData?.confidence ?? 0);
+
+                // Weighted probability: each side contributes its malignancy probability × weight
+                const LAB_WEIGHT   = 0.47;
+                const IMAGE_WEIGHT = 0.53;
+
+                const labMalignantProb  = labVoteResult  === 'Malignant' ? labVoteConf  / 100 : (100 - labVoteConf)  / 100;
+                const imgMalignantProb  = imgOk
+                    ? (imgVoteResult === 'Malignant' ? imgVoteConf / 100 : (100 - imgVoteConf) / 100)
+                    : labMalignantProb; // fallback to lab if no image
+
+                const effectiveImgWeight = imgOk ? IMAGE_WEIGHT : 0;
+                const effectiveLabWeight = imgOk ? LAB_WEIGHT   : 1.0;
+
+                const weightedMalignantProb =
+                    (labMalignantProb * effectiveLabWeight + imgMalignantProb * effectiveImgWeight) /
+                    (effectiveLabWeight + effectiveImgWeight);
+
+                const votingResult     = weightedMalignantProb >= 0.5 ? 'Malignant' : 'Benign';
+                const votingConf       = Math.round(
+                    votingResult === 'Malignant' ? weightedMalignantProb * 100 : (1 - weightedMalignantProb) * 100
+                );
+                const malignancyScore  = Math.round(weightedMalignantProb * 100);
+
+                // Severity from lab (has detailed severity mapping); upgrade to High if image also malignant
+                const baseSeverity: Severity = severityMap[labData.severity] ?? 'Moderate';
+                const severity: Severity =
+                    imgOk && imgVoteResult === 'Malignant' && baseSeverity !== 'High'
+                        ? 'High'
+                        : baseSeverity;
+
                 diagResult = {
-                    malignancyScore : labConfidence,
-                    severity        : severityMap[labData.severity] ?? 'Moderate',
-                    recommendation  : `Lab Diagnosis: ${labData.majority_result ?? labData.diagnosis}. ${imgData?.recommendation ?? ''} Please consult a specialist.`.trim(),
-                    confidence      : labConfidence,
-                    findings: [`Primary Diagnosis: ${labData.majority_result ?? labData.diagnosis}`, ...(lab.tsh ? [`TSH: ${lab.tsh} mIU/L`] : []), ...(lab.t3 ? [`T3: ${lab.t3} nmol/L`] : []), ...(lab.tt4 ? [`TT4: ${lab.tt4} nmol/L`] : []), ...(imgOk ? [`Image Diagnosis: ${imgData!.diagnosis}`, `Vote Summary: ${imgData!.vote_summary}`] : [])],
-                    topModels, votingResult, votingConfidence: votingConf,
+                    malignancyScore,
+                    severity,
+                    recommendation: imgData?.recommendation
+                        ?? `Lab Diagnosis: ${labVoteResult}. Please consult a specialist.`,
+                    confidence      : votingConf,
+                    findings: [
+                        `Final Diagnosis: ${votingResult}`,
+                        `Lab Result: ${labVoteResult} (${labVoteConf}%)`,
+                        ...(imgOk ? [`Image Result: ${imgVoteResult} (${imgVoteConf}%)`] : []),
+                        ...(lab.tsh  ? [`TSH: ${lab.tsh} mIU/L`]  : []),
+                        ...(lab.t3   ? [`T3: ${lab.t3} nmol/L`]   : []),
+                        ...(lab.tt4  ? [`TT4: ${lab.tt4} nmol/L`] : []),
+                        ...(lab.t4u  ? [`T4U: ${lab.t4u} ratio`]  : []),
+                        ...(lab.fti  ? [`FTI: ${lab.fti} index`]  : []),
+                        ...(imgOk && imgData?.vote_summary ? [`Vote Summary: ${imgData.vote_summary}`] : []),
+                    ],
+                    topModels,
+                    votingResult,
+                    votingConfidence: votingConf,
                 };
             }
 
@@ -529,7 +650,6 @@ export default function AIDiagnosisPage() {
                 <Navbar />
                 <main className="dx-main">
 
-                    {/* ── DARK HERO ── */}
                     <div className="dx-hero">
                         <div className="dx-hero-dots"/>
                         <div className="dx-hero-blob"/>
@@ -551,11 +671,7 @@ export default function AIDiagnosisPage() {
                     </div>
 
                     <div className="dx-grid">
-
-                        {/* ── LEFT ── */}
                         <div>
-
-                            {/* Patient */}
                             <div className="dx-card">
                                 <div className="dx-card-head">
                                     <div className="dx-card-icon"><User size={16} color="white"/></div>
@@ -588,21 +704,19 @@ export default function AIDiagnosisPage() {
                                 </div>
                             </div>
 
-                            {/* Input Data */}
                             <div className="dx-card">
                                 <div className="dx-card-head">
                                     <div className="dx-card-icon"><Layers size={16} color="white"/></div>
                                     <span className="dx-card-title">Input Data</span>
                                     <span className="dx-mode-badge" style={
                                         inputMode === 'both'  ? { background:'#EEF2FF', color:'#4F46E5', borderColor:'#C7D2FE' } :
-                                        inputMode === 'image' ? { background:'#F0F9FF', color:'#0891B2', borderColor:'#BAE6FD' } :
-                                                                { background:'#F0FDFA', color:'#0D9488', borderColor:'#99F6E4' }
+                                            inputMode === 'image' ? { background:'#F0F9FF', color:'#0891B2', borderColor:'#BAE6FD' } :
+                                                { background:'#F0FDFA', color:'#0D9488', borderColor:'#99F6E4' }
                                     }>
                                         {inputMode === 'both' ? 'Multi-Modal' : inputMode === 'image' ? 'Image Only' : 'Lab Only'}
                                     </span>
                                 </div>
                                 <div className="dx-card-body">
-
                                     <div className="dx-field">
                                         <label className="dx-label">Diagnosis Mode</label>
                                         <div className="dx-btn-row">
@@ -714,7 +828,6 @@ export default function AIDiagnosisPage() {
                                 </div>
                             </div>
 
-                            {/* Run button */}
                             <button className="dx-run-btn"
                                     onClick={stage === 'done' ? reset : runDiagnosis}
                                     disabled={isRunning || (!hasInput && stage === 'idle')}>
@@ -750,7 +863,6 @@ export default function AIDiagnosisPage() {
                                 </div>
                             )}
 
-                            {/* ── RESULTS ── */}
                             {result && sev && (
                                 <div style={{ marginTop:20 }}>
                                     <div className="dx-result-card">
@@ -843,7 +955,6 @@ export default function AIDiagnosisPage() {
                             )}
                         </div>
 
-                        {/* ── RIGHT SIDEBAR ── */}
                         <div>
                             {!result && stage === 'idle' && (
                                 <div className="dx-info-card">
