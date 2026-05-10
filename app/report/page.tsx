@@ -192,7 +192,6 @@ interface PatientRef { id: string; mrn: string; name: string; age: string; gende
 export default function ThyroidCancerReport() {
     const router = useRouter();
 
-    // ── Auth + patient list ──
     useEffect(() => {
         if (!localStorage.getItem('token')) { router.push('/log-in?role=doctor'); return; }
         const token = localStorage.getItem('token');
@@ -215,20 +214,17 @@ export default function ThyroidCancerReport() {
     const [toast,     setToast]     = useState<ToastState | null>(null);
     const [reportId,  setReportId]  = useState<string | null>(null);
 
-    // ── Patient search (enhancement-style) ──
     const [allPatients,        setAllPatients]        = useState<PatientRef[]>([]);
     const [selectedPatientRef, setSelectedPatientRef] = useState<PatientRef | null>(null);
     const [showSuggest,        setShowSuggest]        = useState(false);
     const [patientSearch,      setPatientSearch]      = useState('');
 
-    // ── Patient fields ──
     const [patientName,   setPatientName]   = useState('');
     const [patientId,     setPatientId]     = useState('');
     const [age,           setAge]           = useState('');
     const [gender,        setGender]        = useState('');
     const [diagnosisDate, setDiagnosisDate] = useState('');
 
-    // ── Tumor ──
     const [lobeInvolvement, setLobeInvolvement] = useState('');
     const [tumorSize,       setTumorSize]       = useState('');
     const [noduleCount,     setNoduleCount]     = useState('');
@@ -238,7 +234,6 @@ export default function ThyroidCancerReport() {
     const [usMargin,        setUsMargin]        = useState('Smooth');
     const [tiradsScore,     setTiradsScore]     = useState('');
 
-    // ── Pathology ──
     const [histologicalType,  setHistologicalType]  = useState('');
     const [capsularInvasion,  setCapsularInvasion]  = useState(false);
     const [vascularInvasion,  setVascularInvasion]  = useState(false);
@@ -246,7 +241,6 @@ export default function ThyroidCancerReport() {
     const [extrathyroidalExt, setExtrathyroidalExt] = useState(false);
     const [multifocality,     setMultifocality]     = useState(false);
 
-    // ── Staging ──
     const [tCategory,       setTCategory]       = useState('');
     const [nCategory,       setNCategory]       = useState('');
     const [mCategory,       setMCategory]       = useState('');
@@ -254,7 +248,6 @@ export default function ThyroidCancerReport() {
     const [stageGroup,      setStageGroup]      = useState('');
     const [ataRisk,         setAtaRisk]         = useState('');
 
-    // ── Molecular ──
     const [brafV600e,    setBrafV600e]    = useState('Not tested');
     const [rasMutation,  setRasMutation]  = useState('Not tested');
     const [retPtc,       setRetPtc]       = useState('Not tested');
@@ -263,7 +256,6 @@ export default function ThyroidCancerReport() {
     const [antiTg,       setAntiTg]       = useState('');
     const [calcitonin,   setCalcitonin]   = useState('');
 
-    // ── Treatment ──
     const [surgeryProcedure,  setSurgeryProcedure]  = useState('');
     const [raiDose,           setRaiDose]           = useState('');
     const [raiDate,           setRaiDate]           = useState('');
@@ -336,7 +328,6 @@ export default function ThyroidCancerReport() {
     const toggleSite = (site: string) =>
         setMetastasisSites(prev => prev.includes(site) ? prev.filter(s => s !== site) : [...prev, site]);
 
-    // ── Patient suggestion list ──
     const patientSuggestions = (() => {
         if (!showSuggest || !patientSearch.trim()) return [];
         const q = patientSearch.toLowerCase();
@@ -353,45 +344,149 @@ export default function ThyroidCancerReport() {
             @keyframes rp-pulse  { 0%,100%{opacity:1} 50%{opacity:0.5} }
             @keyframes rp-toast  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
 
-            .rp-wrap { min-height:100vh; font-family:"DM Sans",sans-serif;
-                background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(29,158,117,0.09) 0%,transparent 60%),
-                           radial-gradient(ellipse 50% 40% at 90% 90%,rgba(8,80,65,0.05) 0%,transparent 50%),#FFFFFF; }
+            .rp-wrap {
+                min-height:100vh;
+                font-family:"DM Sans",sans-serif;
+                background:
+                    radial-gradient(ellipse 80% 50% at 50% -10%,rgba(29,158,117,0.09) 0%,transparent 60%),
+                    radial-gradient(ellipse 50% 40% at 90% 90%,rgba(8,80,65,0.05) 0%,transparent 50%),
+                    #FFFFFF;
+            }
 
-            /* ── Hero — same style as diagnosis (rounded card inside main) ── */
-            .rp-hero { background:linear-gradient(135deg,#0D1B17 0%,#0F3028 60%,#082018 100%); border-radius:20px; padding:36px 44px; margin-bottom:28px; overflow:hidden; position:relative; }
-            .rp-hero-dots { position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.06) 1px,transparent 1px);background-size:20px 20px;pointer-events:none; }
-            .rp-hero-blob { position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(29,158,117,0.15);pointer-events:none;filter:blur(40px); }
-            .rp-hero-inner { position:relative;z-index:1; }
-            .rp-hero-back { display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:12.5px;font-weight:500;cursor:pointer;text-decoration:none;margin-bottom:18px;transition:all .18s;font-family:"DM Sans",sans-serif;width:fit-content; }
+            /* ── Hero — متطابق مع ai-diagnosis ── */
+            .rp-hero {
+                background:linear-gradient(135deg,#0D1B17 0%,#0F3028 60%,#082018 100%);
+                border-radius:20px;
+                padding:36px 44px;
+                margin-bottom:28px;
+                overflow:hidden;
+                position:relative;
+            }
+            .rp-hero-dots {
+                position:absolute;inset:0;
+                background-image:radial-gradient(rgba(255,255,255,0.06) 1px,transparent 1px);
+                background-size:20px 20px;pointer-events:none;
+            }
+            .rp-hero-blob {
+                position:absolute;top:-60px;right:-60px;
+                width:300px;height:300px;border-radius:50%;
+                background:rgba(29,158,117,0.15);pointer-events:none;filter:blur(40px);
+            }
+            .rp-hero-inner {
+                position:relative;z-index:1;
+            }
+            /* ✅ FIX: flex row بين العنوان والـ pills */
+            .rp-hero-flex {
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:24px;
+                flex-wrap:wrap;
+                margin-top:18px;
+            }
+            .rp-hero-back {
+                display:inline-flex;align-items:center;gap:6px;
+                padding:7px 14px;border-radius:8px;
+                border:1px solid rgba(255,255,255,0.12);
+                background:rgba(255,255,255,0.06);
+                color:rgba(255,255,255,0.7);
+                font-size:12.5px;font-weight:500;
+                cursor:pointer;text-decoration:none;
+                transition:all .18s;font-family:"DM Sans",sans-serif;
+                width:fit-content;
+            }
             .rp-hero-back:hover { background:rgba(255,255,255,0.1);color:#fff; }
-            .rp-hero-badge { display:inline-flex;align-items:center;gap:7px;background:rgba(29,158,117,0.15);border:1px solid rgba(29,158,117,0.3);color:#4ADE80;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;border-radius:100px;margin-bottom:12px;width:fit-content; }
-            .rp-badge-dot { width:6px;height:6px;border-radius:50%;background:#4ADE80;animation:rp-pulse 2s ease-in-out infinite; }
-            .rp-hero-title { font-family:"DM Serif Display",serif;font-size:38px;color:white;letter-spacing:-1px;line-height:1.1;margin:0 0 6px; }
+            .rp-hero-badge {
+                display:inline-flex;align-items:center;gap:7px;
+                background:rgba(29,158,117,0.15);
+                border:1px solid rgba(29,158,117,0.3);
+                color:#4ADE80;font-size:10px;font-weight:700;
+                letter-spacing:1.5px;text-transform:uppercase;
+                padding:5px 12px;border-radius:100px;
+                margin-bottom:12px;width:fit-content;
+            }
+            .rp-badge-dot {
+                width:6px;height:6px;border-radius:50%;
+                background:#4ADE80;
+                animation:rp-pulse 2s ease-in-out infinite;
+            }
+            .rp-hero-title {
+                font-family:"DM Serif Display",serif;
+                font-size:38px;color:white;
+                letter-spacing:-1px;line-height:1.1;margin:0 0 6px;
+            }
             .rp-hero-title em { font-style:italic;color:rgba(255,255,255,0.7); }
-            .rp-hero-sub   { font-size:13px;color:rgba(255,255,255,0.45);margin:0; }
+            .rp-hero-sub { font-size:13px;color:rgba(255,255,255,0.45);margin:0; }
+
+            /* ✅ FIX: pills متطابقة مع dx-hero-pills */
             .rp-hero-pills { display:flex;gap:10px;flex-wrap:wrap; }
-            .rp-hero-pill  { background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 18px;text-align:center;min-width:100px; }
-            .rp-pill-val   { font-family:"DM Serif Display",serif;font-size:22px;color:white;line-height:1;display:block; }
-            .rp-pill-lbl   { font-size:10px;color:rgba(255,255,255,0.4);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-top:4px;display:block; }
+            .rp-hero-pill {
+                background:rgba(255,255,255,0.06);
+                border:1px solid rgba(255,255,255,0.1);
+                border-radius:12px;padding:12px 18px;
+                text-align:center;min-width:80px;
+            }
+            .rp-pill-val {
+                font-family:"DM Serif Display",serif;
+                font-size:18px;color:white;line-height:1;display:block;
+            }
+            .rp-pill-lbl {
+                font-size:10px;color:rgba(255,255,255,0.4);
+                font-weight:600;letter-spacing:0.5px;
+                text-transform:uppercase;margin-top:4px;display:block;
+            }
 
             /* ── Main ── */
             .rp-main { max-width:900px;margin:0 auto;padding:28px 52px 120px; }
 
             /* ── Card ── */
-            .rp-card { background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.05),0 0 40px rgba(13,148,136,0.05);animation:rp-fadeUp .5s cubic-bezier(.16,1,.3,1) both; }
-            .rp-card-head { display:flex;align-items:center;gap:12px;padding:18px 24px;border-bottom:1px solid rgba(0,0,0,0.06);background:linear-gradient(to right,#f8fffe,#fff); }
-            .rp-card-icon { width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#1D9E75,#0D9488);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 12px rgba(13,148,136,0.3);flex-shrink:0; }
-            .rp-card-icon-sm { width:28px;height:28px;border-radius:8px;background:rgba(13,148,136,0.08);border:1px solid rgba(13,148,136,0.15);display:flex;align-items:center;justify-content:center;color:#0D9488;flex-shrink:0; }
+            .rp-card {
+                background:#fff;border:1px solid rgba(0,0,0,0.07);
+                border-radius:16px;overflow:hidden;margin-bottom:16px;
+                box-shadow:0 1px 3px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.05),0 0 40px rgba(13,148,136,0.05);
+                animation:rp-fadeUp .5s cubic-bezier(.16,1,.3,1) both;
+            }
+            .rp-card-head {
+                display:flex;align-items:center;gap:12px;
+                padding:18px 24px;border-bottom:1px solid rgba(0,0,0,0.06);
+                background:linear-gradient(to right,#f8fffe,#fff);
+            }
+            .rp-card-icon {
+                width:36px;height:36px;border-radius:10px;
+                background:linear-gradient(135deg,#1D9E75,#0D9488);
+                display:flex;align-items:center;justify-content:center;
+                color:#fff;box-shadow:0 4px 12px rgba(13,148,136,0.3);flex-shrink:0;
+            }
+            .rp-card-icon-sm {
+                width:28px;height:28px;border-radius:8px;
+                background:rgba(13,148,136,0.08);border:1px solid rgba(13,148,136,0.15);
+                display:flex;align-items:center;justify-content:center;
+                color:#0D9488;flex-shrink:0;
+            }
             .rp-card-title { font-size:14px;font-weight:700;color:#111827;letter-spacing:-0.1px; }
 
             /* ── Patient grid ── */
             .rp-patient-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:24px; }
 
             /* ── Tab bar ── */
-            .rp-tabs { display:flex;gap:4px;padding:6px;background:#F1F5F9;border-radius:14px;margin-bottom:20px;overflow-x:auto;box-shadow:inset 0 1px 3px rgba(0,0,0,0.06); }
-            .rp-tab { display:flex;align-items:center;gap:7px;padding:9px 16px;border:none;border-radius:10px;background:transparent;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:600;color:#6B7280;cursor:pointer;transition:all .18s;white-space:nowrap; }
+            .rp-tabs {
+                display:flex;gap:4px;padding:6px;
+                background:#F1F5F9;border-radius:14px;
+                margin-bottom:20px;overflow-x:auto;
+                box-shadow:inset 0 1px 3px rgba(0,0,0,0.06);
+            }
+            .rp-tab {
+                display:flex;align-items:center;gap:7px;
+                padding:9px 16px;border:none;border-radius:10px;
+                background:transparent;font-family:"DM Sans",sans-serif;
+                font-size:13px;font-weight:600;color:#6B7280;
+                cursor:pointer;transition:all .18s;white-space:nowrap;
+            }
             .rp-tab:hover { color:#0D9488;background:rgba(13,148,136,0.06); }
-            .rp-tab-active { background:#fff;color:#0D9488;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.1),0 1px 2px rgba(0,0,0,0.06); }
+            .rp-tab-active {
+                background:#fff;color:#0D9488;font-weight:700;
+                box-shadow:0 2px 8px rgba(0,0,0,0.1),0 1px 2px rgba(0,0,0,0.06);
+            }
 
             /* ── Section ── */
             .rp-section { display:flex;flex-direction:column;gap:16px;animation:rp-fadeUp .4s cubic-bezier(.16,1,.3,1) both; }
@@ -420,8 +515,7 @@ export default function ThyroidCancerReport() {
                 display:flex;align-items:center;justify-content:space-between;
                 width:100%;padding:10px 14px;border:none;background:#fff;
                 cursor:pointer;transition:background .12s;text-align:left;
-                border-bottom:1px solid rgba(0,0,0,0.04);
-                font-family:"DM Sans",sans-serif;
+                border-bottom:1px solid rgba(0,0,0,0.04);font-family:"DM Sans",sans-serif;
             }
             .rp-suggest-item:last-child { border-bottom:none; }
             .rp-suggest-item:hover { background:#F0FDFA; }
@@ -437,74 +531,121 @@ export default function ThyroidCancerReport() {
             .rp-grid-tnm { display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:24px; }
             .rp-grid-mol { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:24px; }
 
-            /* ── TNM ── */
             .rp-tnm-cat-label { font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#6B7280;margin:0 0 8px; }
 
-            /* ── Molecular card ── */
             .rp-mut-card  { background:#F9FAFB;border:1px solid rgba(0,0,0,0.07);border-radius:12px;padding:16px; }
             .rp-mut-label { font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#6B7280;margin:0 0 8px; }
 
             /* ── Radio / Checkbox ── */
             .rp-radio-group,.rp-check-group { display:flex;flex-direction:column;gap:10px; }
-            .rp-radio-opt,.rp-check-opt { display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;color:#374151;font-weight:500;padding:10px 14px;border-radius:10px;border:1px solid rgba(0,0,0,0.07);background:#F9FAFB;transition:all .15s; }
+            .rp-radio-opt,.rp-check-opt {
+                display:flex;align-items:center;gap:10px;cursor:pointer;
+                font-size:13.5px;color:#374151;font-weight:500;
+                padding:10px 14px;border-radius:10px;
+                border:1px solid rgba(0,0,0,0.07);background:#F9FAFB;transition:all .15s;
+            }
             .rp-radio-opt:hover,.rp-check-opt:hover { border-color:rgba(13,148,136,0.3);background:#F0FDFA;color:#0D9488; }
             .rp-radio-opt input,.rp-check-opt input { accent-color:#0D9488;width:16px;height:16px;flex-shrink:0; }
 
             /* ── Action bar ── */
-            .rp-actions { position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(16px);border-top:1px solid rgba(0,0,0,0.08);padding:14px 52px;display:flex;align-items:center;justify-content:flex-end;gap:10px;box-shadow:0 -4px 24px rgba(0,0,0,0.08); }
-            .rp-btn-cancel { height:44px;padding:0 22px;border:1.5px solid rgba(0,0,0,0.1);border-radius:10px;background:#F9FAFB;font-family:"DM Sans",sans-serif;font-size:13.5px;font-weight:600;color:#6B7280;cursor:pointer;transition:all .18s; }
+            .rp-actions {
+                position:fixed;bottom:0;left:0;right:0;z-index:100;
+                background:rgba(255,255,255,0.95);backdrop-filter:blur(16px);
+                border-top:1px solid rgba(0,0,0,0.08);padding:14px 52px;
+                display:flex;align-items:center;justify-content:flex-end;gap:10px;
+                box-shadow:0 -4px 24px rgba(0,0,0,0.08);
+            }
+            .rp-btn-cancel {
+                height:44px;padding:0 22px;border:1.5px solid rgba(0,0,0,0.1);
+                border-radius:10px;background:#F9FAFB;
+                font-family:"DM Sans",sans-serif;font-size:13.5px;font-weight:600;
+                color:#6B7280;cursor:pointer;transition:all .18s;
+            }
             .rp-btn-cancel:hover { background:#F1F5F9;color:#374151; }
-            .rp-btn-draft { height:44px;padding:0 22px;border:1.5px solid rgba(13,148,136,0.3);border-radius:10px;background:#F0FDFA;font-family:"DM Sans",sans-serif;font-size:13.5px;font-weight:700;color:#0D9488;cursor:pointer;transition:all .18s; }
+            .rp-btn-draft {
+                height:44px;padding:0 22px;border:1.5px solid rgba(13,148,136,0.3);
+                border-radius:10px;background:#F0FDFA;
+                font-family:"DM Sans",sans-serif;font-size:13.5px;font-weight:700;
+                color:#0D9488;cursor:pointer;transition:all .18s;
+            }
             .rp-btn-draft:hover:not(:disabled) { background:#CCFBF1; }
             .rp-btn-draft:disabled { opacity:.5;cursor:not-allowed; }
-            .rp-btn-submit { height:44px;padding:0 28px;background:linear-gradient(135deg,#1D9E75,#0D9488,#0F6E56);border:none;border-radius:10px;font-family:"DM Sans",sans-serif;font-size:13.5px;font-weight:700;color:#fff;cursor:pointer;transition:all .22s;box-shadow:0 4px 16px rgba(29,158,117,.28); }
+            .rp-btn-submit {
+                height:44px;padding:0 28px;
+                background:linear-gradient(135deg,#1D9E75,#0D9488,#0F6E56);
+                border:none;border-radius:10px;
+                font-family:"DM Sans",sans-serif;font-size:13.5px;font-weight:700;
+                color:#fff;cursor:pointer;transition:all .22s;
+                box-shadow:0 4px 16px rgba(29,158,117,.28);
+            }
             .rp-btn-submit:hover:not(:disabled) { transform:translateY(-1px);box-shadow:0 8px 24px rgba(13,148,136,.4); }
             .rp-btn-submit:disabled { opacity:.5;cursor:not-allowed;transform:none;box-shadow:none; }
 
             /* ── Toast ── */
-            .rp-toast { position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:13px 22px;border-radius:12px;font-size:13.5px;font-weight:700;font-family:"DM Sans",sans-serif;z-index:9999;white-space:nowrap;animation:rp-toast .3s cubic-bezier(.16,1,.3,1) both;box-shadow:0 8px 32px rgba(0,0,0,0.15); }
+            .rp-toast {
+                position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+                padding:13px 22px;border-radius:12px;font-size:13.5px;font-weight:700;
+                font-family:"DM Sans",sans-serif;z-index:9999;white-space:nowrap;
+                animation:rp-toast .3s cubic-bezier(.16,1,.3,1) both;
+                box-shadow:0 8px 32px rgba(0,0,0,0.15);
+            }
             .rp-toast-success { background:#0D9488;color:#fff; }
             .rp-toast-error   { background:#EF4444;color:#fff; }
             .rp-toast-info    { background:#0891B2;color:#fff; }
 
             @media(max-width:900px) {
-                .rp-hero-inner { padding:40px 24px 36px; }
+                .rp-hero { padding:28px 24px; }
                 .rp-main { padding:32px 24px 120px; }
                 .rp-patient-grid,.rp-grid3,.rp-grid5 { grid-template-columns:repeat(2,1fr); }
                 .rp-grid-mol { grid-template-columns:repeat(2,1fr); }
                 .rp-grid-tnm { grid-template-columns:1fr; }
                 .rp-actions  { padding:14px 24px; }
+                .rp-hero-title { font-size:28px; }
+                .rp-hero-flex  { flex-direction:column; align-items:flex-start; }
             }
             @media(max-width:600px) {
-                .rp-hero-inner { padding:28px 16px 24px; }
+                .rp-hero { padding:24px 20px; }
                 .rp-main { padding:24px 16px 120px; }
                 .rp-patient-grid,.rp-grid3,.rp-grid2,.rp-grid5,.rp-grid-mol { grid-template-columns:1fr; }
                 .rp-tabs { gap:2px; }
                 .rp-tab  { padding:8px 12px;font-size:12px; }
+                .rp-hero-pills { gap:8px; }
+                .rp-hero-pill  { min-width:70px;padding:10px 12px; }
+                .rp-pill-val   { font-size:15px; }
             }
         `}</style>
 
             <div className="rp-wrap">
                 <Navbar />
 
-                {/* ── Dark hero — same layout as diagnosis ── */}
+                {/* ── Hero —  ai-diagnosis ── */}
                 <div className="rp-main" style={{ paddingBottom:0, paddingTop:'calc(64px + 28px)' }}>
                     <div className="rp-hero">
                         <div className="rp-hero-dots" />
                         <div className="rp-hero-blob" />
                         <div className="rp-hero-inner">
+                            {/* Back button */}
                             <button className="rp-hero-back" onClick={() => router.push('/dashboard')}>
                                 <ArrowLeft size={13} /> Dashboard
                             </button>
-                            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:24, flexWrap:'wrap' }}>
+
+                            {/* ✅ FIX: flex row بين العنوان والـ pills */}
+                            <div className="rp-hero-flex">
                                 <div>
-                                    <div className="rp-hero-badge"><span className="rp-badge-dot" />Oncology</div>
+                                    <div className="rp-hero-badge">
+                                        <span className="rp-badge-dot" />
+                                        Oncology
+                                    </div>
                                     <h1 className="rp-hero-title">Thyroid Cancer <em>Report</em></h1>
                                     <p className="rp-hero-sub">5 clinical sections · TNM staging · Auto draft</p>
                                 </div>
                                 <div className="rp-hero-pills">
-                                    {[{val:'5 Clinical Tabs',lbl:'Sections'},{val:'TNM Staging',lbl:'AJCC 8th Ed'},{val:'Auto Draft',lbl:'Save Anytime'}].map(p => (
-                                        <div key={p.val} className="rp-hero-pill">
+                                    {[
+                                        { val:'5', lbl:'Sections'  },
+                                        { val:'TNM', lbl:'AJCC 8th' },
+                                        { val:'Auto', lbl:'Draft'   },
+                                    ].map(p => (
+                                        <div key={p.lbl} className="rp-hero-pill">
                                             <span className="rp-pill-val">{p.val}</span>
                                             <span className="rp-pill-lbl">{p.lbl}</span>
                                         </div>
@@ -525,7 +666,6 @@ export default function ThyroidCancerReport() {
                         </div>
                         <div className="rp-patient-grid">
 
-                            {/* Search field with autocomplete — enhancement style */}
                             <div className="rp-fgroup">
                                 <label className="rp-label">Patient Name *</label>
                                 <input
@@ -541,7 +681,6 @@ export default function ThyroidCancerReport() {
                                     onFocus={() => setShowSuggest(true)}
                                     onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
                                 />
-                                {/* Dropdown */}
                                 {patientSuggestions.length > 0 && (
                                     <div className="rp-suggest">
                                         {patientSuggestions.map(p => (
@@ -602,15 +741,37 @@ export default function ThyroidCancerReport() {
                     {activeTab === 'tumor' && (
                         <div className="rp-section">
                             <div className="rp-card">
-                                <div className="rp-card-head"><div className="rp-card-icon-sm"><ThyroidIcon /></div><span className="rp-card-title">Primary Tumor Characteristics</span></div>
+                                <div className="rp-card-head">
+                                    <div className="rp-card-icon-sm"><ThyroidIcon /></div>
+                                    <span className="rp-card-title">Primary Tumor Characteristics</span>
+                                </div>
                                 <div className="rp-grid3">
-                                    <div className="rp-fgroup"><label className="rp-label">Lobe Involvement *</label><select className="rp-select" value={lobeInvolvement} onChange={e => setLobeInvolvement(e.target.value)}><option value="">Select lobe</option><option>Right lobe only</option><option>Left lobe only</option><option>Isthmus only</option><option>Bilateral</option><option>Multifocal</option></select></div>
-                                    <div className="rp-fgroup"><label className="rp-label">Tumor Size (cm) *</label><input className="rp-input" type="number" step="0.1" placeholder="e.g., 2.5" value={tumorSize} onChange={e => setTumorSize(e.target.value)} /></div>
-                                    <div className="rp-fgroup"><label className="rp-label">Number of Nodules</label><input className="rp-input" type="number" placeholder="e.g., 1, 2, 3" value={noduleCount} onChange={e => setNoduleCount(e.target.value)} /></div>
+                                    <div className="rp-fgroup">
+                                        <label className="rp-label">Lobe Involvement *</label>
+                                        <select className="rp-select" value={lobeInvolvement} onChange={e => setLobeInvolvement(e.target.value)}>
+                                            <option value="">Select lobe</option>
+                                            <option>Right lobe only</option>
+                                            <option>Left lobe only</option>
+                                            <option>Isthmus only</option>
+                                            <option>Bilateral</option>
+                                            <option>Multifocal</option>
+                                        </select>
+                                    </div>
+                                    <div className="rp-fgroup">
+                                        <label className="rp-label">Tumor Size (cm) *</label>
+                                        <input className="rp-input" type="number" step="0.1" placeholder="e.g., 2.5" value={tumorSize} onChange={e => setTumorSize(e.target.value)} />
+                                    </div>
+                                    <div className="rp-fgroup">
+                                        <label className="rp-label">Number of Nodules</label>
+                                        <input className="rp-input" type="number" placeholder="e.g., 1, 2, 3" value={noduleCount} onChange={e => setNoduleCount(e.target.value)} />
+                                    </div>
                                 </div>
                             </div>
                             <div className="rp-card">
-                                <div className="rp-card-head"><div className="rp-card-icon-sm"><Scan size={16}/></div><span className="rp-card-title">Ultrasound Features</span></div>
+                                <div className="rp-card-head">
+                                    <div className="rp-card-icon-sm"><Scan size={16}/></div>
+                                    <span className="rp-card-title">Ultrasound Features</span>
+                                </div>
                                 <div className="rp-grid5">
                                     <div className="rp-fgroup"><label className="rp-label">Composition</label><select className="rp-select" value={usComposition} onChange={e => setUsComposition(e.target.value)}><option>Cystic</option><option>Spongiform</option><option>Mixed</option><option>Solid</option></select></div>
                                     <div className="rp-fgroup"><label className="rp-label">Echogenicity</label><select className="rp-select" value={usEchogenicity} onChange={e => setUsEchogenicity(e.target.value)}><option>Anechoic</option><option>Hyperechoic</option><option>Isoechoic</option><option>Hypoechoic</option></select></div>
@@ -626,21 +787,37 @@ export default function ThyroidCancerReport() {
                     {activeTab === 'pathology' && (
                         <div className="rp-section">
                             <div className="rp-card">
-                                <div className="rp-card-head"><div className="rp-card-icon-sm"><Microscope size={16}/></div><span className="rp-card-title">Histopathological Type</span></div>
+                                <div className="rp-card-head">
+                                    <div className="rp-card-icon-sm"><Microscope size={16}/></div>
+                                    <span className="rp-card-title">Histopathological Type</span>
+                                </div>
                                 <div className="rp-grid1">
                                     <div className="rp-radio-group">
                                         {['Papillary Thyroid Carcinoma (PTC)','Follicular Thyroid Carcinoma (FTC)','Medullary Thyroid Carcinoma (MTC)','Anaplastic Thyroid Carcinoma (ATC)'].map(opt => (
-                                            <label key={opt} className="rp-radio-opt"><input type="radio" name="histType" checked={histologicalType===opt} onChange={() => setHistologicalType(opt)}/> {opt}</label>
+                                            <label key={opt} className="rp-radio-opt">
+                                                <input type="radio" name="histType" checked={histologicalType===opt} onChange={() => setHistologicalType(opt)}/> {opt}
+                                            </label>
                                         ))}
                                     </div>
                                 </div>
                             </div>
                             <div className="rp-card">
-                                <div className="rp-card-head"><div className="rp-card-icon-sm"><Activity size={16}/></div><span className="rp-card-title">Pathological Features</span></div>
+                                <div className="rp-card-head">
+                                    <div className="rp-card-icon-sm"><Activity size={16}/></div>
+                                    <span className="rp-card-title">Pathological Features</span>
+                                </div>
                                 <div className="rp-grid1">
                                     <div className="rp-check-group">
-                                        {[{label:'Capsular invasion',state:capsularInvasion,set:setCapsularInvasion},{label:'Vascular invasion',state:vascularInvasion,set:setVascularInvasion},{label:'Lymphatic invasion',state:lymphaticInvasion,set:setLymphaticInvasion},{label:'Extrathyroidal extension',state:extrathyroidalExt,set:setExtrathyroidalExt},{label:'Multifocality',state:multifocality,set:setMultifocality}].map(({label,state,set}) => (
-                                            <label key={label} className="rp-check-opt"><input type="checkbox" checked={state} onChange={e => set(e.target.checked)}/> {label}</label>
+                                        {[
+                                            {label:'Capsular invasion',      state:capsularInvasion,  set:setCapsularInvasion},
+                                            {label:'Vascular invasion',      state:vascularInvasion,  set:setVascularInvasion},
+                                            {label:'Lymphatic invasion',     state:lymphaticInvasion, set:setLymphaticInvasion},
+                                            {label:'Extrathyroidal extension',state:extrathyroidalExt,set:setExtrathyroidalExt},
+                                            {label:'Multifocality',          state:multifocality,     set:setMultifocality},
+                                        ].map(({label,state,set}) => (
+                                            <label key={label} className="rp-check-opt">
+                                                <input type="checkbox" checked={state} onChange={e => set(e.target.checked)}/> {label}
+                                            </label>
                                         ))}
                                     </div>
                                 </div>
@@ -652,7 +829,10 @@ export default function ThyroidCancerReport() {
                     {activeTab === 'staging' && (
                         <div className="rp-section">
                             <div className="rp-card">
-                                <div className="rp-card-head"><div className="rp-card-icon-sm"><Target size={16}/></div><span className="rp-card-title">TNM Staging (AJCC 8th Edition)</span></div>
+                                <div className="rp-card-head">
+                                    <div className="rp-card-icon-sm"><Target size={16}/></div>
+                                    <span className="rp-card-title">TNM Staging (AJCC 8th Edition)</span>
+                                </div>
                                 <div className="rp-grid-tnm">
                                     <div className="rp-fgroup"><p className="rp-tnm-cat-label">T — Primary Tumor</p><select className="rp-select" value={tCategory} onChange={e => setTCategory(e.target.value)}><option value="">Select T category</option><option>T1a — ≤1 cm</option><option>T1b — &gt;1–2 cm</option><option>T2 — &gt;2–4 cm</option><option>T3a — &gt;4 cm</option><option>T3b — Gross ETE</option><option>T4a — Invades nearby structures</option></select></div>
                                     <div className="rp-fgroup"><p className="rp-tnm-cat-label">N — Lymph Nodes</p><select className="rp-select" value={nCategory} onChange={e => setNCategory(e.target.value)}><option value="">Select N category</option><option>N0 — No metastasis</option><option>N1a — Level VI</option><option>N1b — Other cervical levels</option></select></div>
@@ -669,15 +849,33 @@ export default function ThyroidCancerReport() {
                     {activeTab === 'molecular' && (
                         <div className="rp-section">
                             <div className="rp-card">
-                                <div className="rp-card-head"><div className="rp-card-icon-sm"><FlaskConical size={16}/></div><span className="rp-card-title">Molecular Markers</span></div>
+                                <div className="rp-card-head">
+                                    <div className="rp-card-icon-sm"><FlaskConical size={16}/></div>
+                                    <span className="rp-card-title">Molecular Markers</span>
+                                </div>
                                 <div className="rp-grid-mol">
-                                    {[{label:'BRAF V600E',value:brafV600e,set:setBrafV600e},{label:'RAS Mutation',value:rasMutation,set:setRasMutation},{label:'RET/PTC',value:retPtc,set:setRetPtc},{label:'TERT Promoter',value:tertPromoter,set:setTertPromoter}].map(({label,value,set}) => (
-                                        <div key={label} className="rp-mut-card"><p className="rp-mut-label">{label}</p><select className="rp-select" value={value} onChange={e => set(e.target.value)}><option>Not tested</option><option>Positive</option><option>Negative</option></select></div>
+                                    {[
+                                        {label:'BRAF V600E',    value:brafV600e,    set:setBrafV600e},
+                                        {label:'RAS Mutation',  value:rasMutation,  set:setRasMutation},
+                                        {label:'RET/PTC',       value:retPtc,       set:setRetPtc},
+                                        {label:'TERT Promoter', value:tertPromoter, set:setTertPromoter},
+                                    ].map(({label,value,set}) => (
+                                        <div key={label} className="rp-mut-card">
+                                            <p className="rp-mut-label">{label}</p>
+                                            <select className="rp-select" value={value} onChange={e => set(e.target.value)}>
+                                                <option>Not tested</option>
+                                                <option>Positive</option>
+                                                <option>Negative</option>
+                                            </select>
+                                        </div>
                                     ))}
                                 </div>
                             </div>
                             <div className="rp-card">
-                                <div className="rp-card-head"><div className="rp-card-icon-sm"><DropletsIcon /></div><span className="rp-card-title">Serum Markers</span></div>
+                                <div className="rp-card-head">
+                                    <div className="rp-card-icon-sm"><DropletsIcon /></div>
+                                    <span className="rp-card-title">Serum Markers</span>
+                                </div>
                                 <div className="rp-grid3">
                                     <div className="rp-fgroup"><label className="rp-label">Tg (Thyroglobulin)</label><input className="rp-input" type="number" placeholder="ng/mL" value={tgLevel} onChange={e => setTgLevel(e.target.value)}/></div>
                                     <div className="rp-fgroup"><label className="rp-label">Anti-Tg Antibodies</label><input className="rp-input" type="number" placeholder="IU/mL" value={antiTg} onChange={e => setAntiTg(e.target.value)}/></div>
@@ -691,22 +889,47 @@ export default function ThyroidCancerReport() {
                     {activeTab === 'treatment' && (
                         <div className="rp-section">
                             <div className="rp-card">
-                                <div className="rp-card-head"><div className="rp-card-icon-sm"><Stethoscope size={16}/></div><span className="rp-card-title">Surgery</span></div>
-                                <div className="rp-grid1"><select className="rp-select" style={{maxWidth:380}} value={surgeryProcedure} onChange={e => setSurgeryProcedure(e.target.value)}><option value="">Select procedure</option><option>Total Thyroidectomy</option><option>Near-total Thyroidectomy</option><option>Lobectomy + Isthmusectomy</option><option>Lobectomy only</option></select></div>
+                                <div className="rp-card-head">
+                                    <div className="rp-card-icon-sm"><Stethoscope size={16}/></div>
+                                    <span className="rp-card-title">Surgery</span>
+                                </div>
+                                <div className="rp-grid1">
+                                    <select className="rp-select" style={{maxWidth:380}} value={surgeryProcedure} onChange={e => setSurgeryProcedure(e.target.value)}>
+                                        <option value="">Select procedure</option>
+                                        <option>Total Thyroidectomy</option>
+                                        <option>Near-total Thyroidectomy</option>
+                                        <option>Lobectomy + Isthmusectomy</option>
+                                        <option>Lobectomy only</option>
+                                    </select>
+                                </div>
                             </div>
                             <div className="rp-card">
-                                <div className="rp-card-head"><div className="rp-card-icon-sm"><Activity size={16}/></div><span className="rp-card-title">RAI Therapy</span></div>
+                                <div className="rp-card-head">
+                                    <div className="rp-card-icon-sm"><Activity size={16}/></div>
+                                    <span className="rp-card-title">RAI Therapy</span>
+                                </div>
                                 <div className="rp-grid2">
                                     <div className="rp-fgroup"><label className="rp-label">RAI Dose (mCi)</label><input className="rp-input" type="number" placeholder="e.g., 30, 100" value={raiDose} onChange={e => setRaiDose(e.target.value)}/></div>
                                     <div className="rp-fgroup"><label className="rp-label">Date of RAI</label><DatePicker value={raiDate} onChange={setRaiDate} placeholder="Select date"/></div>
                                 </div>
                             </div>
                             <div className="rp-card">
-                                <div className="rp-card-head"><div className="rp-card-icon-sm"><Pill size={16}/></div><span className="rp-card-title">TSH Suppression</span></div>
-                                <div className="rp-grid1"><div className="rp-fgroup" style={{maxWidth:260}}><label className="rp-label">Levothyroxine Dose</label><input className="rp-input" type="number" placeholder="mcg/day" value={levothyroxineDose} onChange={e => setLevothyroxineDose(e.target.value)}/></div></div>
+                                <div className="rp-card-head">
+                                    <div className="rp-card-icon-sm"><Pill size={16}/></div>
+                                    <span className="rp-card-title">TSH Suppression</span>
+                                </div>
+                                <div className="rp-grid1">
+                                    <div className="rp-fgroup" style={{maxWidth:260}}>
+                                        <label className="rp-label">Levothyroxine Dose</label>
+                                        <input className="rp-input" type="number" placeholder="mcg/day" value={levothyroxineDose} onChange={e => setLevothyroxineDose(e.target.value)}/>
+                                    </div>
+                                </div>
                             </div>
                             <div className="rp-card">
-                                <div className="rp-card-head"><div className="rp-card-icon-sm"><Calendar size={16}/></div><span className="rp-card-title">Follow-up Plan</span></div>
+                                <div className="rp-card-head">
+                                    <div className="rp-card-icon-sm"><Calendar size={16}/></div>
+                                    <span className="rp-card-title">Follow-up Plan</span>
+                                </div>
                                 <div className="rp-grid2">
                                     <div className="rp-fgroup"><label className="rp-label">Next visit</label><DatePicker value={nextVisit} onChange={setNextVisit} placeholder="Select date"/></div>
                                     <div className="rp-fgroup"><label className="rp-label">Next Tg check</label><DatePicker value={nextTg} onChange={setNextTg} placeholder="Select date"/></div>
@@ -720,8 +943,8 @@ export default function ThyroidCancerReport() {
                 {/* ── Fixed action bar ── */}
                 <div className="rp-actions">
                     <button className="rp-btn-cancel" onClick={() => router.back()}>Cancel</button>
-                    <button className="rp-btn-draft" onClick={handleSaveDraft} disabled={loading}>{loading ? 'Saving...' : 'Save as Draft'}</button>
-                    <button className="rp-btn-submit" onClick={handleSubmit} disabled={loading}>{loading ? 'Submitting...' : 'Finalize Report'}</button>
+                    <button className="rp-btn-draft"  onClick={handleSaveDraft} disabled={loading}>{loading ? 'Saving...'     : 'Save as Draft'    }</button>
+                    <button className="rp-btn-submit" onClick={handleSubmit}    disabled={loading}>{loading ? 'Submitting...' : 'Finalize Report'  }</button>
                 </div>
 
                 {/* ── Toast ── */}
