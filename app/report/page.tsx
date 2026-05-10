@@ -357,11 +357,11 @@ export default function ThyroidCancerReport() {
                 background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(29,158,117,0.09) 0%,transparent 60%),
                            radial-gradient(ellipse 50% 40% at 90% 90%,rgba(8,80,65,0.05) 0%,transparent 50%),#FFFFFF; }
 
-            /* ── Hero ── */
-            .rp-hero { background:linear-gradient(135deg,#0D1B17 0%,#0F3028 60%,#082018 100%); padding:52px 52px 48px; position:relative; overflow:hidden; }
+            /* ── Hero — full viewport width, inner constrained ── */
+            .rp-hero { background:linear-gradient(135deg,#0D1B17 0%,#0F3028 60%,#082018 100%); padding:0; position:relative; overflow:hidden; }
             .rp-hero-dots { position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,0.06) 1px,transparent 1px);background-size:20px 20px; }
             .rp-hero-blob { position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(29,158,117,0.15);filter:blur(40px);right:-60px;top:-60px;pointer-events:none; }
-            .rp-hero-inner { position:relative;z-index:1;max-width:900px;margin:0 auto; }
+            .rp-hero-inner { position:relative;z-index:1;max-width:900px;margin:0 auto;padding:52px 52px 48px; }
             .rp-hero-back { display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:12.5px;font-weight:500;cursor:pointer;text-decoration:none;margin-bottom:22px;transition:all .18s;font-family:"DM Sans",sans-serif; }
             .rp-hero-back:hover { background:rgba(255,255,255,0.1);color:#fff; }
             .rp-hero-badge { display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;border:1px solid rgba(29,158,117,0.4);background:rgba(29,158,117,0.12);font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#6EE7B7;margin-bottom:14px; }
@@ -408,7 +408,7 @@ export default function ThyroidCancerReport() {
             .rp-input::placeholder { color:#9CA3AF; }
             .rp-input:focus,.rp-select:focus { border-color:#0D9488;background:#fff;box-shadow:0 0 0 4px rgba(13,148,136,0.08); }
 
-            /* ── Patient suggest dropdown (same as enhancement) ── */
+            /* ── Patient suggest dropdown ── */
             .rp-suggest {
                 position:absolute;top:calc(100% - 2px);left:0;right:0;
                 background:#fff;border:1.5px solid rgba(13,148,136,0.3);
@@ -424,8 +424,8 @@ export default function ThyroidCancerReport() {
             }
             .rp-suggest-item:last-child { border-bottom:none; }
             .rp-suggest-item:hover { background:#F0FDFA; }
-            .rp-suggest-name { font-size:13.5px;font-weight:600;color:#111827; }
-            .rp-suggest-mrn  { font-size:11.5px;color:#9CA3AF;font-variant-numeric:tabular-nums; }
+            .rp-suggest-name { font-size:13.5px;font-weight:700;color:#111827; }
+            .rp-suggest-mrn  { font-size:11.5px;color:#6B7280;font-weight:600;background:#F1F5F9;padding:2px 8px;border-radius:6px; }
             .rp-hint { font-size:12px;color:#0D9488;font-weight:600;margin-top:6px;display:flex;align-items:center;gap:5px; }
 
             /* ── Grids ── */
@@ -467,7 +467,7 @@ export default function ThyroidCancerReport() {
             .rp-toast-info    { background:#0891B2;color:#fff; }
 
             @media(max-width:900px) {
-                .rp-hero { padding:40px 24px 36px; }
+                .rp-hero-inner { padding:40px 24px 36px; }
                 .rp-main { padding:32px 24px 120px; }
                 .rp-patient-grid,.rp-grid3,.rp-grid5 { grid-template-columns:repeat(2,1fr); }
                 .rp-grid-mol { grid-template-columns:repeat(2,1fr); }
@@ -475,7 +475,7 @@ export default function ThyroidCancerReport() {
                 .rp-actions  { padding:14px 24px; }
             }
             @media(max-width:600px) {
-                .rp-hero { padding:28px 16px 24px; }
+                .rp-hero-inner { padding:28px 16px 24px; }
                 .rp-main { padding:24px 16px 120px; }
                 .rp-patient-grid,.rp-grid3,.rp-grid2,.rp-grid5,.rp-grid-mol { grid-template-columns:1fr; }
                 .rp-tabs { gap:2px; }
