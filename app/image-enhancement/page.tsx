@@ -178,23 +178,33 @@ export default function ImageEnhancementPage() {
 
     return (
         <>
-        <style>{`
+            <style>{`
             @keyframes ie-fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
             @keyframes ie-spin   { to{transform:rotate(360deg)} }
             @keyframes ie-pulse  { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-            .ie-wrap { min-height:100vh; font-family:"DM Sans",sans-serif;
+            .ie-wrap {
+                min-height:100vh; font-family:"DM Sans",sans-serif;
                 background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(29,158,117,0.09) 0%, transparent 60%),
-                            radial-gradient(ellipse 50% 40% at 90% 90%, rgba(8,80,65,0.05) 0%, transparent 50%), #FFFFFF; }
+                            radial-gradient(ellipse 50% 40% at 90% 90%, rgba(8,80,65,0.05) 0%, transparent 50%), #FFFFFF;
+            }
 
-            /* Hero */
+            .ie-hero-wrap {
+                max-width:1280px;
+                margin:0 auto;
+                padding:calc(64px + 28px) 52px 0;
+            }
+
             .ie-hero {
                 background: linear-gradient(135deg,#0D1B17 0%,#0F3028 60%,#082018 100%);
-                padding: 52px 52px 48px;
-                position: relative; overflow: hidden;
+                border-radius:20px;
+                padding:36px 44px;
+                margin-bottom:28px;
+                position:relative;
+                overflow:hidden;
             }
             .ie-hero-dots {
-                position:absolute; inset:0; pointer-events:none;
+                position:absolute; inset:0; pointer-events:none; border-radius:20px;
                 background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
                 background-size: 20px 20px;
             }
@@ -203,40 +213,52 @@ export default function ImageEnhancementPage() {
                 background:rgba(29,158,117,0.15); filter:blur(40px);
                 right:-60px; top:-60px; pointer-events:none;
             }
-            .ie-hero-inner { position:relative; z-index:1; max-width:1280px; margin:0 auto; }
+            .ie-hero-inner { position:relative; z-index:1; }
+
+            .ie-hero-flex {
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:24px;
+                flex-wrap:wrap;
+                margin-top:18px;
+            }
+
             .ie-hero-back {
                 display:inline-flex; align-items:center; gap:6px;
                 padding:7px 14px; border-radius:8px;
                 border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.06);
                 color:rgba(255,255,255,0.7); font-size:12.5px; font-weight:500;
-                text-decoration:none; margin-bottom:22px;
+                text-decoration:none;
                 transition:all .18s; cursor:pointer;
             }
             .ie-hero-back:hover { background:rgba(255,255,255,0.1); color:#fff; }
+
             .ie-hero-badge {
                 display:inline-flex; align-items:center; gap:6px;
                 padding:5px 12px; border-radius:100px;
-                border:1px solid rgba(29,158,117,0.4); background:rgba(29,158,117,0.12);
-                font-size:10px; font-weight:800; letter-spacing:2px; text-transform:uppercase;
-                color:#6EE7B7; margin-bottom:14px;
+                border:1px solid rgba(29,158,117,0.3); background:rgba(29,158,117,0.15);
+                font-size:10px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase;
+                color:#4ADE80; margin-bottom:12px; width:fit-content;
             }
-            .ie-hero-badge-dot { width:5px; height:5px; border-radius:50%; background:#1D9E75; animation:ie-pulse 2s ease-in-out infinite; }
+            .ie-hero-badge-dot { width:6px; height:6px; border-radius:50%; background:#4ADE80; animation:ie-pulse 2s ease-in-out infinite; }
+
             .ie-hero-title {
-                font-family:"DM Serif Display",serif; font-size:clamp(28px,3.5vw,44px);
-                color:#fff; letter-spacing:-0.8px; line-height:1.1; margin:0 0 22px;
+                font-family:"DM Serif Display",serif; font-size:38px;
+                color:#fff; letter-spacing:-1px; line-height:1.1; margin:0 0 6px;
             }
-            .ie-hero-title em { font-style:italic; color:#6EE7B7; }
+            .ie-hero-title em { font-style:italic; color:rgba(255,255,255,0.7); }
+            .ie-hero-sub { font-size:13px; color:rgba(255,255,255,0.45); margin:0; }
+
             .ie-hero-pills { display:flex; gap:10px; flex-wrap:wrap; }
             .ie-hero-pill {
-                display:flex; align-items:center; gap:8px;
-                padding:8px 16px; border-radius:10px;
                 background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+                border-radius:12px; padding:12px 18px; text-align:center; min-width:100px;
             }
-            .ie-pill-val { font-size:15px; font-weight:800; color:#fff; }
-            .ie-pill-lbl { font-size:11px; color:rgba(255,255,255,0.55); font-weight:500; }
+            .ie-pill-val { font-family:"DM Serif Display",serif; font-size:22px; color:#fff; line-height:1; display:block; }
+            .ie-pill-lbl { font-size:10px; color:rgba(255,255,255,0.4); font-weight:600; letter-spacing:0.5px; text-transform:uppercase; margin-top:4px; display:block; }
 
-            /* Main content */
-            .ie-main { max-width:1280px; margin:0 auto; padding:44px 52px 100px; }
+            .ie-main { max-width:1280px; margin:0 auto; padding:0 52px 100px; }
 
             /* Grid */
             .ie-grid { display:grid; grid-template-columns:1fr 340px; gap:24px; align-items:start; }
@@ -294,23 +316,23 @@ export default function ImageEnhancementPage() {
             .ie-input:focus { border-color:#0D9488; background:#fff; box-shadow:0 0 0 4px rgba(13,148,136,0.08); }
             .ie-hint { margin:6px 0 0; font-size:12px; color:#0D9488; font-weight:500; line-height:1.5; }
 
-            /* Suggest dropdown */
             .ie-suggest {
                 position:absolute; top:calc(100% - 2px); left:0; right:0;
                 background:#fff; border:1.5px solid rgba(13,148,136,0.3);
                 border-top:none; border-radius:0 0 10px 10px;
-                box-shadow:0 8px 24px rgba(15,23,42,.12); z-index:50; overflow:hidden;
+                box-shadow:0 8px 24px rgba(15,23,42,.12); z-index:100; overflow:hidden;
             }
             .ie-suggest-item {
                 display:flex; align-items:center; justify-content:space-between;
                 width:100%; padding:10px 14px; border:none; background:#fff;
                 cursor:pointer; transition:background .12s; text-align:left;
                 border-bottom:1px solid rgba(0,0,0,0.04);
+                font-family:"DM Sans",sans-serif;
             }
             .ie-suggest-item:last-child { border-bottom:none; }
             .ie-suggest-item:hover { background:#F0FDFA; }
-            .ie-suggest-name { font-size:13.5px; font-weight:600; color:#111827; }
-            .ie-suggest-mrn  { font-size:11.5px; color:#9CA3AF; font-variant-numeric:tabular-nums; }
+            .ie-suggest-name { font-size:13.5px; font-weight:600; color:#111827; flex:1; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-right:12px; }
+            .ie-suggest-mrn  { font-size:11.5px; color:#9CA3AF; font-variant-numeric:tabular-nums; flex-shrink:0; background:#F1F5F9; padding:2px 7px; border-radius:6px; }
 
             /* Type grid */
             .ie-type-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
@@ -451,305 +473,317 @@ export default function ImageEnhancementPage() {
             .ie-tip-text  { font-size:12.5px; color:#4B5563; line-height:1.5; }
 
             @media (max-width:1024px) {
-                .ie-hero { padding:40px 28px 36px; }
-                .ie-main { padding:36px 28px 80px; }
+                .ie-hero-wrap { padding:calc(64px + 16px) 28px 0; }
+                .ie-main { padding:0 28px 80px; }
                 .ie-grid { grid-template-columns:1fr; }
                 .ie-sidebar { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
                 .ie-type-grid { grid-template-columns:repeat(2,1fr); }
+                .ie-hero { padding:28px 24px; }
             }
             @media (max-width:640px) {
-                .ie-hero { padding:32px 16px 28px; }
-                .ie-main { padding:28px 16px 60px; }
+                .ie-hero-wrap { padding:calc(64px + 12px) 16px 0; }
+                .ie-main { padding:0 16px 60px; }
+                .ie-hero { padding:24px 20px; }
+                .ie-hero-flex { flex-direction:column; align-items:flex-start; }
                 .ie-res-grid { grid-template-columns:1fr; }
                 .ie-sidebar { grid-template-columns:1fr; }
                 .ie-type-grid { grid-template-columns:repeat(2,1fr); }
+                .ie-hero-pills { gap:8px; }
+                .ie-hero-pill { min-width:80px; padding:10px 12px; }
+                .ie-pill-val { font-size:18px; }
             }
         `}</style>
-        <div className="ie-wrap">
-            <Navbar />
+            <div className="ie-wrap">
+                <Navbar />
 
-            {/* Dark hero */}
-            <div className="ie-hero">
-                <div className="ie-hero-dots" />
-                <div className="ie-hero-blob" />
-                <div className="ie-hero-inner">
-                    <Link href="/dashboard" className="ie-hero-back">
-                        <ArrowLeft size={13} /> Dashboard
-                    </Link>
-                    <div className="ie-hero-badge">
-                        <span className="ie-hero-badge-dot" />
-                        AI-Powered
-                    </div>
-                    <h1 className="ie-hero-title">Image <em>Enhancement</em></h1>
-                    <div className="ie-hero-pills">
-                        {[
-                            { val:'Deep Learning', lbl:'Technology' },
-                            { val:'2 Scan Types',  lbl:'Supported' },
-                            { val:'Auto-Saved',    lbl:'To Patient' },
-                        ].map(p => (
-                            <div key={p.val} className="ie-hero-pill">
-                                <span className="ie-pill-val">{p.val}</span>
-                                <span className="ie-pill-lbl">{p.lbl}</span>
+                {/*  Hero wrapper —  */}
+                <div className="ie-hero-wrap">
+                    <div className="ie-hero">
+                        <div className="ie-hero-dots" />
+                        <div className="ie-hero-blob" />
+                        <div className="ie-hero-inner">
+
+                            {/*  flex row*/}
+                            <div className="ie-hero-flex">
+                                <div>
+                                    <div className="ie-hero-badge">
+                                        <span className="ie-hero-badge-dot" />
+                                        AI-Powered
+                                    </div>
+                                    <h1 className="ie-hero-title">Image <em>Enhancement</em></h1>
+                                    <p className="ie-hero-sub">Deep learning · 2 scan types · Auto-saved to patient</p>
+                                </div>
+                                <div className="ie-hero-pills">
+                                    {[
+                                        { val:'Deep Learning', lbl:'Technology' },
+                                        { val:'2',             lbl:'Scan Types' },
+                                        { val:'Auto',          lbl:'Saved'      },
+                                    ].map(p => (
+                                        <div key={p.lbl} className="ie-hero-pill">
+                                            <span className="ie-pill-val">{p.val}</span>
+                                            <span className="ie-pill-lbl">{p.lbl}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        ))}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <main className="ie-main">
-                <div className="ie-grid">
-                    <div>
-                        {/* Patient & Scan Info */}
-                        <div className="ie-card">
-                            <div className="ie-card-head">
-                                <div className="ie-card-icon" style={{ background:'linear-gradient(135deg,#0F766E,#0D9488)' }}>
-                                    <User size={18} color="white" />
+                <main className="ie-main">
+                    <div className="ie-grid">
+                        <div>
+                            {/* Patient & Scan Info */}
+                            <div className="ie-card">
+                                <div className="ie-card-head">
+                                    <div className="ie-card-icon" style={{ background:'linear-gradient(135deg,#0F766E,#0D9488)' }}>
+                                        <User size={18} color="white" />
+                                    </div>
+                                    <span className="ie-card-title">Patient &amp; Scan Info</span>
+                                    <span className="ie-optional-badge">Optional</span>
                                 </div>
-                                <span className="ie-card-title">Patient &amp; Scan Info</span>
-                                <span className="ie-optional-badge">Optional</span>
+                                <div className="ie-card-body">
+                                    <div className="ie-field">
+                                        <label className="ie-label">Patient</label>
+                                        <input
+                                            className="ie-input" type="text"
+                                            placeholder="Search by name or MRN..."
+                                            value={patientId} autoComplete="off"
+                                            onChange={e => {
+                                                setPatientId(e.target.value);
+                                                setSelectedPatientRef(null);
+                                                setSavedOk(false);
+                                                setShowSuggest(true);
+                                            }}
+                                            onFocus={() => setShowSuggest(true)}
+                                            onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
+                                        />
+                                        {showSuggest && patientId.trim() && (() => {
+                                            const q = patientId.toLowerCase();
+                                            const matches = allPatients.filter(p =>
+                                                p.name.toLowerCase().includes(q) || p.mrn.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)
+                                            ).slice(0, 5);
+                                            return matches.length > 0 ? (
+                                                <div className="ie-suggest">
+                                                    {matches.map(p => (
+                                                        <button key={p.id} className="ie-suggest-item"
+                                                                onMouseDown={() => {
+                                                                    setPatientId(p.name);
+                                                                    setSelectedPatientRef({ id: p.id, mrn: p.mrn, name: p.name });
+                                                                    setShowSuggest(false);
+                                                                    setSavedOk(false);
+                                                                }}>
+                                                            <span className="ie-suggest-name">{p.name}</span>
+                                                            <span className="ie-suggest-mrn">{p.mrn}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            ) : null;
+                                        })()}
+                                        {selectedPatientRef && (
+                                            <p className="ie-hint">✓ {selectedPatientRef.name} — Image will be saved automatically after enhancement.</p>
+                                        )}
+                                        {!selectedPatientRef && patientId.trim() && (
+                                            <p className="ie-hint">Image will be saved automatically to this patient's record after enhancement.</p>
+                                        )}
+                                    </div>
+
+                                    <div className="ie-field">
+                                        <label className="ie-label">Scan Type</label>
+                                        <div className="ie-type-grid">
+                                            {SCAN_TYPES.map(t => (
+                                                <button key={t.value}
+                                                        className="ie-type-btn"
+                                                        style={scanType === t.value ? { background:'#fff', borderColor:'#0D9488', borderWidth:'2px', color:'#0D9488' } : {}}
+                                                        onClick={() => setScanType(t.value)}>
+                                                    {scanType === t.value && <Check size={12} />}
+                                                    {t.value}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="ie-field">
+                                        <label className="ie-label">Scan Label <span className="ie-label-opt">(optional)</span></label>
+                                        <input className="ie-input" type="text"
+                                               placeholder="e.g. Right lobe longitudinal"
+                                               value={scanLabel} onChange={e => setScanLabel(e.target.value)} />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="ie-card-body">
-                                <div className="ie-field">
-                                    <label className="ie-label">Patient</label>
-                                    <input
-                                        className="ie-input" type="text"
-                                        placeholder="Search by name or MRN..."
-                                        value={patientId} autoComplete="off"
-                                        onChange={e => {
-                                            setPatientId(e.target.value);
-                                            setSelectedPatientRef(null);
-                                            setSavedOk(false);
-                                            setShowSuggest(true);
-                                        }}
-                                        onFocus={() => setShowSuggest(true)}
-                                        onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
-                                    />
-                                    {showSuggest && patientId.trim() && (() => {
-                                        const q = patientId.toLowerCase();
-                                        const matches = allPatients.filter(p =>
-                                            p.name.toLowerCase().includes(q) || p.mrn.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)
-                                        ).slice(0, 5);
-                                        return matches.length > 0 ? (
-                                            <div className="ie-suggest">
-                                                {matches.map(p => (
-                                                    <button key={p.id} className="ie-suggest-item"
-                                                            onMouseDown={() => {
-                                                                setPatientId(p.mrn);
-                                                                setSelectedPatientRef({ id: p.id, mrn: p.mrn, name: p.name });
-                                                                setShowSuggest(false);
-                                                                setSavedOk(false);
-                                                            }}>
-                                                        <span className="ie-suggest-name">{p.name}</span>
-                                                        <span className="ie-suggest-mrn">{p.mrn}</span>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        ) : null;
-                                    })()}
-                                    {selectedPatientRef && (
-                                        <p className="ie-hint">✓ {selectedPatientRef.name} — Image will be saved automatically after enhancement.</p>
+
+                            {/* Upload card */}
+                            <div className="ie-card">
+                                <div className="ie-card-head">
+                                    <div className="ie-card-icon"><Camera size={18} color="white" /></div>
+                                    <span className="ie-card-title">Upload Scan</span>
+                                    <span className="ie-scan-pill" style={{ background:activeType.bg, color:activeType.color, borderColor:activeType.border }}>{scanType}</span>
+                                </div>
+                                <div className="ie-card-body">
+                                    <div className={`ie-upload${dragOver ? ' ie-upload-over' : ''}`}
+                                         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                                         onDragLeave={() => setDragOver(false)} onDrop={handleDrop}>
+                                        <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+                                        {preview ? (
+                                            <>
+                                                <img src={preview} className="ie-preview-img" alt="preview" />
+                                                <div className="ie-file-name">{selectedFile?.name}</div>
+                                                {selectedFile && <div className="ie-file-size">{fmtSize(selectedFile.size)}</div>}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="ie-upload-icon"><Upload size={24} /></div>
+                                                <div className="ie-upload-title">Drop your {scanType} scan here</div>
+                                                <div className="ie-upload-sub">or click to browse — PNG, JPG, DICOM</div>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    <button className="ie-enhance-btn" onClick={handleEnhance} disabled={!selectedFile || loading}>
+                                        {loading ? <><span className="ie-spinner" />Enhancing...</> : <><Zap size={15} />Enhance {scanType}</>}
+                                    </button>
+
+                                    {(loading || progress > 0) && (
+                                        <div className="ie-progress-wrap">
+                                            <ProgressBar progress={progress} steps={PROCESS_STEPS} label="Processing" />
+                                        </div>
                                     )}
-                                    {!selectedPatientRef && patientId.trim() && (
-                                        <p className="ie-hint">Image will be saved automatically to this patient's record after enhancement.</p>
+
+                                    {error && (
+                                        <div className="ie-error">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                <circle cx="12" cy="12" r="10" stroke="#EF4444" strokeWidth="2"/>
+                                                <path d="M12 8v4M12 16h.01" stroke="#EF4444" strokeWidth="2" strokeLinecap="round"/>
+                                            </svg>
+                                            {error}
+                                        </div>
+                                    )}
+
+                                    {savedOk && (
+                                        <div className="ie-saved">
+                                            <Check size={14} />
+                                            Saved to patient <strong>{selectedPatientRef?.name || patientId}</strong>
+                                            {' '}({selectedPatientRef?.mrn || patientId})
+                                            <button className="ie-saved-link"
+                                                    onClick={() => router.push(
+                                                        `/patient-management?patientId=${encodeURIComponent(selectedPatientRef?.mrn || patientId.trim())}&tab=images`
+                                                    )}>
+                                                View →
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
+                            </div>
 
-                                <div className="ie-field">
-                                    <label className="ie-label">Scan Type</label>
-                                    <div className="ie-type-grid">
-                                        {SCAN_TYPES.map(t => (
-                                            <button key={t.value}
-                                                    className="ie-type-btn"
-                                                    style={scanType === t.value ? { background:'#fff', borderColor:'#0D9488', borderWidth:'2px', color:'#0D9488' } : {}}
-                                                    onClick={() => setScanType(t.value)}>
-                                                {scanType === t.value && <Check size={12} />}
-                                                {t.value}
-                                            </button>
+                            {/* Results */}
+                            {originalSrc && enhancedSrc && (
+                                <div className="ie-results">
+                                    <div className="ie-sec-head">
+                                        <span className="ie-sec-label">Results</span>
+                                        <div className="ie-sec-line" />
+                                        <span className="ie-sec-type" style={{ background:activeType.bg, color:activeType.color, borderColor:activeType.border }}>{scanType}</span>
+                                    </div>
+                                    <div className="ie-res-grid">
+                                        <div className="ie-img-card">
+                                            <div className="ie-img-hdr">
+                                                <div className="ie-img-dot" />
+                                                <span className="ie-img-lbl">Original</span>
+                                            </div>
+                                            <img src={originalSrc} alt="Original" className="ie-img-result" />
+                                            <a href={originalSrc} download="original.png" className="ie-dl-btn"><Download size={12} /> Download Original</a>
+                                        </div>
+                                        <div className="ie-img-card ie-img-card-enh">
+                                            <div className="ie-img-hdr">
+                                                <div className="ie-img-dot ie-img-dot-teal" />
+                                                <span className="ie-img-lbl ie-img-lbl-teal">Enhanced</span>
+                                                <span className="ie-img-badge">AI</span>
+                                            </div>
+                                            <img src={enhancedSrc} alt="Enhanced" className="ie-img-result" />
+                                            <a href={enhancedSrc} download="enhanced.png" className="ie-dl-btn ie-dl-btn-teal"><Download size={12} /> Download Enhanced</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Sidebar */}
+                        <div className="ie-sidebar">
+                            <div className="ie-info-card">
+                                <div className="ie-info-head">
+                                    <div className="ie-info-icon" style={{ background:'rgba(13,148,136,.08)', border:'1px solid #CCFBF1' }}>
+                                        <Zap size={14} color="#0D9488" />
+                                    </div>
+                                    <span className="ie-info-title">How it works</span>
+                                </div>
+                                <div className="ie-info-body">
+                                    <div className="ie-how-list">
+                                        {[
+                                            { n:'1', t:'Patient Info', d:'Enter the Patient ID and select the scan type' },
+                                            { n:'2', t:'Upload',       d:'Drop your Ultrasound or CT scan' },
+                                            { n:'3', t:'Enhance',      d:'AI improves quality using deep learning' },
+                                            { n:'4', t:'Auto-save',    d:'Image saved to patient record automatically' },
+                                        ].map(st => (
+                                            <div key={st.n} className="ie-how-item">
+                                                <div className="ie-how-num">{st.n}</div>
+                                                <div className="ie-how-text"><span className="ie-how-bold">{st.t} — </span>{st.d}</div>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
-
-                                <div className="ie-field">
-                                    <label className="ie-label">Scan Label <span className="ie-label-opt">(optional)</span></label>
-                                    <input className="ie-input" type="text"
-                                           placeholder="e.g. Right lobe longitudinal"
-                                           value={scanLabel} onChange={e => setScanLabel(e.target.value)} />
-                                </div>
                             </div>
-                        </div>
 
-                        {/* Upload card */}
-                        <div className="ie-card">
-                            <div className="ie-card-head">
-                                <div className="ie-card-icon"><Camera size={18} color="white" /></div>
-                                <span className="ie-card-title">Upload Scan</span>
-                                <span className="ie-scan-pill" style={{ background:activeType.bg, color:activeType.color, borderColor:activeType.border }}>{scanType}</span>
-                            </div>
-                            <div className="ie-card-body">
-                                <div className={`ie-upload${dragOver ? ' ie-upload-over' : ''}`}
-                                     onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                                     onDragLeave={() => setDragOver(false)} onDrop={handleDrop}>
-                                    <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
-                                    {preview ? (
-                                        <>
-                                            <img src={preview} className="ie-preview-img" alt="preview" />
-                                            <div className="ie-file-name">{selectedFile?.name}</div>
-                                            {selectedFile && <div className="ie-file-size">{fmtSize(selectedFile.size)}</div>}
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="ie-upload-icon"><Upload size={24} /></div>
-                                            <div className="ie-upload-title">Drop your {scanType} scan here</div>
-                                            <div className="ie-upload-sub">or click to browse — PNG, JPG, DICOM</div>
-                                        </>
-                                    )}
+                            <div className="ie-info-card">
+                                <div className="ie-info-head">
+                                    <div className="ie-info-icon" style={{ background:'rgba(8,145,178,.08)', border:'1px solid #BAE6FD' }}>
+                                        <Info size={14} color="#0891B2" />
+                                    </div>
+                                    <span className="ie-info-title">Scan Types</span>
                                 </div>
-
-                                <button className="ie-enhance-btn" onClick={handleEnhance} disabled={!selectedFile || loading}>
-                                    {loading ? <><span className="ie-spinner" />Enhancing...</> : <><Zap size={15} />Enhance {scanType}</>}
-                                </button>
-
-                                {(loading || progress > 0) && (
-                                    <div className="ie-progress-wrap">
-                                        <ProgressBar progress={progress} steps={PROCESS_STEPS} label="Processing" />
-                                    </div>
-                                )}
-
-                                {error && (
-                                    <div className="ie-error">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                                            <circle cx="12" cy="12" r="10" stroke="#EF4444" strokeWidth="2"/>
-                                            <path d="M12 8v4M12 16h.01" stroke="#EF4444" strokeWidth="2" strokeLinecap="round"/>
-                                        </svg>
-                                        {error}
-                                    </div>
-                                )}
-
-                                {savedOk && (
-                                    <div className="ie-saved">
-                                        <Check size={14} />
-                                        Saved to patient <strong>{selectedPatientRef?.name || patientId}</strong>
-                                        {' '}({selectedPatientRef?.mrn || patientId})
-                                        <button className="ie-saved-link"
-                                                onClick={() => router.push(
-                                                    `/patient-management?patientId=${encodeURIComponent(selectedPatientRef?.mrn || patientId.trim())}&tab=images`
-                                                )}>
-                                            View →
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Results */}
-                        {originalSrc && enhancedSrc && (
-                            <div className="ie-results">
-                                <div className="ie-sec-head">
-                                    <span className="ie-sec-label">Results</span>
-                                    <div className="ie-sec-line" />
-                                    <span className="ie-sec-type" style={{ background:activeType.bg, color:activeType.color, borderColor:activeType.border }}>{scanType}</span>
-                                </div>
-                                <div className="ie-res-grid">
-                                    <div className="ie-img-card">
-                                        <div className="ie-img-hdr">
-                                            <div className="ie-img-dot" />
-                                            <span className="ie-img-lbl">Original</span>
-                                        </div>
-                                        <img src={originalSrc} alt="Original" className="ie-img-result" />
-                                        <a href={originalSrc} download="original.png" className="ie-dl-btn"><Download size={12} /> Download Original</a>
-                                    </div>
-                                    <div className="ie-img-card ie-img-card-enh">
-                                        <div className="ie-img-hdr">
-                                            <div className="ie-img-dot ie-img-dot-teal" />
-                                            <span className="ie-img-lbl ie-img-lbl-teal">Enhanced</span>
-                                            <span className="ie-img-badge">AI</span>
-                                        </div>
-                                        <img src={enhancedSrc} alt="Enhanced" className="ie-img-result" />
-                                        <a href={enhancedSrc} download="enhanced.png" className="ie-dl-btn ie-dl-btn-teal"><Download size={12} /> Download Enhanced</a>
+                                <div className="ie-info-body">
+                                    <div className="ie-scan-list">
+                                        {[
+                                            { type:'Ultrasound', desc:'Thyroid nodule assessment & soft tissue imaging' },
+                                            { type:'CT Scan',    desc:'Cross-sectional anatomy & lesion detection' },
+                                        ].map(item => {
+                                            const t = SCAN_TYPES.find(t => t.value === item.type)!;
+                                            return (
+                                                <div key={item.type} className="ie-scan-item">
+                                                    <span className="ie-scan-tag" style={{ background:t.bg, color:t.color, borderColor:t.border }}>{item.type}</span>
+                                                    <span className="ie-scan-desc">{item.desc}</span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
-                        )}
-                    </div>
 
-                    {/* Sidebar */}
-                    <div className="ie-sidebar">
-                        <div className="ie-info-card">
-                            <div className="ie-info-head">
-                                <div className="ie-info-icon" style={{ background:'rgba(13,148,136,.08)', border:'1px solid #CCFBF1' }}>
-                                    <Zap size={14} color="#0D9488" />
+                            <div className="ie-info-card">
+                                <div className="ie-info-head">
+                                    <div className="ie-info-icon" style={{ background:'rgba(13,148,136,.08)', border:'1px solid #CCFBF1' }}>
+                                        <CheckCircle2 size={14} color="#0D9488" />
+                                    </div>
+                                    <span className="ie-info-title">Best practices</span>
                                 </div>
-                                <span className="ie-info-title">How it works</span>
-                            </div>
-                            <div className="ie-info-body">
-                                <div className="ie-how-list">
-                                    {[
-                                        { n:'1', t:'Patient Info', d:'Enter the Patient ID and select the scan type' },
-                                        { n:'2', t:'Upload',       d:'Drop your Ultrasound or CT scan' },
-                                        { n:'3', t:'Enhance',      d:'AI improves quality using deep learning' },
-                                        { n:'4', t:'Auto-save',    d:'Image saved to patient record automatically' },
-                                    ].map(st => (
-                                        <div key={st.n} className="ie-how-item">
-                                            <div className="ie-how-num">{st.n}</div>
-                                            <div className="ie-how-text"><span className="ie-how-bold">{st.t} — </span>{st.d}</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="ie-info-card">
-                            <div className="ie-info-head">
-                                <div className="ie-info-icon" style={{ background:'rgba(8,145,178,.08)', border:'1px solid #BAE6FD' }}>
-                                    <Info size={14} color="#0891B2" />
-                                </div>
-                                <span className="ie-info-title">Scan Types</span>
-                            </div>
-                            <div className="ie-info-body">
-                                <div className="ie-scan-list">
-                                    {[
-                                        { type:'Ultrasound', desc:'Thyroid nodule assessment & soft tissue imaging' },
-                                        { type:'CT Scan',    desc:'Cross-sectional anatomy & lesion detection' },
-                                    ].map(item => {
-                                        const t = SCAN_TYPES.find(t => t.value === item.type)!;
-                                        return (
-                                            <div key={item.type} className="ie-scan-item">
-                                                <span className="ie-scan-tag" style={{ background:t.bg, color:t.color, borderColor:t.border }}>{item.type}</span>
-                                                <span className="ie-scan-desc">{item.desc}</span>
+                                <div className="ie-info-body">
+                                    <div className="ie-tips-list">
+                                        {[
+                                            'Use high-resolution scans for best results',
+                                            'Ensure proper probe positioning before capture',
+                                            'Avoid motion blur — hold still during imaging',
+                                            'DICOM files preserve the most diagnostic detail',
+                                        ].map((tip, i) => (
+                                            <div key={i} className="ie-tip-item">
+                                                <div className="ie-tip-dot" />
+                                                <span className="ie-tip-text">{tip}</span>
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="ie-info-card">
-                            <div className="ie-info-head">
-                                <div className="ie-info-icon" style={{ background:'rgba(13,148,136,.08)', border:'1px solid #CCFBF1' }}>
-                                    <CheckCircle2 size={14} color="#0D9488" />
-                                </div>
-                                <span className="ie-info-title">Best practices</span>
-                            </div>
-                            <div className="ie-info-body">
-                                <div className="ie-tips-list">
-                                    {[
-                                        'Use high-resolution scans for best results',
-                                        'Ensure proper probe positioning before capture',
-                                        'Avoid motion blur — hold still during imaging',
-                                        'DICOM files preserve the most diagnostic detail',
-                                    ].map((tip, i) => (
-                                        <div key={i} className="ie-tip-item">
-                                            <div className="ie-tip-dot" />
-                                            <span className="ie-tip-text">{tip}</span>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </main>
-        </div>
+                </main>
+            </div>
         </>
     );
 }
