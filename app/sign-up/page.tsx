@@ -62,7 +62,7 @@ export default function SignUpPage() {
             });
 
             if (raw?.next_step === 'choose_verification') {
-                setSignupPhone(raw?.phone ?? form.phone);
+                setSignupPhone(form.phone);
                 setSignupEmail(raw?.email ?? form.email);
                 setStep(2);
             } else {
@@ -78,13 +78,16 @@ export default function SignUpPage() {
 
     const handleChoose = async (method: 'sms' | 'email') => {
         setError(''); setSending(method);
-        const identifier = method === 'sms' ? signupPhone : signupEmail;
         try {
-            await auth.sendOtp(identifier, method);
             if (method === 'sms') {
-                router.push(`/phone-verification?identifier=${encodeURIComponent(identifier)}`);
+                const phone = signupPhone.startsWith('05')
+                    ? '+966' + signupPhone.slice(1)
+                    : signupPhone;
+                await auth.resendOtp(phone);
+                router.push(`/phone-verification?identifier=${encodeURIComponent(phone)}`);
             } else {
-                router.push(`/email-verification?identifier=${encodeURIComponent(identifier)}`);
+                await auth.resendEmailOtp(signupEmail);
+                router.push(`/email-verification?identifier=${encodeURIComponent(signupEmail)}`);
             }
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Failed to send code. Please try again.');
