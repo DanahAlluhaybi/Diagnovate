@@ -622,12 +622,8 @@ export default function ThyroidCancerReport() {
                         <div className="rp-hero-blob" />
                         <div className="rp-hero-inner">
 
-                            {/* Back button — فوق الـ row */}
-                            <button className="rp-hero-back" onClick={() => router.push('/dashboard')}>
-                                <ArrowLeft size={13} /> Dashboard
-                            </button>
 
-                            {/* العنوان والـ pills على نفس السطر */}
+
                             <div className="rp-hero-row">
                                 <div>
                                     <div className="rp-hero-badge">
