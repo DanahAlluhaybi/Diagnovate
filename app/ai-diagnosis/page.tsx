@@ -738,7 +738,7 @@ export default function AIDiagnosisPage() {
 
                                     {(inputMode === 'image' || inputMode === 'both') && (
                                         <div className="dx-field">
-                                            <label className="dx-label">Medical Scan <span style={{ color:'#94A3B8', textTransform:'none', letterSpacing:0, fontWeight:500, fontSize:11 }}>(Ultrasound / CT)</span></label>
+                                            <label className="dx-label">Medical Scan <span style={{ color:'#94A3B8', textTransform:'none', letterSpacing:0, fontWeight:500, fontSize:11 }}>(Ultrasound)</span></label>
                                             <div className={`dx-upload${dragOver ? ' dx-upload-over' : ''}`}
                                                  onDragOver={e => { e.preventDefault(); setDragOver(true); }}
                                                  onDragLeave={() => setDragOver(false)}

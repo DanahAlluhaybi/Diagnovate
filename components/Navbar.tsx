@@ -281,14 +281,16 @@ export default function Navbar({ pendingCount = 0, variant }: NavbarProps) {
                                         </div>
                                     </div>
                                     <div className="nb-drop-menu">
-                                        {role === 'doctor' && (
-                                            <Link href="/profile" className="nb-menu-item" onClick={() => setProfOpen(false)}>
-                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                                                </svg>
-                                                My Profile
-                                            </Link>
-                                        )}
+                                        <Link
+                                            href={role === 'admin' ? '/admin/profile' : '/profile'}
+                                            className="nb-menu-item"
+                                            onClick={() => setProfOpen(false)}
+                                        >
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                                            </svg>
+                                            My Profile
+                                        </Link>
                                         <div className="nb-menu-sep" />
                                         <button className="nb-menu-item nb-menu-item-danger" onClick={handleLogout}>
                                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">

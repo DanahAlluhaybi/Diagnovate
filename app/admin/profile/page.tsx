@@ -1,9 +1,10 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
-import { Shield, Lock, Bell, Sun, Moon, X, ChevronRight, ArrowLeft, Settings, ChevronDown, LogOut, User, Save } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Lock, Bell, Sun, Moon, X, ChevronRight, ArrowLeft, Settings, Shield, Save } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BASE } from '@/lib/api';
+import Navbar from '@/components/Navbar';
 
 const AP_STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600;700;800&display=swap');
@@ -146,34 +147,12 @@ export default function AdminProfilePage() {
     const [passwordError, setPasswordError] = useState('');
     const [passwordSuccess, setPasswordSuccess] = useState('');
     const [success, setSuccess] = useState('');
-    const [profileOpen, setProfileOpen] = useState(false);
-    const [notifOpen, setNotifOpen] = useState(false);
-    const profileRef = useRef<HTMLDivElement>(null);
-    const notifRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const userStr = localStorage.getItem('admin_user');
         if (userStr) setAdmin(JSON.parse(userStr));
         const savedTheme = localStorage.getItem('theme') as 'Light'|'Dark'|null;
         if (savedTheme) setTheme(savedTheme);
-    }, []);
-
-    useEffect(() => {
-        const handler = (e: MouseEvent) => {
-            if (profileRef.current && !profileRef.current.contains(e.target as Node))
-                setProfileOpen(false);
-        };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, []);
-
-    useEffect(() => {
-        const handler = (e: MouseEvent) => {
-            if (notifRef.current && !notifRef.current.contains(e.target as Node))
-                setNotifOpen(false);
-        };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
     }, []);
 
     const handleLogout = () => {
@@ -212,81 +191,9 @@ export default function AdminProfilePage() {
             <style>{AP_STYLES}</style>
             <div className="ap-wrap">
 
-                {/* NAV */}
-                <nav className="ap-nav">
-                    <Link href="/admin" className="ap-nav-logo">
-                        <div className="ap-nav-logomark">
-                            <svg width="18" height="18" viewBox="0 0 40 40" fill="none">
-                                <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5"/>
-                                <line x1="20" y1="10" x2="20" y2="30" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
-                                <line x1="10" y1="20" x2="30" y2="20" stroke="white" strokeWidth="2.8" strokeLinecap="round"/>
-                                <circle cx="20" cy="20" r="3.5" fill="white"/>
-                            </svg>
-                        </div>
-                        <span>Diagno<span className="ap-nav-accent">vate</span></span>
-                    </Link>
-
-                    <div className="ap-nav-links">
-                        <Link href="/admin" className="ap-nav-link">Admin Panel</Link>
-                    </div>
-
-                    <div className="ap-nav-right">
-                        <div style={{ position: 'relative' }} ref={notifRef}>
-                            <button className="ap-nav-iconbtn" onClick={() => setNotifOpen(p => !p)} title="Notifications">
-                                <Bell size={15} />
-                            </button>
-                            {notifOpen && (
-                                <div style={{
-                                    position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                                    background: 'white', border: '1px solid rgba(0,0,0,0.07)',
-                                    borderRadius: 18, boxShadow: '0 16px 48px rgba(15,23,42,0.12)',
-                                    zIndex: 300, width: 280, overflow: 'hidden',
-                                    animation: 'apDropIn 0.18s cubic-bezier(0.16,1,0.3,1) both'
-                                }}>
-                                    <div style={{ padding: '14px 18px', borderBottom: '1px solid #F1F5F9', fontSize: 11, fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', color: '#0D9488', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        <Bell size={13} /> Notifications
-                                    </div>
-                                    <div style={{ padding: '48px 24px', textAlign: 'center' }}>
-                                        <Bell size={28} color="#CBD5E1" style={{ margin: '0 auto 12px', display: 'block' }} />
-                                        <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', margin: '0 0 4px' }}>All clear</p>
-                                        <p style={{ fontSize: 12, color: '#94A3B8', margin: 0 }}>No new notifications</p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        <div className="ap-nav-divider" />
-                        <div className="ap-nav-dropwrap" ref={profileRef}>
-                            <div className="ap-nav-profile" onClick={() => setProfileOpen(p => !p)}>
-                                <div className="ap-nav-avatar"><Shield size={13} /></div>
-                                <div>
-                                    <div className="ap-nav-pname">{admin?.name ?? 'Admin'}</div>
-                                    <div className="ap-nav-prole">Administrator</div>
-                                </div>
-                                <ChevronDown size={12} color="#94A3B8" />
-                            </div>
-                            {profileOpen && (
-                                <div className="ap-nav-dropdown">
-                                    <div className="ap-nav-profhead">
-                                        <div className="ap-nav-profav"><Shield size={18} /></div>
-                                        <div>
-                                            <div className="ap-nav-profname">{admin?.name ?? 'Admin'}</div>
-                                            <div className="ap-nav-profspec">{admin?.email ?? ''}</div>
-                                        </div>
-                                    </div>
-                                    <div style={{ padding: '6px 0' }}>
-                                        <Link href="/admin/profile" className="ap-nav-menuitem">
-                                            <User size={14} /> My Profile
-                                        </Link>
-                                        <div className="ap-nav-sep" />
-                                        <button className="ap-nav-menuitem ap-nav-menuitem-danger" onClick={handleLogout}>
-                                            <LogOut size={14} /> Sign out
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </nav>
+                {/* NAV — unified with doctor nav */}
+                <Navbar variant="admin" />
+                <div style={{ height: 68 }} />
 
                 {/* HERO */}
                 <div className="ap-hero">
@@ -298,13 +205,12 @@ export default function AdminProfilePage() {
                                 <ArrowLeft size={13} /> Admin Panel
                             </Link>
                             <div className="ap-hero-label">Admin Account</div>
-                            <h1 className="ap-hero-title">My Profile</h1>
+                            <h1 className="ap-hero-title">My <em style={{fontStyle:'italic',color:'#6EE7B7'}}>Profile</em></h1>
                             <p className="ap-hero-sub">Manage your administrator account and preferences</p>
                         </div>
                         <div className="ap-hero-pills">
                             {[
-                                { dot: true, label: 'Secure Access' },
-                                { dot: false, label: 'Settings' },
+                                { dot: true, label: 'Account Info' },
                                 { dot: false, label: 'Notifications' },
                             ].map((p, i) => (
                                 <div key={i} className="ap-hero-pill">
@@ -323,7 +229,7 @@ export default function AdminProfilePage() {
                         <div>
                             <div className="ap-card">
                                 <div className="ap-avatar-card">
-                                    <div className="ap-av"><Shield size={32} color="white" /></div>
+                                    <div className="ap-av" style={{fontSize:28,fontWeight:800,color:'white',letterSpacing:-1}}>{admin?.name ? admin.name.split(' ').map((n:string)=>n[0]).join('').toUpperCase().slice(0,2) : 'A'}</div>
                                     <div className="ap-av-name">{admin?.name ?? 'Admin'}</div>
                                     <div className="ap-av-role">{admin?.email ?? ''}</div>
                                     <span className="ap-av-badge">System Administrator</span>

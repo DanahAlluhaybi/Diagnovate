@@ -449,7 +449,6 @@ export default function ProfilePage() {
                         <div className="pf-hero-pills">
                             {[
                                 { val:'Personal Info',  lbl:'Edit Anytime' },
-                                { val:'Secure',         lbl:'Password Protected' },
                                 { val:'Notifications',  lbl:'Customizable' },
                             ].map(p => (
                                 <div key={p.val} className="pf-hero-pill">

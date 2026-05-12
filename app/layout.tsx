@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { DM_Serif_Display, DM_Sans } from 'next/font/google';
 import './globals.css';
 import PageProgress from '@/components/PageProgress';
+import InactivityLogout from '@/components/InactivityLogout';
 
 const dmSerif = DM_Serif_Display({
     subsets: ['latin'],
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         } as React.CSSProperties}>
         <body style={{ fontFamily: 'var(--font-dm-sans, "Plus Jakarta Sans", sans-serif)', margin: 0 }}>
         <PageProgress />
+        <InactivityLogout />
         <div className="pageEnter">{children}</div>
         </body>
         </html>

@@ -10,7 +10,7 @@ import { BASE } from '@/lib/api';
 import { uploadToCloudinary, saveImageRecord } from '@/lib/imageStorage';
 
 interface EnhanceResponse {
-    success: boolean; original: string; enhanced: string;
+    success: boolean; original_image: string; enhanced_image: string;
     loading?: boolean; error?: string;
 }
 
@@ -159,7 +159,7 @@ export default function ImageEnhancementPage() {
                                     await fetch(`${BASE}/api/cases/${caseId}`, {
                                         method: 'PATCH',
                                         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ enhanced_image_path: data.enhanced }),
+                                        body: JSON.stringify({ enhanced_image_path: data.enhanced_image }),
                                     });
                                 }
                             }

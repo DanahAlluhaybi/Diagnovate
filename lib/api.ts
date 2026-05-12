@@ -194,10 +194,10 @@ export const auth = {
         return { token, user: (raw?.admin ?? raw?.user ?? null) as Doctor | null };
     },
 
-    verifyEmailOtp: async (email: string, code: string): Promise<{ token: string | null; user: Doctor | null }> => {
-        const raw = await request<RawResponse>('/api/auth/verify-otp', {  // ← غيّر verify-email-otp إلى verify-otp
+    verifyEmailOtp: async (email: string, code: string, skip = false): Promise<{ token: string | null; user: Doctor | null }> => {
+        const raw = await request<RawResponse>('/api/auth/verify-email-otp', {
             method: 'POST',
-            body: JSON.stringify({ identifier: email, code }),  // ← identifier بدل email
+            body: JSON.stringify(skip ? { email, skip: true } : { email, code }),
         });
         const token = raw?.token ?? raw?.access_token ?? raw?.jwt;
         if (token) localStorage.setItem('token', token);
@@ -219,12 +219,11 @@ export const auth = {
         });
     },
 
-        resendEmailOtp: async (email: string): Promise<RawResponse> => {
-            return await request<RawResponse>('/api/auth/send-email-otp', {
-                method: 'POST',
-                body: JSON.stringify({ identifier: email }), // ← identifier بدل email
-            });
-
+    resendEmailOtp: async (email: string): Promise<RawResponse> => {
+        return await request<RawResponse>('/api/auth/send-email-otp', {
+            method: 'POST',
+            body: JSON.stringify({ email }),
+        });
     },
 
     checkStatus: async (): Promise<RawResponse> => {
@@ -374,3 +373,4 @@ export async function getRecentActivity(patientsList: PatientLike[]): Promise<Ac
     } catch {
         return [];
     }
+}
