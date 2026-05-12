@@ -20,11 +20,10 @@ interface SavedImage {
     originalSrc: string; enhancedSrc: string; isEnhanced: boolean;
 }
 
-type ScanType = 'Ultrasound' | 'CT Scan';
+type ScanType = 'Ultrasound';
 
 const SCAN_TYPES: { value: ScanType; color: string; bg: string; border: string }[] = [
     { value: 'Ultrasound', color: '#0D9488', bg: '#F0FDFA', border: '#99F6E4' },
-    { value: 'CT Scan',    color: '#0891B2', bg: '#F0F9FF', border: '#BAE6FD' },
 ];
 
 const PROCESS_STEPS = [
@@ -110,7 +109,7 @@ export default function ImageEnhancementPage() {
 
         const fd = new FormData();
         fd.append('image', selectedFile);
-        fd.append('image_type', scanType === 'Ultrasound' ? 'ultrasound' : 'ct');
+        fd.append('image_type', 'ultrasound');
         if (patientId.trim()) {
             fd.append('case_id', selectedPatientRef?.id || mrn);
         }
@@ -719,7 +718,7 @@ export default function ImageEnhancementPage() {
                                     <div className="ie-how-list">
                                         {[
                                             { n:'1', t:'Patient Info', d:'Enter the Patient ID and select the scan type' },
-                                            { n:'2', t:'Upload',       d:'Drop your Ultrasound or CT scan' },
+                                            { n:'2', t:'Upload',       d:'Drop your Ultrasound scan here' },
                                             { n:'3', t:'Enhance',      d:'AI improves quality using deep learning' },
                                             { n:'4', t:'Auto-save',    d:'Image saved to patient record automatically' },
                                         ].map(st => (
@@ -743,7 +742,6 @@ export default function ImageEnhancementPage() {
                                     <div className="ie-scan-list">
                                         {[
                                             { type:'Ultrasound', desc:'Thyroid nodule assessment & soft tissue imaging' },
-                                            { type:'CT Scan',    desc:'Cross-sectional anatomy & lesion detection' },
                                         ].map(item => {
                                             const t = SCAN_TYPES.find(t => t.value === item.type)!;
                                             return (

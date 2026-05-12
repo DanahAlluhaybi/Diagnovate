@@ -13,6 +13,7 @@ interface RawResponse {
     identifier?: string;
     next_step?: string;
     email?: string;
+    phone?: string;
     doctor?: Doctor;
     admin?: Record<string, unknown>;
     user?: Record<string, unknown>;
@@ -373,4 +374,3 @@ export async function getRecentActivity(patientsList: PatientLike[]): Promise<Ac
     } catch {
         return [];
     }
-}

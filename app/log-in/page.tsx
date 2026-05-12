@@ -51,8 +51,7 @@ function LoginForm() {
         setLoading(true);
         try {
             const { token, user } = await auth.verifyOtp(identifier, otp);
-            localStorage.setItem(isAdmin ? 'admin_token' : 'token', token);
-            console.log('Storing user:', user);
+            if (token) localStorage.setItem(isAdmin ? 'admin_token' : 'token', token);
             if (user) localStorage.setItem(isAdmin ? 'admin_user' : 'user', JSON.stringify(user));
             router.push(isAdmin ? '/admin' : '/dashboard');
         } catch (err: unknown) {
