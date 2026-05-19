@@ -479,10 +479,10 @@ function PatientManagementPage() {
         if (!form.firstName || !form.lastName || !form.mrn || !form.birthDate || !form.phone) {
             setFormError('Please fill in all required fields.'); return;
         }
+        const age = calcAge(form.birthDate);
+        const result = await addPatientToAPI({ ...form, age });
 
 
-
-        const result = await addPatientToAPI(form);
         if (result.success) {
             setPatients(prev => [result.data, ...prev]);
             setShowModal(false); setSelectedPatient(result.data);
